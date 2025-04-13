@@ -1,6 +1,6 @@
 {
     "name": "adaiasmagdiel/erlenmeyer",
-    "description": "Soon",
+    "description": "Erlenmeyer is a lightweight PHP framework designed to create web applications simply and efficiently.",
     "type": "project",
     "require": {
         "adaiasmagdiel/hermes": "^1.0"
