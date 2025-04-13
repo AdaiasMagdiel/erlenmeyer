@@ -1,0 +1,68 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "ea00c234fadfefa202bdcaae0daa3a12",
+    "packages": [
+        {
+            "name": "adaiasmagdiel/hermes",
+            "version": "v1.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AdaiasMagdiel/hermes.git",
+                "reference": "8f9b6c2508539ed9ed3a4710d40a2f436d07601e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AdaiasMagdiel/hermes/zipball/8f9b6c2508539ed9ed3a4710d40a2f436d07601e",
+                "reference": "8f9b6c2508539ed9ed3a4710d40a2f436d07601e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "pestphp/pest": "^2.33"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AdaiasMagdiel\\Hermes\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adaías Magdiel",
+                    "email": "eu@adaiasmagdiel.com"
+                }
+            ],
+            "description": "Hermes is a experimental lightweight PHP library for routing management. It provides a simple and intuitive way to define routes and execute actions based on HTTP requests.",
+            "homepage": "https://github.com/AdaiasMagdiel/hermes",
+            "keywords": [
+                "router",
+                "routing",
+                "web"
+            ],
+            "support": {
+                "issues": "https://github.com/AdaiasMagdiel/hermes/issues",
+                "source": "https://github.com/AdaiasMagdiel/hermes/tree/v1.0.5"
+            },
+            "time": "2024-02-24T18:33:03+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}

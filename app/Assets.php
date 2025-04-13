@@ -1,0 +1,191 @@
+<?php
+
+namespace AdaiasMagdiel\Erlenmeyer;
+
+/**
+ * Class for managing and serving static assets.
+ */
+class Assets
+{
+	/**
+	 * @var string The directory where assets are stored.
+	 */
+	private string $assetsDirectory;
+
+	/**
+	 * @var string The route prefix for asset requests.
+	 */
+	private string $assetsRoute;
+
+	/**
+	 * Constructs an Assets instance.
+	 *
+	 * @param string $assetsDirectory The directory where assets are stored. Default is "/public".
+	 * @param string $assetsRoute The route prefix for asset requests. Default is "/assets".
+	 */
+	function __construct(string $assetsDirectory = "/public", string $assetsRoute = "/assets")
+	{
+		$this->assetsDirectory = ltrim($assetsDirectory, "/");
+		$this->assetsRoute = ltrim($assetsRoute, "/");
+	}
+
+	/**
+	 * Checks if the current request is for an asset.
+	 *
+	 * @return bool True if the request URI starts with the assets route, false otherwise.
+	 */
+	public function isAssetRequest(): bool
+	{
+		$requestPath = ltrim($_SERVER["REQUEST_URI"], "/");
+		return str_starts_with($requestPath, $this->assetsRoute);
+	}
+
+	/**
+	 * Serves the requested asset if it exists and is accessible.
+	 *
+	 * This method parses the request URI, sanitizes it to prevent directory traversal,
+	 * and checks if the requested file is within the assets directory.
+	 * If the file is valid, it is sent to the client with appropriate headers.
+	 *
+	 * @return bool True if the asset was served successfully, false otherwise.
+	 */
+	public function serveAsset(): bool
+	{
+		$requestedPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+		$requestedPath = ltrim($requestedPath, '/');
+		$requestedPath = str_replace(['../', '..\\'], '', $requestedPath);
+
+		$requestedPath = str_replace($this->assetsRoute, "", $requestedPath);
+
+		$fullPath = realpath($this->assetsDirectory . '/' . $requestedPath);
+
+		if (!$this->isValidAsset($fullPath)) {
+			http_response_code(404);
+			return false;
+		}
+
+		if (strpos($fullPath, realpath($this->assetsDirectory)) !== 0) {
+			http_response_code(404);
+			return false;
+		}
+
+		$this->sendFileToClient($fullPath);
+		return true;
+	}
+
+	/**
+	 * Checks if the given path is a valid asset file.
+	 *
+	 * @param string $path The full path to the file.
+	 * @return bool True if the path is a file and exists, false otherwise.
+	 */
+	private static function isValidAsset(string $path): bool
+	{
+		return $path && is_file($path);
+	}
+
+	/**
+	 * Sends the file to the client with appropriate headers.
+	 *
+	 * This method sets the Content-Type, Content-Length, and caching headers
+	 * (Cache-Control, ETag, Last-Modified). It also checks if the client already
+	 * has the latest version using If-None-Match and If-Modified-Since headers,
+	 * and sends a 304 Not Modified response if appropriate.
+	 *
+	 * @param string $filePath The full path to the file to send.
+	 */
+	private static function sendFileToClient(string $filePath): void
+	{
+		$mimeType = self::detectMimeType($filePath);
+		$etag = md5_file($filePath);
+		$lastModified = filemtime($filePath);
+
+		header('Content-Type: ' . $mimeType);
+		header('Content-Length: ' . filesize($filePath));
+		header('Cache-Control: public, max-age=86400, must-revalidate');
+		header('ETag: "' . $etag . '"');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
+
+		$ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? null;
+		$ifModifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? null;
+
+		if (($ifNoneMatch && $ifNoneMatch === $etag) || ($ifModifiedSince && strtotime($ifModifiedSince) >= $lastModified)) {
+			http_response_code(304);
+			return;
+		}
+
+		ob_clean();
+		readfile($filePath);
+	}
+
+	/**
+	 * Detects the MIME type of a file based on its extension.
+	 *
+	 * @param string $filePath The path to the file.
+	 * @return string The MIME type of the file.
+	 */
+	public static function detectMimeType(string $filePath): string
+	{
+		$extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+		return match ($extension) {
+			// Texts and Codes
+			'css'   => 'text/css',
+			'js'    => 'application/javascript',
+			'txt'   => 'text/plain',
+			'html', 'htm' => 'text/html',
+			'xml'   => 'application/xml',
+			'csv'   => 'text/csv',
+
+			// Images
+			'png'   => 'image/png',
+			'jpg', 'jpeg', 'jpe' => 'image/jpeg',
+			'webp'  => 'image/webp',
+			'svg'   => 'image/svg+xml',
+			'gif'   => 'image/gif',
+			'ico'   => 'image/x-icon',
+			'bmp'   => 'image/bmp',
+			'tiff'  => 'image/tiff',
+			'psd'   => 'image/vnd.adobe.photoshop',
+
+			// Fonts
+			'woff'  => 'font/woff',
+			'woff2' => 'font/woff2',
+			'ttf'   => 'font/ttf',
+			'otf'   => 'font/otf',
+
+			// Archives
+			'pdf'   => 'application/pdf',
+			'zip'   => 'application/zip',
+			'rar'   => 'application/x-rar-compressed',
+			'tar'   => 'application/x-tar',
+			'gz'    => 'application/gzip',
+			'7z'    => 'application/x-7z-compressed',
+
+			// Documents
+			'doc'   => 'application/msword',
+			'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'xls'   => 'application/vnd.ms-excel',
+			'xlsx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'ppt'   => 'application/vnd.ms-powerpoint',
+			'pptx'  => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			'odt'   => 'application/vnd.oasis.opendocument.text',
+
+			// Audio/Video
+			'mp3'   => 'audio/mpeg',
+			'wav'   => 'audio/wav',
+			'ogg'   => 'audio/ogg',
+			'mp4'   => 'video/mp4',
+			'mov'   => 'video/quicktime',
+			'avi'   => 'video/x-msvideo',
+			'webm'  => 'video/webm',
+
+			// Data
+			'json'  => 'application/json',
+			'yml', 'yaml' => 'application/x-yaml',
+
+			default => 'application/octet-stream'
+		};
+	}
+}

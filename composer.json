@@ -1,0 +1,21 @@
+{
+    "name": "adaiasmagdiel/erlenmeyer",
+    "description": "Soon",
+    "type": "project",
+    "require": {
+        "adaiasmagdiel/hermes": "^1.0"
+    },
+    "license": "GPL-3.0-only",
+    "autoload": {
+        "psr-4": {
+            "AdaiasMagdiel\\Erlenmeyer\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Adaías Magdiel",
+            "email": "adaiasmagdiell@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
