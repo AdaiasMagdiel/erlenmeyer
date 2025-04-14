@@ -3,6 +3,7 @@
 namespace AdaiasMagdiel\Erlenmeyer;
 
 use AdaiasMagdiel\Hermes\Router;
+use Closure;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -17,9 +18,9 @@ class App
 	private Assets $assets;
 
 	/**
-	 * @var callable Custom 404 handler.
+	 * @var Closure Custom 404 handler.
 	 */
-	private callable $_404;
+	private Closure $_404;
 
 	/**
 	 * @var array List of global middlewares.
@@ -49,12 +50,12 @@ class App
 		$this->assets = new Assets($assetsDir, $assetsRoute);
 
 		// Default 404 handler
-		$this->_404 = $this->_404 = function (Request $req, Response $res): void {
+		$this->set404Handler(function (Request $req, Response $res): void {
 			$res
 				->setStatusCode(404)
 				->withHtml("<h1>404 Not Found</h1><p>Requested URI: {$req->getUri()}</p>")
 				->send();
-		};
+		});
 
 		// Initialize router
 		Router::initialize();
@@ -91,7 +92,7 @@ class App
 	 */
 	public function set404Handler(callable $action): void
 	{
-		$this->_404 = $action;
+		$this->_404 = Closure::fromCallable($action);
 	}
 
 	/**
