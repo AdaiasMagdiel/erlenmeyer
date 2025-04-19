@@ -34,8 +34,11 @@ class App
 	 * @param string $assetsRoute Base route for serving assets (default: "/assets").
 	 * @throws InvalidArgumentException If the assets directory is invalid or inaccessible, or if the assets route is malformed.
 	 */
-	public function __construct(private string $assetsDir = "/public", private string $assetsRoute = "/assets")
-	{
+	public function __construct(
+		private string $assetsDir = "/public",
+		private string $assetsRoute = "/assets",
+		bool $autoServeAssets = true
+	) {
 		// Validate assets directory
 		$this->assetsDir = realpath($assetsDir);
 		if ($this->assetsDir === false || !is_dir($this->assetsDir) || !is_readable($this->assetsDir)) {
@@ -61,8 +64,8 @@ class App
 		Router::initialize();
 
 		// Set fallback handler
-		Router::fallback(function () {
-			if ($this->assets->isAssetRequest()) {
+		Router::fallback(function () use ($autoServeAssets) {
+			if ($autoServeAssets && $this->assets->isAssetRequest()) {
 				$this->assets->serveAsset();
 				return;
 			}
@@ -119,8 +122,23 @@ class App
 		// Apply middlewares to the action
 		$handler = $this->applyMiddlewares($action, $allMiddlewares);
 
-		Router::route($method, $route, function () use ($handler) {
-			$handler(new Request(), new Response());
+		// Extract parameter names from the route pattern
+		preg_match_all('/\[([a-zA-Z0-9\.\-_]+)\]/', $route, $matches);
+		$paramNames = $matches[1] ?? [];
+
+		// Register the route with dynamic parameters
+		Router::route($method, $route, function (...$paramValues) use ($handler, $paramNames) {
+			$request = new Request();
+			$response = new Response();
+
+			// Create a params object
+			$params = new \stdClass();
+			foreach ($paramNames as $index => $name) {
+				$params->$name = $paramValues[$index] ?? null;
+			}
+
+			// Call the handler with Request, Response, and params object
+			call_user_func($handler, $request, $response, $params);
 		});
 	}
 
@@ -179,10 +197,11 @@ class App
 		$next = $handler;
 		$middlewares = array_reverse($middlewares);
 
-		// Apply middlewares in reverse order to ensure proper nesting
 		foreach ($middlewares as $middleware) {
-			$next = function (Request $req, Response $res) use ($middleware, $next): void {
-				$middleware($req, $res, $next);
+			$next = function (Request $req, Response $res, $params) use ($middleware, $next): void {
+				$middleware($req, $res, function (Request $req, Response $res, $params) use ($next) {
+					$next($req, $res, $params);
+				}, $params);
 			};
 		}
 
