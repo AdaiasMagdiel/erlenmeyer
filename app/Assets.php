@@ -51,22 +51,33 @@ class Assets
 	 */
 	public function serveAsset(): bool
 	{
-		$requestedPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-		$requestedPath = ltrim($requestedPath, '/');
-		$requestedPath = str_replace(['../', '..\\'], '', $requestedPath);
-
-		$requestedPath = str_replace($this->assetsRoute, "", $requestedPath);
-
-		$fullPath = realpath($this->assetsDirectory . '/' . $requestedPath);
-
-		if (!$this->isValidAsset($fullPath)) {
-			http_response_code(404);
+		$requestedPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+		if (!$requestedPath) {
+			http_response_code(400);
+			echo "Invalid request";
 			return false;
 		}
 
-		if (strpos($fullPath, realpath($this->assetsDirectory)) !== 0) {
+		$requestedPath = str_replace($this->assetsRoute, '', $requestedPath);
+		$requestedPath = ltrim($requestedPath, '/');
+
+		$baseDir = realpath($this->assetsDirectory);
+		if ($baseDir === false) {
+			http_response_code(500);
+			echo "Internal server error";
+			return false;
+		}
+
+		$fullPath = realpath($baseDir . '/' . $requestedPath);
+		if ($fullPath === false || !$this->isValidAsset($fullPath)) {
 			http_response_code(404);
+			echo "File not found";
+			return false;
+		}
+
+		if (strpos($fullPath, $baseDir) !== 0) {
+			http_response_code(404);
+			echo "File not found";
 			return false;
 		}
 
