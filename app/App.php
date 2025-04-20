@@ -6,6 +6,7 @@ use AdaiasMagdiel\Hermes\Router;
 use Closure;
 use InvalidArgumentException;
 use RuntimeException;
+use stdClass;
 
 /**
  * Main application class for handling routing, assets, and HTTP responses.
@@ -39,21 +40,23 @@ class App
 		private string $assetsRoute = "/assets",
 		bool $autoServeAssets = true
 	) {
-		// Validate assets directory
-		$this->assetsDir = realpath($assetsDir);
-		if ($this->assetsDir === false || !is_dir($this->assetsDir) || !is_readable($this->assetsDir)) {
-			throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDir");
-		}
+		if ($autoServeAssets) {
+			// Validate assets directory
+			$this->assetsDir = realpath($assetsDir);
+			if ($this->assetsDir === false || !is_dir($this->assetsDir) || !is_readable($this->assetsDir)) {
+				throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDir");
+			}
 
-		// Validate assets route (relaxed to allow subdirectories)
-		if (!preg_match('/^\/[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $assetsRoute)) {
-			throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
+			// Validate assets route (relaxed to allow subdirectories)
+			if (!preg_match('/^\/[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $assetsRoute)) {
+				throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
+			}
 		}
 
 		$this->assets = new Assets($assetsDir, $assetsRoute);
 
 		// Default 404 handler
-		$this->set404Handler(function (Request $req, Response $res): void {
+		$this->set404Handler(function (Request $req, Response $res, $params): void {
 			$res
 				->setStatusCode(404)
 				->withHtml("<h1>404 Not Found</h1><p>Requested URI: {$req->getUri()}</p>")
@@ -72,7 +75,9 @@ class App
 
 			// Apply global middlewares to 404 handler
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
-			$handler(new Request(), new Response());
+			$params = new stdClass();
+
+			$handler(new Request(), new Response(), $params);
 		});
 	}
 
