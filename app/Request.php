@@ -223,7 +223,8 @@ class Request
             $this->ip = filter_var(trim($ips[0]), FILTER_VALIDATE_IP) ?: $this->ip;
         }
         // Light sanitization for User-Agent
-        $this->userAgent = trim(filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_UNSAFE_RAW, ['options' => ['default' => null]]));
+        $userAgent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_UNSAFE_RAW, ['options' => ['default' => null]]);
+        $this->userAgent = $userAgent !== null ? trim($userAgent) : null;
     }
 
     /**
