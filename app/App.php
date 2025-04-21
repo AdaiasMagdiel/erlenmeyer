@@ -57,6 +57,10 @@ class App
 		private string $assetsRoute = "/assets",
 		bool $autoServeAssets = true
 	) {
+		if (!is_dir(__DIR__ . '/logs')) {
+			mkdir(__DIR__ . '/logs', 0755);
+		}
+
 		if ($autoServeAssets) {
 			// Resolve and validate the assets directory path
 			$this->assetsDir = realpath($assetsDir);
