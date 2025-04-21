@@ -29,8 +29,9 @@ class App
 	/** @var array Map of exception classes to their respective handlers. */
 	private array $exceptionHandlers = [];
 
-	/** @var string Path to the error log file. */
-	private string $logFile = __DIR__ . '/logs/error.log';
+	/** @var string Path to the log directory. */
+	private string $logDir = __DIR__ . '/logs';
+	private string $logFile = __DIR__ . '/logs/info.log';
 
 	/** @var array Storage for routes, indexed by HTTP method (e.g., ['GET' => ['/route' => handler]]). */
 	private array $routes = [];
@@ -61,12 +62,19 @@ class App
 	public function __construct(
 		private string $assetsDir = "/public",
 		private string $assetsRoute = "/assets",
-		bool $autoServeAssets = true
+		bool $autoServeAssets = true,
+		string $logDir = ""
 	) {
-		// Ensure logs directory exists
-		if (!is_dir(__DIR__ . '/logs')) {
-			mkdir(__DIR__ . '/logs', 0755, true);
+		if (empty($logDir)) {
+			$this->logDir = __DIR__ . '/logs';
 		}
+
+		// Ensure logs directory exists
+		if (!is_dir($this->logDir)) {
+			mkdir($this->logDir, 0755, true);
+		}
+
+		$this->logFile = $this->logDir . "/info.log";
 
 		// Log application startup
 		$this->logMessage('INFO', 'Application initialized with assetsDir: ' . $assetsDir . ', assetsRoute: ' . $assetsRoute);
