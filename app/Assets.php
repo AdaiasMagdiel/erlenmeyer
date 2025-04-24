@@ -2,6 +2,8 @@
 
 namespace AdaiasMagdiel\Erlenmeyer;
 
+use InvalidArgumentException;
+
 /**
  * Class for managing and serving static assets.
  */
@@ -22,11 +24,43 @@ class Assets
 	 *
 	 * @param string $assetsDirectory The directory where assets are stored. Default is "/public".
 	 * @param string $assetsRoute The route prefix for asset requests. Default is "/assets".
+	 * @throws InvalidArgumentException If the assets directory or route is invalid.
 	 */
-	function __construct(string $assetsDirectory = "/public", string $assetsRoute = "/assets")
+	public function __construct(string $assetsDirectory = "/public", string $assetsRoute = "/assets")
 	{
-		$this->assetsDirectory = ltrim($assetsDirectory, "/");
+		$this->assetsDirectory = $assetsDirectory;
 		$this->assetsRoute = ltrim($assetsRoute, "/");
+
+		// Validate assets directory
+		$realDir = realpath($this->assetsDirectory);
+		if ($realDir === false || !is_dir($realDir) || !is_readable($realDir)) {
+			throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDirectory");
+		}
+
+		// Validate assets route
+		if (!preg_match('/^\/?[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $this->assetsRoute)) {
+			throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
+		}
+	}
+
+	/**
+	 * Gets the assets directory.
+	 *
+	 * @return string The assets directory.
+	 */
+	public function getAssetsDirectory(): string
+	{
+		return $this->assetsDirectory;
+	}
+
+	/**
+	 * Gets the assets route.
+	 *
+	 * @return string The assets route.
+	 */
+	public function getAssetsRoute(): string
+	{
+		return '/' . $this->assetsRoute; // Ensure leading slash for consistency
 	}
 
 	/**
@@ -43,10 +77,6 @@ class Assets
 	/**
 	 * Serves the requested asset if it exists and is accessible.
 	 *
-	 * This method parses the request URI, sanitizes it to prevent directory traversal,
-	 * and checks if the requested file is within the assets directory.
-	 * If the file is valid, it is sent to the client with appropriate headers.
-	 *
 	 * @return bool True if the asset was served successfully, false otherwise.
 	 */
 	public function serveAsset(): bool
@@ -58,7 +88,7 @@ class Assets
 			return false;
 		}
 
-		$requestedPath = str_replace($this->assetsRoute, '', $requestedPath);
+		$requestedPath = str_replace($this->assetsRoute, '', ltrim($requestedPath, '/'));
 		$requestedPath = ltrim($requestedPath, '/');
 
 		$baseDir = realpath($this->assetsDirectory);
