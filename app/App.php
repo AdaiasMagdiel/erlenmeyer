@@ -18,7 +18,7 @@ use Exception;
 class App
 {
 	/** @var Assets Asset manager instance for serving static files. */
-	private Assets $assets;
+	private ?Assets $assets;
 
 	/** @var Closure Custom handler for 404 errors. */
 	private Closure $_404;
@@ -54,45 +54,40 @@ class App
 	 * Initializes the asset manager, default 404 handler, default exception handler,
 	 * and fallback route for handling asset requests or 404 errors.
 	 *
-	 * @param string $assetsDir Directory for static assets (default: "/public"). Set to null to disable assets.
-	 * @param string $assetsRoute Base route for serving assets (default: "/assets").
-	 * @param bool $autoServeAssets Whether to automatically serve assets (default: true).
-	 * @throws InvalidArgumentException If the assets directory is invalid or inaccessible, or if the assets route is malformed.
+	 * @param ?Assets $assets An optional Assets instance for managing static assets. Set to null to disable assets.
+	 * @param ?string $logDir Directory for logs. Set to null to disable logging.
+	 * @throws InvalidArgumentException If the assets configuration or log directory is invalid.
 	 */
 	public function __construct(
-		private string $assetsDir = "/public",
-		private string $assetsRoute = "/assets",
-		bool $autoServeAssets = true,
-		?string $logDir = ""
+		?Assets $assets = null,
+		?string $logDir = null
 	) {
+		$this->assets = $assets;
 		$this->logDir = empty($logDir) ? null : $logDir;
 
-		// Ensure logs directory exists
-		if (!is_dir($this->logDir))
-			mkdir($this->logDir, 0755, true);
-
-		if (!is_null($this->logDir))
+		if (!is_null($this->logDir) && !empty($this->logDir)) {
+			// Ensure logs directory exists
+			if (!is_dir($this->logDir)) {
+				mkdir($this->logDir, 0755, true);
+			}
 			$this->logFile = $this->logDir . "/info.log";
+		}
 
 		// Log application startup
-		$this->logMessage('INFO', 'Application initialized with assetsDir: ' . $assetsDir . ', assetsRoute: ' . $assetsRoute);
+		$this->logMessage('INFO', 'Application initialized' . ($this->assets ? ' with assets enabled' : ' without assets'));
 
-		if ($autoServeAssets) {
-			// Resolve and validate the assets directory path
-			$this->assetsDir = realpath($assetsDir);
-			if ($this->assetsDir === false || !is_dir($this->assetsDir) || !is_readable($this->assetsDir)) {
+		// Validate assets configuration if provided
+		if ($this->assets) {
+			$assetsDir = realpath($this->assets->getAssetsDirectory());
+			if ($assetsDir === false || !is_dir($assetsDir) || !is_readable($assetsDir)) {
 				$this->logMessage('ERROR', "Invalid or inaccessible assets directory: $assetsDir");
 				throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDir");
 			}
-
-			// Validate the assets route format (allows subdirectories)
+			$assetsRoute = $this->assets->getAssetsRoute();
 			if (!preg_match('/^\/[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $assetsRoute)) {
 				$this->logMessage('ERROR', "Invalid assets route: $assetsRoute");
 				throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
 			}
-
-			// Initialize asset manager
-			$this->assets = new Assets($assetsDir, $assetsRoute);
 			$this->logMessage('INFO', 'Asset manager initialized for route: ' . $assetsRoute);
 		}
 
@@ -115,9 +110,9 @@ class App
 
 		// Initialize routes with 404 and fallback handlers
 		$this->routes['404'] = $this->_404;
-		$this->routes['fallback'] = function () use ($autoServeAssets) {
-			// Serve assets if the request matches the assets route
-			if ($autoServeAssets && $this->assets->isAssetRequest()) {
+		$this->routes['fallback'] = function () {
+			// Serve assets if enabled and the request matches the assets route
+			if ($this->assets && $this->assets->isAssetRequest()) {
 				$this->logMessage('INFO', 'Serving asset: ' . $_SERVER['REQUEST_URI']);
 				$this->assets->serveAsset();
 				return;
