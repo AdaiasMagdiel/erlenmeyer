@@ -30,8 +30,8 @@ class App
 	private array $exceptionHandlers = [];
 
 	/** @var string Path to the log directory. */
-	private string $logDir = __DIR__ . '/logs';
-	private string $logFile = __DIR__ . '/logs/info.log';
+	private ?string $logDir;
+	private string $logFile;
 
 	/** @var array Storage for routes, indexed by HTTP method (e.g., ['GET' => ['/route' => handler]]). */
 	private array $routes = [];
@@ -63,18 +63,16 @@ class App
 		private string $assetsDir = "/public",
 		private string $assetsRoute = "/assets",
 		bool $autoServeAssets = true,
-		string $logDir = ""
+		?string $logDir = ""
 	) {
-		if (empty($logDir)) {
-			$this->logDir = __DIR__ . '/logs';
-		}
+		$this->logDir = empty($logDir) ? null : $logDir;
 
 		// Ensure logs directory exists
-		if (!is_dir($this->logDir)) {
+		if (!is_dir($this->logDir))
 			mkdir($this->logDir, 0755, true);
-		}
 
-		$this->logFile = $this->logDir . "/info.log";
+		if (!is_null($this->logDir))
+			$this->logFile = $this->logDir . "/info.log";
 
 		// Log application startup
 		$this->logMessage('INFO', 'Application initialized with assetsDir: ' . $assetsDir . ', assetsRoute: ' . $assetsRoute);
@@ -375,6 +373,8 @@ class App
 	 */
 	private function logMessage(string $level, string $message, bool $append = true): void
 	{
+		if (is_null($this->logDir)) return;
+
 		// Format log entry with timestamp and level
 		$timestamp = date('Y-m-d H:i:s');
 		$logEntry = "[{$timestamp}] [$level] $message\n";
