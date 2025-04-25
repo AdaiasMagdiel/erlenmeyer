@@ -62,6 +62,11 @@ class App
 		?Assets $assets = null,
 		?string $logDir = null
 	) {
+		// Start the session
+		if (session_status() === PHP_SESSION_NONE) {
+			session_start();
+		}
+
 		$this->assets = $assets;
 		$this->logDir = empty($logDir) ? null : $logDir;
 
