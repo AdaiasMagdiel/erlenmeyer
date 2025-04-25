@@ -13,27 +13,35 @@ class Response
     /**
      * @var int HTTP status code.
      */
-    private $statusCode = 200;
+    private int $statusCode = 200;
 
     /**
      * @var array Headers to be sent.
      */
-    private $headers = [];
+    private array $headers = [];
 
     /**
      * @var string|null Response content.
      */
-    private $body = null;
+    private ?string $body = null;
 
     /**
      * @var bool Indicates whether the response has been sent.
      */
-    private $isSent = false;
+    private bool $isSent = false;
 
     /**
      * @var string Default content type (Content-Type).
      */
-    private $contentType = 'text/html';
+    private string $contentType = 'text/html';
+
+    /**
+     * An associative array mapping function names to their callable implementations.
+     * Used to allow overriding native PHP functions (e.g., 'header') for testing or dependency injection.
+     *
+     * @var array<string, string> 
+     */
+    private static array $functions = ["header" => 'header'];
 
     /**
      * Constructor for the Response class.
@@ -47,6 +55,11 @@ class Response
         foreach ($headers as $name => $value) {
             $this->setHeader($name, $value);
         }
+    }
+
+    public static function updateFunctions(array $functions = [])
+    {
+        self::$functions = array_merge(self::$functions, $functions);
     }
 
     /**
@@ -311,7 +324,7 @@ class Response
 
         // Sends the headers
         foreach ($this->headers as $name => $value) {
-            header("$name: $value", true);
+            self::$functions['header']("$name: $value", true);
         }
 
         // Sends the body, if any
