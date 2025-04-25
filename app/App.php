@@ -250,6 +250,104 @@ class App
 	}
 
 	/**
+	 * Registers a PUT route.
+	 *
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function put(string $route, callable $action, array $middlewares = []): void
+	{
+		$this->route('PUT', $route, $action, $middlewares);
+	}
+
+	/**
+	 * Registers a DELETE route.
+	 *
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function delete(string $route, callable $action, array $middlewares = []): void
+	{
+		$this->route('DELETE', $route, $action, $middlewares);
+	}
+
+	/**
+	 * Registers a PATCH route.
+	 *
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function patch(string $route, callable $action, array $middlewares = []): void
+	{
+		$this->route('PATCH', $route, $action, $middlewares);
+	}
+
+	/**
+	 * Registers an OPTIONS route.
+	 *
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function options(string $route, callable $action, array $middlewares = []): void
+	{
+		$this->route('OPTIONS', $route, $action, $middlewares);
+	}
+
+	/**
+	 * Registers a HEAD route.
+	 *
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function head(string $route, callable $action, array $middlewares = []): void
+	{
+		$this->route('HEAD', $route, $action, $middlewares);
+	}
+
+	/**
+	 * Registers a route that matches any HTTP method.
+	 *
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function any(string $route, callable $action, array $middlewares = []): void
+	{
+		$methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+		foreach ($methods as $method) {
+			$this->route($method, $route, $action, $middlewares);
+		}
+	}
+
+	/**
+	 * Registers multiple routes with the same action and middlewares.
+	 *
+	 * @param array $methods Array of HTTP methods (e.g., ['GET', 'POST']).
+	 * @param string $route Route pattern.
+	 * @param callable $action Action to execute.
+	 * @param array $middlewares Route-specific middlewares.
+	 * @return void
+	 */
+	public function match(array $methods, string $route, callable $action, array $middlewares = []): void
+	{
+		foreach ($methods as $method) {
+			$this->route(strtoupper($method), $route, $action, $middlewares);
+		}
+	}
+
+
+	/**
 	 * Registers a redirect from one route to another.
 	 *
 	 * @param string $from Source route.
@@ -307,13 +405,6 @@ class App
 	 */
 	public function run(): void
 	{
-		// Prevent multiple executions
-		static $hasRun = false;
-		if ($hasRun) {
-			$this->logMessage('ERROR', 'Application execution attempted multiple times');
-			throw new RuntimeException("The application has already been executed.");
-		}
-		$hasRun = true;
 		$this->logMessage('INFO', 'Application started');
 
 		// Convert PHP errors to exceptions
@@ -452,11 +543,11 @@ class App
 		if (isset($this->routes['redirects'])) {
 			foreach ($this->routes['redirects'] as $redirect) {
 				if ($uri === $redirect['from']) {
-					$statusCode = $redirect['permanent'] ? '301 Moved Permanently' : '302 Found';
+					$statusCode = $redirect['permanent'] ? 301 : 302;
 					$this->logMessage('INFO', "Redirecting from $uri to {$redirect['to']} ($statusCode)");
-					header("HTTP/1.1 {$statusCode}");
-					header("Location: {$redirect['to']}");
-					exit;
+					$res = new Response();
+					$res->redirect($redirect['to'], $statusCode)->send();
+					return;
 				}
 			}
 		}
