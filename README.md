@@ -232,11 +232,89 @@ $res->send();
 
 ## Logging
 
-If a log directory is provided during `App` initialization, Erlenmeyer will log events to `info.log`. Logs are rotated when the file exceeds 3MB, keeping up to 5 rotated files.
+Erlenmeyer provides a flexible and extensible logging system to help you monitor and debug your application. Logging is essential for tracking events, identifying issues, and understanding application behavior. The logging system is based on the `LoggerInterface`, which defines the contract for logging messages and exceptions.
+
+### Using the Default Logger
+
+Erlenmeyer includes a `DefaultLogger` that logs messages to a file with automatic rotation. To use it, create an instance of `DefaultLogger` with a specified log directory and pass it to the `App` constructor.
+
+**Example:**
 
 ```php
-$app = new App(logDir: '/path/to/logs');
+use AdaiasMagdiel\Erlenmeyer\Logging\DefaultLogger;
+use AdaiasMagdiel\Erlenmeyer\App;
+
+$logger = new DefaultLogger('/path/to/logs');
+$app = new App(logger: $logger);
 ```
+
+- Logs will be written to `/path/to/logs/info.log`.
+- The logger automatically rotates the log file when it exceeds 3MB, keeping up to 5 rotated files (e.g., `info.log.1`, `info.log.2`, etc.).
+- If no log directory is provided, the `DefaultLogger` will not log anything.
+
+### Log Levels
+
+The logging system supports the following levels, defined in the `LogLevel` enum:
+
+| Level      | Description                                   |
+|------------|-----------------------------------------------|
+| `INFO`     | General operational information               |
+| `DEBUG`    | Detailed debug information                    |
+| `WARNING`  | Indicates something unexpected but recoverable |
+| `ERROR`    | Indicates a serious error affecting functionality |
+| `CRITICAL` | Indicates a critical error that may cause the application to crash |
+
+These levels can be used when logging messages to categorize their severity.
+
+### Creating a Custom Logger
+
+If you need advanced logging features, such as logging to a database, sending logs to an external service, or using a custom format, you can create a custom logger by implementing the `LoggerInterface`.
+
+**Example of a Custom Logger:**
+
+```php
+use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
+use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
+use Exception;
+use AdaiasMagdiel\Erlenmeyer\Request;
+
+class CustomLogger implements LoggerInterface
+{
+    private $logFile;
+
+    public function __construct(string $logFile)
+    {
+        $this->logFile = $logFile;
+    }
+
+    public function log(LogLevel $level, string $message): void
+    {
+        $timestamp = date('Y-m-d H:i:s');
+        $logEntry = "[$timestamp] [$level->value] $message\n";
+        file_put_contents($this->logFile, $logEntry, FILE_APPEND);
+    }
+
+    public function logException(Exception $e, ?Request $request = null): void
+    {
+        $timestamp = date('Y-m-d H:i:s');
+        $message = "[$timestamp] [ERROR] Exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "\n";
+        if ($request) {
+            $message .= "Request: " . $request->getMethod() . " " . $request->getUri() . "\n";
+        }
+        $message .= $e->getTraceAsString() . "\n";
+        file_put_contents($this->logFile, $message, FILE_APPEND);
+    }
+}
+```
+
+To use the custom logger, pass an instance to the `App` constructor:
+
+```php
+$customLogger = new CustomLogger('/path/to/custom.log');
+$app = new App(logger: $customLogger);
+```
+
+**Important Note:** If no logger is explicitly provided, the `App` will create a `DefaultLogger` without a log directory, which means no logging will occur. You must configure a logger explicitly to enable logging.
 
 ## Tests
 
