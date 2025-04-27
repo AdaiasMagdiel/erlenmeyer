@@ -1,15 +1,3 @@
-### Resposta
-
-**Pontos-Chave:**
-- Erlenmeyer é um framework PHP leve, inspirado no Flask, projetado para simplicidade e eficiência.
-- Suporta roteamento, middlewares, gerenciamento de sessões, ativos estáticos e tratamento de erros.
-- Licenciado sob GPLv3, disponível via Composer e hospedado no GitHub.
-- Inclui testes com PestPHP e é extensível para vários casos de uso.
-
-**O que é o Erlenmeyer?**  
-Erlenmeyer é um framework PHP minimalista que ajuda a criar aplicações web de forma simples e eficiente. Inspirado no Flask do Python, ele oferece ferramentas como roteamento, middlewares e gerenciamento de sessões, mantendo uma abordagem leve e flexível para desenvolvedores PHP.
-
-**Como instalar?**  
 # Erlenmeyer - Minimal PHP Framework for Web Applications
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)  
