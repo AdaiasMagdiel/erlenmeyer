@@ -2,6 +2,7 @@
 
 use AdaiasMagdiel\Erlenmeyer\App;
 use AdaiasMagdiel\Erlenmeyer\Assets;
+use AdaiasMagdiel\Erlenmeyer\Logging\DefaultLogger;
 use AdaiasMagdiel\Erlenmeyer\Request;
 use AdaiasMagdiel\Erlenmeyer\Response;
 use AdaiasMagdiel\Erlenmeyer\Session;
@@ -11,11 +12,12 @@ it('can instantiate an Erlenmeyer application', function () {
     expect(true)->toBeTrue();
 });
 
-it('can create an Erlenmeyer application with logs directory', function () {
+it('can create an Erlenmeyer application with a logger', function () {
     $logDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "erlenmeyer_test_" . uniqid() . DIRECTORY_SEPARATOR;
     $logFile = $logDir . DIRECTORY_SEPARATOR . 'info.log';
 
-    new App(logDir: $logDir);
+    $logger = new DefaultLogger(logDir: $logDir);
+    new App(logger: $logger);
 
     expect(is_dir($logDir))->toBeTrue();
     expect(is_file($logFile))->toBeTrue();
@@ -167,7 +169,8 @@ it('logs errors to file', function () {
     $logDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "erlenmeyer_test_" . uniqid() . DIRECTORY_SEPARATOR;
     $logFile = $logDir . 'info.log';
 
-    $app = new App(logDir: $logDir);
+    $logger = new DefaultLogger(logDir: $logDir);
+    $app = new App(logger: $logger);
     $app->get('/error', function (Request $req, Response $res, $params) {
         throw new \Exception('Test error');
     });
