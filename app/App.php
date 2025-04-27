@@ -2,6 +2,9 @@
 
 namespace AdaiasMagdiel\Erlenmeyer;
 
+use AdaiasMagdiel\Erlenmeyer\Logging\DefaultLogger;
+use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
+use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use Closure;
 use InvalidArgumentException;
 use RuntimeException;
@@ -20,6 +23,13 @@ class App
 	/** @var Assets Asset manager instance for serving static files. */
 	private ?Assets $assets;
 
+	/**
+	 * @var LoggerInterface $logger
+	 * Logger interface for handling system logging.
+	 * Allows logging of various levels (debug, info, warning, error, etc.) and exceptions.
+	 */
+	private LoggerInterface $logger;
+
 	/** @var Closure Custom handler for 404 errors. */
 	private Closure $_404;
 
@@ -28,10 +38,6 @@ class App
 
 	/** @var array Map of exception classes to their respective handlers. */
 	private array $exceptionHandlers = [];
-
-	/** @var string Path to the log directory. */
-	private ?string $logDir;
-	private string $logFile;
 
 	/** @var array Storage for routes, indexed by HTTP method (e.g., ['GET' => ['/route' => handler]]). */
 	private array $routes = [];
@@ -60,7 +66,7 @@ class App
 	 */
 	public function __construct(
 		?Assets $assets = null,
-		?string $logDir = null
+		?LoggerInterface $logger = null
 	) {
 		// Start the session
 		if (session_status() === PHP_SESSION_NONE) {
@@ -68,32 +74,30 @@ class App
 		}
 
 		$this->assets = $assets;
-		$this->logDir = empty($logDir) ? null : $logDir;
 
-		if (!is_null($this->logDir) && !empty($this->logDir)) {
-			// Ensure logs directory exists
-			if (!is_dir($this->logDir)) {
-				mkdir($this->logDir, 0755, true);
-			}
-			$this->logFile = $this->logDir . "/info.log";
+		if (is_null($logger)) {
+			$defaultLogger = new DefaultLogger();
+			$this->logger = $defaultLogger;
+		} else {
+			$this->logger = $logger;
 		}
 
 		// Log application startup
-		$this->logMessage('INFO', 'Application initialized' . ($this->assets ? ' with assets enabled' : ' without assets'));
+		$this->logger->log(LogLevel::INFO, 'Application initialized' . ($this->assets ? ' with assets enabled' : ' without assets'));
 
 		// Validate assets configuration if provided
 		if ($this->assets) {
 			$assetsDir = realpath($this->assets->getAssetsDirectory());
 			if ($assetsDir === false || !is_dir($assetsDir) || !is_readable($assetsDir)) {
-				$this->logMessage('ERROR', "Invalid or inaccessible assets directory: $assetsDir");
+				$this->logger->log(LogLevel::ERROR, "Invalid or inaccessible assets directory: $assetsDir");
 				throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDir");
 			}
 			$assetsRoute = $this->assets->getAssetsRoute();
 			if (!preg_match('/^\/[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $assetsRoute)) {
-				$this->logMessage('ERROR', "Invalid assets route: $assetsRoute");
+				$this->logger->log(LogLevel::ERROR, "Invalid assets route: $assetsRoute");
 				throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
 			}
-			$this->logMessage('INFO', 'Asset manager initialized for route: ' . $assetsRoute);
+			$this->logger->log(LogLevel::INFO, 'Asset manager initialized for route: ' . $assetsRoute);
 		}
 
 		// Set default 404 handler
@@ -110,7 +114,7 @@ class App
 				->setStatusCode(500)
 				->withHtml("<h1>500 Internal Server Error</h1><p>Error: {$e->getMessage()}</p>")
 				->send();
-			$this->logError($e, $req);
+			$this->logger->logException($e, $req);
 		});
 
 		// Initialize routes with 404 and fallback handlers
@@ -118,12 +122,12 @@ class App
 		$this->routes['fallback'] = function () {
 			// Serve assets if enabled and the request matches the assets route
 			if ($this->assets && $this->assets->isAssetRequest()) {
-				$this->logMessage('INFO', 'Serving asset: ' . $_SERVER['REQUEST_URI']);
+				$this->logger->log(LogLevel::INFO, 'Serving asset: ' . $_SERVER['REQUEST_URI']);
 				$this->assets->serveAsset();
 				return;
 			}
 			// Apply global middlewares and execute 404 handler
-			$this->logMessage('WARNING', 'No route matched, executing 404 handler for URI: ' . $_SERVER['REQUEST_URI']);
+			$this->logger->log(LogLevel::WARNING, 'No route matched, executing 404 handler for URI: ' . $_SERVER['REQUEST_URI']);
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
 			$params = new stdClass();
 			$handler(new Request(), new Response(), $params);
@@ -145,12 +149,12 @@ class App
 			$exceptionClass !== Exception::class &&
 			!is_subclass_of($exceptionClass, Exception::class)
 		)) {
-			$this->logMessage('ERROR', "Invalid exception class: $exceptionClass");
+			$this->logger->log(LogLevel::ERROR, "Invalid exception class: $exceptionClass");
 			throw new InvalidArgumentException("Invalid exception class: $exceptionClass");
 		}
 		// Store the handler as a Closure
 		$this->exceptionHandlers[$exceptionClass] = Closure::fromCallable($handler);
-		$this->logMessage('INFO', "Exception handler registered for class: $exceptionClass");
+		$this->logger->log(LogLevel::INFO, "Exception handler registered for class: $exceptionClass");
 	}
 
 	/**
@@ -195,7 +199,7 @@ class App
 		// Normalize and validate HTTP method
 		$method = strtoupper(trim($method));
 		if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'], true)) {
-			$this->logMessage('ERROR', "Invalid HTTP method: $method for route: $route");
+			$this->logger->log(LogLevel::ERROR, "Invalid HTTP method: $method for route: $route");
 			throw new InvalidArgumentException("Invalid HTTP method: $method");
 		}
 
@@ -220,7 +224,7 @@ class App
 			'handler' => $handler,
 			'paramNames' => $paramNames
 		];
-		$this->logMessage('INFO', "Route registered: $method $route");
+		$this->logger->log(LogLevel::INFO, "Route registered: $method $route");
 	}
 
 	/**
@@ -367,7 +371,7 @@ class App
 			'to' => $to,
 			'permanent' => $permanent
 		];
-		$this->logMessage('INFO', "Redirect registered: $from to $to (permanent: " . ($permanent ? 'true' : 'false') . ")");
+		$this->logger->log(LogLevel::INFO, "Redirect registered: $from to $to (permanent: " . ($permanent ? 'true' : 'false') . ")");
 	}
 
 	/**
@@ -381,7 +385,7 @@ class App
 		// Store and register the 404 handler
 		$this->_404 = Closure::fromCallable($action);
 		$this->routes['404'] = $this->_404;
-		$this->logMessage('INFO', 'Custom 404 handler set');
+		$this->logger->log(LogLevel::INFO, 'Custom 404 handler set');
 	}
 
 	/**
@@ -394,7 +398,7 @@ class App
 	{
 		// Append middleware to global list
 		$this->globalMiddlewares[] = $middleware;
-		$this->logMessage('INFO', 'Global middleware added');
+		$this->logger->log(LogLevel::INFO, 'Global middleware added');
 	}
 
 	/**
@@ -405,11 +409,11 @@ class App
 	 */
 	public function run(): void
 	{
-		$this->logMessage('INFO', 'Application started');
+		$this->logger->log(LogLevel::INFO, 'Application started');
 
 		// Convert PHP errors to exceptions
 		set_error_handler(function ($severity, $message, $file, $line) {
-			$this->logMessage('ERROR', "PHP error: $message in $file:$line (severity: $severity)");
+			$this->logger->log(LogLevel::ERROR, "PHP error: $message in $file:$line (severity: $severity)");
 			throw new \ErrorException($message, 500, $severity, $file, $line);
 		});
 
@@ -423,87 +427,16 @@ class App
 				$handler(new Request(), new Response(), $e);
 			} else {
 				// Fallback for unhandled exceptions
-				$this->logMessage('ERROR', "Unhandled exception: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
+				$this->logger->log(LogLevel::ERROR, "Unhandled exception: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
 				http_response_code(500);
 				echo "<p>Unexpected error occurred.</p>";
-				$this->logError($e);
+				$this->logger->logException($e);
 			}
 		} finally {
 			// Restore default PHP error handler
 			restore_error_handler();
-			$this->logMessage('INFO', 'Application execution completed');
+			$this->logger->log(LogLevel::INFO, 'Application execution completed');
 		}
-	}
-
-	/**
-	 * Logs an exception to the error log file with request context.
-	 *
-	 * @param Exception $e The exception to log.
-	 * @param Request|null $request The request object, if available.
-	 * @return void
-	 */
-	private function logError(Exception $e, ?Request $request = null): void
-	{
-		// Format error message with timestamp, request details, and stack trace
-		$timestamp = date('Y-m-d H:i:s');
-		$requestInfo = $request ? "Request: {$request->getMethod()} {$request->getUri()}" : 'No request context';
-		$message = "[{$timestamp}] [ERROR] {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n";
-		$message .= "$requestInfo\n";
-		$message .= $e->getTraceAsString() . "\n\n";
-		// Write to log file with size check
-		$this->logMessage('ERROR', $message, false);
-	}
-
-	/**
-	 * Logs a message to the log file, ensuring the file size does not exceed 3MB.
-	 *
-	 * @param string $level Log level (e.g., INFO, ERROR, WARNING).
-	 * @param string $message Message to log.
-	 * @param bool $append Whether to append to the log file (default: true).
-	 * @return void
-	 */
-	private function logMessage(string $level, string $message, bool $append = true): void
-	{
-		if (is_null($this->logDir)) return;
-
-		// Format log entry with timestamp and level
-		$timestamp = date('Y-m-d H:i:s');
-		$logEntry = "[{$timestamp}] [$level] $message\n";
-
-		// Check if log file exists and its size
-		if (file_exists($this->logFile) && filesize($this->logFile) >= self::MAX_LOG_SIZE) {
-			// Rotate log file
-			$this->rotateLogFile();
-		}
-
-		// Write or append to log file
-		file_put_contents($this->logFile, $logEntry, $append ? FILE_APPEND : 0);
-	}
-
-	/**
-	 * Rotates the log file if it exceeds the maximum size.
-	 *
-	 * @return void
-	 */
-	private function rotateLogFile(): void
-	{
-		// Determine the next available log file number
-		for ($i = self::MAX_LOG_FILES - 1; $i >= 1; $i--) {
-			$oldLog = $this->logFile . '.' . $i;
-			$newLog = $this->logFile . '.' . ($i + 1);
-			if (file_exists($oldLog)) {
-				rename($oldLog, $newLog);
-			}
-		}
-
-		// Rename current log file to .1
-		if (file_exists($this->logFile)) {
-			rename($this->logFile, $this->logFile . '.1');
-		}
-
-		// Create a new empty log file
-		file_put_contents($this->logFile, '');
-		$this->logMessage('INFO', 'Log file rotated', false);
 	}
 
 	/**
@@ -520,7 +453,7 @@ class App
 		$route = preg_replace($this->routePattern, $this->paramPattern, $route);
 		// Escape forward slashes and wrap in regex delimiters
 		$route = str_replace('/', '\/', $route);
-		$this->logMessage('INFO', "Parsed route: $route");
+		$this->logger->log(LogLevel::INFO, "Parsed route: $route");
 		return "/^{$route}$/";
 	}
 
@@ -537,14 +470,14 @@ class App
 		$params = [];
 
 		// Log incoming request
-		$this->logMessage('INFO', "Handling request: $method $uri");
+		$this->logger->log(LogLevel::INFO, "Handling request: $method $uri");
 
 		// Check for redirects
 		if (isset($this->routes['redirects'])) {
 			foreach ($this->routes['redirects'] as $redirect) {
 				if ($uri === $redirect['from']) {
 					$statusCode = $redirect['permanent'] ? 301 : 302;
-					$this->logMessage('INFO', "Redirecting from $uri to {$redirect['to']} ($statusCode)");
+					$this->logger->log(LogLevel::INFO, "Redirecting from $uri to {$redirect['to']} ($statusCode)");
 					$res = new Response();
 					$res->redirect($redirect['to'], $statusCode)->send();
 					return;
@@ -554,7 +487,7 @@ class App
 
 		// Check if routes exist for the method
 		if (!isset($this->routes[$method])) {
-			$this->logMessage('WARNING', "No routes defined for method: $method");
+			$this->logger->log(LogLevel::WARNING, "No routes defined for method: $method");
 			$this->handleFallbackOrNotFound();
 			return;
 		}
@@ -577,7 +510,7 @@ class App
 
 				// Log route match and parameters
 				$paramList = json_encode((array)$paramObj);
-				$this->logMessage('INFO', "Route matched: $method $route with parameters: $paramList");
+				$this->logger->log(LogLevel::INFO, "Route matched: $method $route with parameters: $paramList");
 
 				// Execute the handler
 				$handler($request, $response, $paramObj);
@@ -586,7 +519,7 @@ class App
 		}
 
 		// Handle unmatched routes
-		$this->logMessage('WARNING', "No route matched for: $method $uri");
+		$this->logger->log(LogLevel::WARNING, "No route matched for: $method $uri");
 		$this->handleFallbackOrNotFound();
 	}
 
@@ -599,10 +532,10 @@ class App
 	{
 		// Use fallback handler if defined, otherwise apply 404 handler
 		if (isset($this->routes['fallback'])) {
-			$this->logMessage('INFO', 'Executing fallback handler');
+			$this->logger->log(LogLevel::INFO, 'Executing fallback handler');
 			$this->routes['fallback']();
 		} else {
-			$this->logMessage('INFO', 'Executing 404 handler');
+			$this->logger->log(LogLevel::INFO, 'Executing 404 handler');
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
 			$handler(new Request(), new Response(), new stdClass());
 		}
@@ -644,7 +577,7 @@ class App
 		// Wrap each middleware around the handler
 		foreach ($middlewares as $middleware) {
 			$next = function (Request $req, Response $res, $params) use ($middleware, $next): void {
-				$this->logMessage('INFO', 'Applying middleware for request: ' . $req->getUri());
+				$this->logger->log(LogLevel::INFO, 'Applying middleware for request: ' . $req->getUri());
 				$middleware($req, $res, function (Request $req, Response $res, $params) use ($next) {
 					$next($req, $res, $params);
 				}, $params);
