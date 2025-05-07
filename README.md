@@ -234,23 +234,36 @@ $res->send();
 
 Erlenmeyer provides a flexible and extensible logging system to help you monitor and debug your application. Logging is essential for tracking events, identifying issues, and understanding application behavior. The logging system is based on the `LoggerInterface`, which defines the contract for logging messages and exceptions.
 
-### Using the Default Logger
+### Using Loggers
 
-Erlenmeyer includes a `DefaultLogger` that logs messages to a file with automatic rotation. To use it, create an instance of `DefaultLogger` with a specified log directory and pass it to the `App` constructor.
+Erlenmeyer provides two built-in loggers: `FileLogger` for file-based logging with rotation, and `ConsoleLogger` for logging to the command line using `error_log`. You can choose either by passing an instance to the `App` constructor.
 
-**Example:**
+**Example with FileLogger:**
 
 ```php
-use AdaiasMagdiel\Erlenmeyer\Logging\DefaultLogger;
+use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 use AdaiasMagdiel\Erlenmeyer\App;
 
-$logger = new DefaultLogger('/path/to/logs');
+$logger = new FileLogger('/path/to/logs');
 $app = new App(logger: $logger);
 ```
 
-- Logs will be written to `/path/to/logs/info.log`.
-- The logger automatically rotates the log file when it exceeds 3MB, keeping up to 5 rotated files (e.g., `info.log.1`, `info.log.2`, etc.).
-- If no log directory is provided, the `DefaultLogger` will not log anything.
+- Logs are written to `/path/to/logs/info.log`.
+- The `FileLogger` automatically rotates the log file when it exceeds 3MB, keeping up to 5 rotated files (e.g., `info.log.1`, `info.log.2`, etc.).
+- If no log directory is provided, `FileLogger` will not log anything.
+
+**Example with ConsoleLogger:**
+
+```php
+use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;
+use AdaiasMagdiel\Erlenmeyer\App;
+
+$logger = new ConsoleLogger();
+$app = new App(logger: $logger);
+```
+
+- Logs are output to the command line using `error_log`, appearing in the terminal or server error log.
+- No configuration is required for `ConsoleLogger`, making it ideal for debugging or CLI environments.
 
 ### Log Levels
 
@@ -314,7 +327,7 @@ $customLogger = new CustomLogger('/path/to/custom.log');
 $app = new App(logger: $customLogger);
 ```
 
-**Important Note:** If no logger is explicitly provided, the `App` will create a `DefaultLogger` without a log directory, which means no logging will occur. You must configure a logger explicitly to enable logging.
+**Important Note:** If no logger is explicitly provided, the `App` will create a `FileLogger` without a log directory, which means no logging will occur. You must configure a logger explicitly to enable logging.
 
 ## Tests
 
