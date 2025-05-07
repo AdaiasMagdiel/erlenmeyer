@@ -5,8 +5,7 @@ namespace AdaiasMagdiel\Erlenmeyer\Logging;
 use AdaiasMagdiel\Erlenmeyer\Request;
 use Exception;
 
-// TODO: PHPDoc
-class DefaultLogger implements LoggerInterface
+class FileLogger implements LoggerInterface
 {
 	/**
 	 * Maximum log file size in bytes (3MB)
@@ -71,7 +70,6 @@ class DefaultLogger implements LoggerInterface
 	 *
 	 * @param LogLevel $level Log level (e.g., INFO, ERROR, WARNING).
 	 * @param string $message Message to log.
-	 * @param bool $append Whether to append to the log file (default: true).
 	 * @return void
 	 */
 	public function log(LogLevel $level = LogLevel::INFO, string $message = ""): void
@@ -88,7 +86,7 @@ class DefaultLogger implements LoggerInterface
 			$this->rotateLogFile();
 		}
 
-		// Write or append to log file
+		// Write to log file
 		file_put_contents($this->logFile, $logEntry, FILE_APPEND);
 	}
 
