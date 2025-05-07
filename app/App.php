@@ -2,7 +2,7 @@
 
 namespace AdaiasMagdiel\Erlenmeyer;
 
-use AdaiasMagdiel\Erlenmeyer\Logging\DefaultLogger;
+use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use Closure;
@@ -48,12 +48,6 @@ class App
 	/** @var string Regex replacement for route parameters (e.g., ([a-zA-Z0-9\.\-_]+)). */
 	private string $paramPattern = '/([a-zA-Z0-9\.\-_]+)';
 
-	/** @var int Maximum log file size in bytes (3MB). */
-	private const MAX_LOG_SIZE = 3145728; // 3MB
-
-	/** @var int Maximum number of rotated log files to keep. */
-	private const MAX_LOG_FILES = 5;
-
 	/**
 	 * Constructs the application instance.
 	 *
@@ -76,7 +70,7 @@ class App
 		$this->assets = $assets;
 
 		if (is_null($logger)) {
-			$defaultLogger = new DefaultLogger();
+			$defaultLogger = new FileLogger();
 			$this->logger = $defaultLogger;
 		} else {
 			$this->logger = $logger;
@@ -558,7 +552,7 @@ class App
 	 */
 	private function getUri(): string
 	{
-		$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? "";
 		return strlen($uri) > 1 ? rtrim($uri, '/') : $uri;
 	}
 
