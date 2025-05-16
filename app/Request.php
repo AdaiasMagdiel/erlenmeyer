@@ -3,6 +3,7 @@
 namespace AdaiasMagdiel\Erlenmeyer;
 
 use RuntimeException;
+use stdClass;
 
 /**
  * Class to encapsulate and process HTTP request data.
@@ -318,7 +319,7 @@ class Request
      * @param mixed $default Default value if the data does not exist.
      * @return mixed Data value or default value.
      */
-    public function getFormDataParam(string $key, $default = null)
+    public function getFormDataParam(string $key, $default = null): mixed
     {
         return $this->formData[$key] ?? $default;
     }
@@ -327,15 +328,31 @@ class Request
      * Retrieves JSON data from the request body.
      *
      * @param bool $assoc If true, returns an associative array; if false, returns an object.
-     * @return mixed JSON data.
-     * @throws RuntimeException If JSON decoding fails.
+     * @param bool $ignoreContentType If true, bypasses Content-Type check and attempts JSON decoding regardless.
+     * @return mixed JSON data or null if decoding fails and $ignoreContentType is true.
+     * @throws RuntimeException If JSON decoding fails or Content-Type is invalid when $ignoreContentType is false.
      */
-    public function getJson(bool $assoc = true)
+    public function getJson(bool $assoc = true, bool $ignoreContentType = false)
     {
         $this->initJson();
+
+        $contentType = $this->getHeader('Content-Type') ?? '';
+        if (!$ignoreContentType && stripos($contentType, 'application/json') !== 0) {
+            throw new RuntimeException("Invalid Content-Type: expected application/json, got {$contentType}");
+        }
+
         if ($this->jsonError) {
             throw new RuntimeException("Failed to decode JSON: {$this->jsonError}");
         }
+
+        if ($ignoreContentType && $this->rawBody !== null) {
+            $decoded = json_decode($this->rawBody, $assoc);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return null;
+            }
+            return $decoded;
+        }
+
         return $assoc ? $this->jsonData : ($this->rawBody ? json_decode($this->rawBody) : null);
     }
 
