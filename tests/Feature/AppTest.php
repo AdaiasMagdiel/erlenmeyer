@@ -38,7 +38,7 @@ it('can create an Erlenmeyer application with Assets management', function () {
     $assets = new Assets(assetsDirectory: $dir, assetsRoute: "/assets");
     $app = new App(assets: $assets);
 
-    $data = get($app, "/assets/" . $file);
+    $data = RequestSimulator::get($app, "/assets/" . $file);
 
     expect($data["body"])->toBe("test");
 
@@ -52,7 +52,7 @@ it('handles a GET route with static response', function () {
         $res->withHtml('Hello, World!')->send();
     });
 
-    $data = get($app, '/hello');
+    $data = RequestSimulator::get($app, '/hello');
 
     expect($data['status'])->toBe(200);
     expect($data['body'])->toBe('Hello, World!');
@@ -66,7 +66,7 @@ it('handles a METHOD route with query params', function () {
         $res->withText("Page: $page")->send();
     });
 
-    $data = get($app, '/users', ['page' => 42]);
+    $data = RequestSimulator::get($app, '/users', ['page' => 42]);
 
     expect($data['status'])->toBe(200);
     expect($data['body'])->toBe('Page: 42');
@@ -80,7 +80,7 @@ it('handles a POST route with form data', function () {
         $res->withHtml("Welcome, $name!")->setStatusCode(201)->send();
     });
 
-    $data = post($app, '/submit', ['name' => 'Alice']);
+    $data = RequestSimulator::post($app, '/submit', ['name' => 'Alice']);
 
     expect($data['status'])->toBe(201);
     expect($data['body'])->toBe('Welcome, Alice!');
@@ -93,7 +93,7 @@ it('handles dynamic routes with parameters', function () {
         $res->withHtml("User ID: $id")->send();
     });
 
-    $data = get($app, '/user/123');
+    $data = RequestSimulator::get($app, '/user/123');
 
     expect($data['status'])->toBe(200);
     expect($data['body'])->toBe('User ID: 123');
@@ -102,7 +102,7 @@ it('handles dynamic routes with parameters', function () {
 it('returns 404 for unmatched routes', function () {
     $app = new App();
 
-    $data = get($app, '/nonexistent');
+    $data = RequestSimulator::get($app, '/nonexistent');
 
     expect($data['status'])->toBe(404);
     expect($data['body'])->toContain('404 Not Found');
@@ -115,7 +115,7 @@ it('handles custom 404 handler', function () {
         $res->setStatusCode(404)->withHtml('Custom 404: Page Not Found')->send();
     });
 
-    $data = get($app, '/nonexistent');
+    $data = RequestSimulator::get($app, '/nonexistent');
 
     expect($data['status'])->toBe(404);
     expect($data['body'])->toBe('Custom 404: Page Not Found');
@@ -131,7 +131,7 @@ it('applies global middleware to all routes', function () {
         $res->withHtml($res->getBody() . 'Route handler')->send();
     });
 
-    $data = get($app, '/test');
+    $data = RequestSimulator::get($app, '/test');
 
     expect($data['status'])->toBe(200);
     expect($data['body'])->toBe('Middleware executed: Route handler');
@@ -144,7 +144,7 @@ it('handles redirects', function () {
         $res->withHtml('Redirected to new')->send();
     });
 
-    $data = get($app, '/old');
+    $data = RequestSimulator::get($app, '/old');
 
     expect($data['status'])->toBe(302);
     expect($data['headers'])->toContain('Location: /new');
@@ -159,7 +159,7 @@ it('handles exceptions with custom handler', function () {
         throw new \RuntimeException('Test error');
     });
 
-    $data = get($app, '/error');
+    $data = RequestSimulator::get($app, '/error');
 
     expect($data['status'])->toBe(500);
     expect($data['body'])->toBe('Custom Error: Test error');
@@ -175,7 +175,7 @@ it('logs errors to file', function () {
         throw new \Exception('Test error');
     });
 
-    $data = get($app, '/error');
+    $data = RequestSimulator::get($app, '/error');
 
     expect($data['status'])->toBe(500);
     expect(file_get_contents($logFile))->toContain('Test error');
@@ -196,12 +196,12 @@ it('supports session management', function () {
     });
 
     // Simulate setting session
-    $data1 = get($app, '/set-session');
+    $data1 = RequestSimulator::get($app, '/set-session');
     expect($data1['status'])->toBe(200);
     expect($data1['body'])->toBe('Session set');
 
     // Simulate getting session (note: requires session persistence)
-    $data2 = get($app, '/get-session', [], ['PHPSESSID' => session_id()]);
+    $data2 = RequestSimulator::get($app, '/get-session', [], ['PHPSESSID' => session_id()]);
     expect($data2['status'])->toBe(200);
     expect($data2['body'])->toBe('User: Alice');
 });
@@ -218,17 +218,17 @@ it('supports flash messages', function () {
     });
 
     // Set flash message
-    $data1 = get($app, '/set-flash');
+    $data1 = RequestSimulator::get($app, '/set-flash');
     expect($data1['status'])->toBe(200);
     expect($data1['body'])->toBe('Flash set');
 
     // Get flash message
-    $data2 = get($app, '/get-flash', [], ['PHPSESSID' => session_id()]);
+    $data2 = RequestSimulator::get($app, '/get-flash', [], ['PHPSESSID' => session_id()]);
     expect($data2['status'])->toBe(200);
     expect($data2['body'])->toBe('Flash: Success!');
 
     // Verify flash message is cleared
-    $data3 = get($app, '/get-flash', [], ['PHPSESSID' => session_id()]);
+    $data3 = RequestSimulator::get($app, '/get-flash', [], ['PHPSESSID' => session_id()]);
     expect($data3['body'])->toBe('Flash: No message');
 });
 
@@ -254,11 +254,11 @@ it('handles PUT and DELETE routes', function () {
         $res->withHtml("Deleted ID: $id")->send();
     });
 
-    $data1 = put($app, '/update/456', ['data' => 'New value']);
+    $data1 = RequestSimulator::put($app, '/update/456', ['data' => 'New value']);
     expect($data1['status'])->toBe(200);
     expect($data1['body'])->toBe('Updated ID: 456 with New value');
 
-    $data2 = delete($app, '/delete/789');
+    $data2 = RequestSimulator::delete($app, '/delete/789');
     expect($data2['status'])->toBe(200);
     expect($data2['body'])->toBe('Deleted ID: 789');
 });
@@ -269,7 +269,7 @@ it('handles routes with multiple parameters', function () {
         $res->withHtml("User {$params->id}, Post {$params->postId}")->send();
     });
 
-    $data = get($app, '/user/123/post/456');
+    $data = RequestSimulator::get($app, '/user/123/post/456');
     expect($data['body'])->toBe('User 123, Post 456');
 });
 
@@ -279,8 +279,8 @@ it('handles ANY routes with multiple methods', function () {
         $res->withText("Handled {$req->getMethod()} request")->send();
     });
 
-    $getData = get($app, '/any-route');
-    $postData = post($app, '/any-route');
+    $getData = RequestSimulator::get($app, '/any-route');
+    $postData = RequestSimulator::post($app, '/any-route');
 
     expect($getData['body'])->toBe('Handled GET request');
     expect($postData['body'])->toBe('Handled POST request');
@@ -292,9 +292,9 @@ it('handles MATCH routes with specified methods', function () {
         $res->withText("Matched {$req->getMethod()}")->send();
     });
 
-    $getData = get($app, '/match-route');
-    $postData = post($app, '/match-route');
-    $putData = put($app, '/match-route'); // Should not match
+    $getData = RequestSimulator::get($app, '/match-route');
+    $postData = RequestSimulator::post($app, '/match-route');
+    $putData = RequestSimulator::put($app, '/match-route'); // Should not match
 
     expect($getData['status'])->toBe(200);
     expect($postData['status'])->toBe(200);
@@ -310,7 +310,7 @@ it('applies route-specific middlewares', function () {
         $next($req, $res, $params);
     }]);
 
-    $data = get($app, '/admin');
+    $data = RequestSimulator::get($app, '/admin');
     expect($data['body'])->toBe('Admin middleware: Admin area');
 });
 
@@ -326,7 +326,7 @@ it('handles CORS headers', function () {
         ])->withJson(['data' => 'test'])->send();
     });
 
-    $data = get($app, '/api');
+    $data = RequestSimulator::get($app, '/api');
 
     // Verifica os headers CORS
     expect($data['headers'])->toContain('Access-Control-Allow-Origin: *');
@@ -350,7 +350,7 @@ it('handles file uploads', function () {
     $tmpFile = sys_get_temp_dir() . '/test.txt';
     file_put_contents($tmpFile, 'test content');
 
-    $data = post($app, '/upload', [], [], [
+    $data = RequestSimulator::post($app, '/upload', [], [], [
         'test_file' => [
             'name' => 'test.txt',
             'type' => 'text/plain',
@@ -362,4 +362,104 @@ it('handles file uploads', function () {
 
     expect($data['body'])->toBe('Received test.txt (12 bytes)');
     unlink($tmpFile);
+});
+
+it('handles middleware that stops execution', function () {
+    $app = new App();
+    $app->get('/test', function (Request $req, Response $res, $params) {
+        $res->withText('Should not reach here')->send();
+    }, [function (Request $req, Response $res, callable $next, $params) {
+        $res->withText('Stopped by middleware')->send();
+    }]);
+
+    $data = RequestSimulator::get($app, '/test');
+    expect($data['body'])->toBe('Stopped by middleware');
+});
+
+it('handles OPTIONS and PATCH routes', function () {
+    $app = new App();
+    $app->options('/api', function (Request $req, Response $res, $params) {
+        $res->setCORS(['methods' => 'GET,POST'])->send();
+    });
+    $app->patch('/update', function (Request $req, Response $res, $params) {
+        $res->withText('Patched')->send();
+    });
+
+    $data1 = RequestSimulator::simulateRequest($app, 'OPTIONS', '/api');
+    expect($data1['headers'])->toContain('Access-Control-Allow-Methods: GET,POST');
+
+    $data2 = RequestSimulator::simulateRequest($app, 'PATCH', '/update');
+    expect($data2['body'])->toBe('Patched');
+});
+
+it('handles JSON body with valid and invalid content for POST and PUT', function () {
+    $app = new App();
+    $app->post('/json', function (Request $req, Response $res, $params) {
+        $data = $req->getJson(assoc: true, ignoreContentType: true); // Test with ignoreContentType
+        $res->withJson(['data' => $data ?? 'null'])->send();
+    });
+    $app->put('/json', function (Request $req, Response $res, $params) {
+        $data = $req->getJson(assoc: true, ignoreContentType: true); // Test with ignoreContentType
+        $res->withJson(['data' => $data ?? 'null'])->send();
+    });
+
+    // Valid JSON - POST
+    $data1 = RequestSimulator::postJson($app, '/json', ['key' => 'value']);
+    expect($data1['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data1['body']))->toBe('{"data": {"key": "value"}}');
+    expect($data1['headers'])->toContain('Content-Type: application/json; charset=UTF-8');
+
+    // Valid JSON - PUT
+    $data2 = RequestSimulator::putJson($app, '/json', ['key' => 'value']);
+    expect($data2['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data2['body']))->toBe('{"data": {"key": "value"}}');
+    expect($data2['headers'])->toContain('Content-Type: application/json; charset=UTF-8');
+
+    // Invalid JSON with POST and ignoreContentType
+    $data3 = RequestSimulator::post($app, '/json', [], [], [], ['HTTP_CONTENT_TYPE' => 'text/plain'], '{"key": "value"');
+    expect($data3['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data3['body']))->toBe('{"data": "null"}');
+
+    // Invalid JSON with PUT and ignoreContentType
+    $data4 = RequestSimulator::put($app, '/json', [], [], [], ['HTTP_CONTENT_TYPE' => 'text/plain'], '{"key": "value"');
+    expect($data4['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data4['body']))->toBe('{"data": "null"}');
+
+    // Empty body with POST
+    $data5 = RequestSimulator::post($app, '/json', [], [], [], ['HTTP_CONTENT_TYPE' => 'text/plain'], '');
+    expect($data5['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data5['body']))->toBe('{"data": "null"}');
+
+    // Empty body with PUT
+    $data6 = RequestSimulator::put($app, '/json', [], [], [], ['HTTP_CONTENT_TYPE' => 'text/plain'], '');
+    expect($data6['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data6['body']))->toBe('{"data": "null"}');
+
+    // Without Content-Type with POST
+    $data7 = RequestSimulator::post($app, '/json', [], [], [], [], '{}');
+    expect($data7['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data7['body']))->toBe('{"data": []}');
+
+    // Without Content-Type with PUT
+    $data8 = RequestSimulator::put($app, '/json', [], [], [], [], '{}');
+    expect($data8['status'])->toBe(200);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data8['body']))->toBe('{"data": []}');
+
+    // Valid JSON with incorrect Content-Type and ignoreContentType = false
+    $app->post('/json-strict', function (Request $req, Response $res, $params) {
+        try {
+            $data = $req->getJson(true, false); // Strict Content-Type check
+            $res->withJson(['data' => $data])->send();
+        } catch (\RuntimeException $e) {
+            $res->setStatusCode(400)->withJson(['error' => $e->getMessage()])->send();
+        }
+    });
+
+    $data9 = RequestSimulator::post($app, '/json-strict', [], [], [], ['HTTP_CONTENT_TYPE' => 'text/plain'], '{"key":"value"}');
+    expect($data9['status'])->toBe(400);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data9['body']))->toContain('Invalid Content-Type');
+
+    $data10 = RequestSimulator::post($app, '/json-strict', [], [], [], ['HTTP_CONTENT_TYPE' => 'application/json'], '{"key":"value"');
+    expect($data10['status'])->toBe(400);
+    expect(str_replace(["\n", "\r", "\t", "    "], '', $data10['body']))->toContain('Failed to decode JSON');
 });
