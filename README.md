@@ -334,7 +334,7 @@ $app = new App(logger: $customLogger);
 Erlenmeyer uses PestPHP for testing. Run tests with:
 
 ```bash
-./composer/bin/pest
+./vendor/bin/pest
 ```
 
 ## Use Cases
