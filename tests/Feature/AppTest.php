@@ -338,3 +338,45 @@ test('app uses fallback handler when defined', function () {
 
     expect($called)->toBeTrue();
 });
+
+test('app run() executes a normal route and outputs content once', function () {
+    $app = new App(null, $this->logger);
+    $app->get('/', fn($req, $res) => $res->withText('Hello World'));
+
+    // Captura a saída gerada
+    ob_start();
+    $app->run();
+    $output = ob_get_clean();
+
+    expect($output)->toBe('Hello World');
+});
+
+test('app run() does not call send() twice', function () {
+    $app = new App(null, $this->logger);
+
+    $app->get('/', function ($req, $res) {
+        $res->withText('Already sent')->send();
+    });
+
+    ob_start();
+    $app->run();
+    $output = ob_get_clean();
+
+    expect($output)->toBe('Already sent');
+});
+
+test('app run() uses custom exception handler for RuntimeException', function () {
+    $app = new App(null, $this->logger);
+
+    $app->setExceptionHandler(RuntimeException::class, function ($req, $res, $e) {
+        $res->setStatusCode(500)->withText('Runtime handled');
+    });
+
+    $app->get('/', fn() => throw new RuntimeException('Boom'));
+
+    ob_start();
+    $app->run();
+    $output = ob_get_clean();
+
+    expect($output)->toBe('Runtime handled');
+});
