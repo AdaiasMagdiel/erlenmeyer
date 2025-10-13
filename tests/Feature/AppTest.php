@@ -123,13 +123,19 @@ test('app applies global middlewares', function () {
 test('app handles redirects', function () {
     $app = new App(null, $this->logger);
 
-    $app->redirect('/old', '/new', true);
+    $app->redirect('/old1', '/new1', true);
+    $app->redirect('/old2', '/new2', false);
 
     $client = new ErlenClient($app);
-    $response = $client->get('/old');
+    $response = $client->get('/old1');
 
     expect($response->getStatusCode())->toBe(301)
-        ->and($response->getHeaders())->toHaveKey('Location', '/new');
+        ->and($response->getHeaders())->toHaveKey('Location', '/new1');
+
+    $response = $client->get('/old2');
+
+    expect($response->getStatusCode())->toBe(302)
+        ->and($response->getHeaders())->toHaveKey('Location', '/new2');
 });
 
 test('app handles exceptions with custom handler', function () {
@@ -254,4 +260,81 @@ test('app differentiates between similar routes', function () {
 
     $response2 = $client->get('/api/users/123');
     expect($response2->getBody())->toBe('User details: 123');
+});
+
+test('app run() executes and handles uncaught exceptions', function () {
+    $app = new App(null, $this->logger);
+    $app->get('/', fn() => throw new Exception('boom'));
+    ob_start();
+    $app->run();
+    $output = ob_get_clean();
+
+    expect($output)->toContain('500 Internal Server Error');
+});
+
+test('app returns correct handler for subclass exception', function () {
+    $app = new App(null, $this->logger);
+    $app->setExceptionHandler(Exception::class, fn() => 'handled');
+
+    $handler = $app->getExceptionHandler(new RuntimeException('test'));
+    expect($handler)->not->toBeNull();
+});
+
+test('app supports all HTTP methods', function () {
+    $app = new App(null, $this->logger);
+    $app->put('/put', fn($r, $s) => $s->withText('PUT'));
+    $app->delete('/del', fn($r, $s) => $s->withText('DELETE'));
+    $app->patch('/patch', fn($r, $s) => $s->withText('PATCH'));
+    $app->options('/opt', fn($r, $s) => $s->withText('OPTIONS'));
+    $app->head('/head', fn($r, $s) => $s->withText('HEAD'));
+    $app->match(['GET', 'POST'], '/multi', fn($r, $s) => $s->withText('MULTI'));
+
+    $client = new ErlenClient($app);
+    expect($client->put('/put')->getBody())->toBe('PUT');
+    expect($client->delete('/del')->getBody())->toBe('DELETE');
+});
+
+test('app applies multiple middlewares in correct order', function () {
+    $app = new App(null, $this->logger);
+    $order = [];
+
+    $app->addMiddleware(function ($req, $res, $next) use (&$order) {
+        $order[] = 'first';
+        $next($req, $res, new stdClass());
+        $order[] = 'after first';
+    });
+
+    $app->addMiddleware(function ($req, $res, $next) use (&$order) {
+        $order[] = 'second';
+        $next($req, $res, new stdClass());
+        $order[] = 'after second';
+    });
+
+    $app->get('/mw', fn($r, $s) => $s->withText('OK'));
+    $client = new ErlenClient($app);
+    $client->get('/mw');
+
+    expect($order)->toBe(['first', 'second', 'after second', 'after first']);
+});
+
+test('app uses fallback handler when defined', function () {
+    $app = new App(null, $this->logger);
+    $called = false;
+    $app->set404Handler(fn() => null);
+    $app->addMiddleware(fn($r, $s, $next) => $next($r, $s, new stdClass()));
+
+    // Sobrescreve o fallback
+    $reflection = new ReflectionClass($app);
+    $prop = $reflection->getProperty('routes');
+    $prop->setAccessible(true);
+    $routes = $prop->getValue($app);
+    $routes['fallback'] = function () use (&$called) {
+        $called = true;
+    };
+    $prop->setValue($app, $routes);
+
+    $client = new ErlenClient($app);
+    $client->get('/not-found');
+
+    expect($called)->toBeTrue();
 });
