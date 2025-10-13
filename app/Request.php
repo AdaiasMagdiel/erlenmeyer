@@ -6,85 +6,87 @@ use RuntimeException;
 use stdClass;
 
 /**
- * Class to encapsulate and process HTTP request data.
+ * Represents an HTTP request and provides access to its data.
  */
 class Request
 {
     /**
      * @var array Request headers.
      */
-    private $headers;
+    private array $headers;
 
     /**
      * @var string HTTP request method (GET, POST, etc.).
      */
-    private $method;
+    private string $method;
 
     /**
      * @var string Request URI without query string.
      */
-    private $uri;
+    private string $uri;
 
     /**
      * @var array Query string parameters.
      */
-    private $queryParams;
+    private array $queryParams;
 
     /**
      * @var array Form data (POST).
      */
-    private $formData;
+    private array $formData;
 
     /**
      * @var array|null Decoded JSON body data.
      */
-    private $jsonData;
+    private ?array $jsonData = null;
 
     /**
      * @var string|null JSON decoding error, if any.
      */
-    private $jsonError;
+    private ?string $jsonError = null;
 
     /**
      * @var string|null Raw request body.
      */
-    private $rawBody;
+    private ?string $rawBody = null;
 
     /**
      * @var array Uploaded files.
      */
-    private $files;
+    private array $files = [];
 
     /**
      * @var string|null Client IP address.
      */
-    private $ip;
+    private ?string $ip = null;
 
     /**
      * @var string|null Client User-Agent.
      */
-    private $userAgent;
+    private ?string $userAgent = null;
 
     /**
-     * @var array $_SERVER data (for test injection).
+     * @var array Server data (used for dependency injection in tests).
      */
-    private $server;
+    private array $server;
 
     /**
-     * Constructor for the Request class.
+     * Creates a new Request instance.
      *
-     * @param array|null $server $_SERVER data (for tests or CLI).
-     * @param array|null $get $_GET data.
-     * @param array|null $post $_POST data.
-     * @param array|null $files $_FILES data.
-     * @param string $inputStream Input stream (default: php://input).
+     * @param array|null $server The server data (typically $_SERVER).
+     * @param array|null $get The query string parameters ($_GET).
+     * @param array|null $post The POST form data ($_POST).
+     * @param array|null $files The uploaded files ($_FILES).
+     * @param string $inputStream Input stream for reading the raw body. Default: 'php://input'.
+     * @param string|null $rawBody Optional raw body data.
      */
     public function __construct(
         ?array $server = null,
         ?array $get = null,
         ?array $post = null,
         ?array $files = null,
-        string $inputStream = 'php://input'
+        string $inputStream = 'php://input',
+        ?string $rawBody = null
     ) {
         $this->server = $server ?? $_SERVER;
         $this->initHeaders();
@@ -92,26 +94,30 @@ class Request
         $this->initUri();
         $this->initQueryParams($get ?? $_GET);
         $this->initFormData($post ?? $_POST);
-        $this->initRawBody($inputStream);
         $this->initFiles($files ?? $_FILES);
         $this->initClientInfo();
+
+        if ($rawBody !== null) {
+            $this->rawBody = $rawBody;
+        } else {
+            $this->initRawBody($inputStream);
+        }
     }
 
     /**
-     * Initializes request headers.
+     * Initializes request headers from the server array.
      */
     private function initHeaders(): void
     {
-        if (function_exists('getallheaders')) {
-            $this->headers = getallheaders() ?: [];
-        } else {
-            $this->headers = [];
-            foreach ($this->server as $name => $value) {
-                if (strpos($name, 'HTTP_') === 0) {
-                    $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
-                    // Light sanitization: trim and ensure string
-                    $this->headers[$headerName] = trim(filter_var($value, FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE) ?? '');
-                }
+        $this->headers = [];
+
+        foreach ($this->server as $name => $value) {
+            if (strpos($name, 'HTTP_') === 0) {
+                $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                $this->headers[$headerName] = trim((string) $value);
+            } elseif (in_array($name, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
+                $headerName = str_replace('_', '-', $name);
+                $this->headers[$headerName] = trim((string) $value);
             }
         }
     }
@@ -119,23 +125,23 @@ class Request
     /**
      * Determines the HTTP request method.
      *
-     * @param array $post $_POST data to check for method override.
+     * @param array $post POST data used to check for method override.
      */
     private function initMethod(array $post): void
     {
-        $this->method = filter_var($this->server['REQUEST_METHOD'] ?? 'GET', FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE) ?? 'GET';
+        $this->method = strtoupper($this->server['REQUEST_METHOD'] ?? 'GET');
+
         if ($this->method === 'POST') {
             if (isset($post['_method'])) {
-                // Sanitization of method override
-                $this->method = strtoupper(trim(filter_var($post['_method'], FILTER_UNSAFE_RAW, FILTER_NULL_ON_FAILURE) ?? ''));
-            } elseif ($override = filter_input(INPUT_SERVER, 'HTTP_X_HTTP_METHOD_OVERRIDE', FILTER_UNSAFE_RAW, ['options' => ['default' => null]])) {
-                $this->method = strtoupper(trim($override));
+                $this->method = strtoupper(trim((string) $post['_method']));
+            } elseif (isset($this->server['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+                $this->method = strtoupper(trim((string) $this->server['HTTP_X_HTTP_METHOD_OVERRIDE']));
             }
         }
     }
 
     /**
-     * Captures the request URI, removing the query string.
+     * Initializes the request URI, removing any query string.
      */
     private function initUri(): void
     {
@@ -143,38 +149,35 @@ class Request
         if (($pos = strpos($this->uri, '?')) !== false) {
             $this->uri = substr($this->uri, 0, $pos);
         }
+        if ($this->uri === '') {
+            $this->uri = '/';
+        }
     }
 
     /**
      * Initializes query string parameters.
      *
-     * @param array $get $_GET data.
+     * @param array $get Query string parameters ($_GET).
      */
     private function initQueryParams(array $get): void
     {
-        // Escapes special characters to prevent XSS when displaying
-        $this->queryParams = array_map(function ($value) {
-            return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-        }, $get);
+        $this->queryParams = array_map(fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'), $get);
     }
 
     /**
-     * Initializes form data (POST).
+     * Initializes POST form data.
      *
-     * @param array $post $_POST data.
+     * @param array $post POST data ($_POST).
      */
     private function initFormData(array $post): void
     {
-        // Escapes special characters to prevent XSS when displaying
-        $this->formData = array_map(function ($value) {
-            return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-        }, $post);
+        $this->formData = array_map(fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'), $post);
     }
 
     /**
-     * Captures the raw request body.
+     * Reads the raw request body.
      *
-     * @param string $inputStream Input stream.
+     * @param string $inputStream The input stream path.
      */
     private function initRawBody(string $inputStream): void
     {
@@ -182,7 +185,7 @@ class Request
     }
 
     /**
-     * Initializes JSON body data (lazy loading).
+     * Lazily initializes JSON data from the request body.
      */
     private function initJson(): void
     {
@@ -206,7 +209,7 @@ class Request
     /**
      * Initializes uploaded files.
      *
-     * @param array $files $_FILES data.
+     * @param array $files Uploaded files ($_FILES).
      */
     private function initFiles(array $files): void
     {
@@ -214,25 +217,29 @@ class Request
     }
 
     /**
-     * Initializes client information (IP and User-Agent).
+     * Initializes client metadata (IP and User-Agent).
      */
     private function initClientInfo(): void
     {
         $this->ip = filter_var($this->server['REMOTE_ADDR'] ?? null, FILTER_VALIDATE_IP);
-        if ($forwarded = filter_input(INPUT_SERVER, 'HTTP_X_FORWARDED_FOR', FILTER_UNSAFE_RAW)) {
+
+        if (isset($this->server['HTTP_X_FORWARDED_FOR'])) {
+            $forwarded = $this->server['HTTP_X_FORWARDED_FOR'];
             $ips = explode(',', $forwarded);
             $this->ip = filter_var(trim($ips[0]), FILTER_VALIDATE_IP) ?: $this->ip;
         }
-        // Light sanitization for User-Agent
-        $userAgent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_UNSAFE_RAW, ['options' => ['default' => null]]);
-        $this->userAgent = $userAgent !== null ? trim($userAgent) : null;
+
+        $this->userAgent = $this->server['HTTP_USER_AGENT'] ?? null;
+        if ($this->userAgent !== null) {
+            $this->userAgent = trim($this->userAgent);
+        }
     }
 
     /**
-     * Retrieves the value of a specific header.
+     * Returns a header value by name.
      *
-     * @param string $name Header name.
-     * @return string|null Header value or null if not found.
+     * @param string $name The header name.
+     * @return string|null The header value or null if not found.
      */
     public function getHeader(string $name): ?string
     {
@@ -240,9 +247,9 @@ class Request
     }
 
     /**
-     * Retrieves all request headers.
+     * Returns all headers.
      *
-     * @return array All headers.
+     * @return array All request headers.
      */
     public function getHeaders(): array
     {
@@ -250,7 +257,7 @@ class Request
     }
 
     /**
-     * Checks if a header exists.
+     * Checks if a specific header exists.
      *
      * @param string $name Header name.
      * @return bool True if the header exists, false otherwise.
@@ -261,9 +268,9 @@ class Request
     }
 
     /**
-     * Retrieves the HTTP request method.
+     * Returns the HTTP method (GET, POST, etc.).
      *
-     * @return string HTTP method (GET, POST, etc.).
+     * @return string HTTP method.
      */
     public function getMethod(): string
     {
@@ -271,9 +278,9 @@ class Request
     }
 
     /**
-     * Retrieves the request URI.
+     * Returns the request URI (without query string).
      *
-     * @return string URI without query string.
+     * @return string The request URI.
      */
     public function getUri(): string
     {
@@ -281,9 +288,9 @@ class Request
     }
 
     /**
-     * Retrieves all query string parameters.
+     * Returns all query parameters.
      *
-     * @return array Query string parameters.
+     * @return array Query parameters.
      */
     public function getQueryParams(): array
     {
@@ -291,11 +298,11 @@ class Request
     }
 
     /**
-     * Retrieves a specific query string parameter.
+     * Returns a specific query parameter.
      *
-     * @param string $key Parameter key.
-     * @param mixed $default Default value if the parameter does not exist.
-     * @return mixed Parameter value or default value.
+     * @param string $key The parameter key.
+     * @param mixed $default Default value if not found.
+     * @return mixed The parameter value or the default.
      */
     public function getQueryParam(string $key, $default = null)
     {
@@ -303,7 +310,7 @@ class Request
     }
 
     /**
-     * Retrieves all form data (POST).
+     * Returns all POST form data.
      *
      * @return array Form data.
      */
@@ -313,11 +320,11 @@ class Request
     }
 
     /**
-     * Retrieves a specific form data parameter (POST).
+     * Returns a specific POST form value.
      *
-     * @param string $key Data key.
-     * @param mixed $default Default value if the data does not exist.
-     * @return mixed Data value or default value.
+     * @param string $key The key name.
+     * @param mixed $default Default value if not found.
+     * @return mixed The value or default.
      */
     public function getFormDataParam(string $key, $default = null): mixed
     {
@@ -325,27 +332,29 @@ class Request
     }
 
     /**
-     * Retrieves JSON data from the request body.
+     * Returns decoded JSON body data.
      *
-     * @param bool $assoc If true, returns an associative array; if false, returns an object.
-     * @param bool $ignoreContentType If true, bypasses Content-Type check and attempts JSON decoding regardless.
-     * @return mixed JSON data or null if decoding fails and $ignoreContentType is true.
-     * @throws RuntimeException If JSON decoding fails or Content-Type is invalid when $ignoreContentType is false.
+     * @param bool $assoc Return associative array if true, object if false.
+     * @param bool $ignoreContentType If true, ignore the Content-Type check.
+     * @return mixed The decoded JSON data.
+     * @throws RuntimeException If JSON decoding fails or Content-Type is invalid.
      */
     public function getJson(bool $assoc = true, bool $ignoreContentType = false)
     {
         $this->initJson();
-
         $contentType = $this->getHeader('Content-Type') ?? '';
-        if (!$ignoreContentType && stripos($contentType, 'application/json') !== 0) {
-            throw new RuntimeException("Invalid Content-Type: expected application/json, got {$contentType}");
+
+        if (!$ignoreContentType) {
+            if (stripos($contentType, 'application/json') !== 0) {
+                throw new RuntimeException("Invalid Content-Type: expected application/json, got {$contentType}");
+            }
+            if ($this->jsonError) {
+                throw new RuntimeException("Failed to decode JSON: {$this->jsonError}");
+            }
+            return $assoc ? $this->jsonData : ($this->rawBody ? json_decode($this->rawBody) : null);
         }
 
-        if ($this->jsonError) {
-            throw new RuntimeException("Failed to decode JSON: {$this->jsonError}");
-        }
-
-        if ($ignoreContentType && $this->rawBody !== null) {
+        if ($this->rawBody !== null) {
             $decoded = json_decode($this->rawBody, $assoc);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return null;
@@ -353,13 +362,13 @@ class Request
             return $decoded;
         }
 
-        return $assoc ? $this->jsonData : ($this->rawBody ? json_decode($this->rawBody) : null);
+        return null;
     }
 
     /**
-     * Retrieves the JSON decoding error, if any.
+     * Returns the JSON decoding error message, if any.
      *
-     * @return string|null Error message or null if no error occurred.
+     * @return string|null The error message or null if none.
      */
     public function getJsonError(): ?string
     {
@@ -368,9 +377,9 @@ class Request
     }
 
     /**
-     * Retrieves the raw request body.
+     * Returns the raw request body.
      *
-     * @return string|null Raw body or null if not available.
+     * @return string|null The raw request body.
      */
     public function getRawBody(): ?string
     {
@@ -378,9 +387,9 @@ class Request
     }
 
     /**
-     * Retrieves all uploaded files.
+     * Returns all uploaded files.
      *
-     * @return array Uploaded files.
+     * @return array The uploaded files.
      */
     public function getFiles(): array
     {
@@ -388,11 +397,11 @@ class Request
     }
 
     /**
-     * Retrieves a specific uploaded file.
+     * Returns a specific uploaded file by key (and optional index for multi-files).
      *
      * @param string $key File key.
-     * @param int|null $index Index for multiple files.
-     * @return array|null File data or null if not found.
+     * @param int|null $index Optional index for multiple uploads.
+     * @return array|null File information or null if not found.
      */
     public function getFile(string $key, ?int $index = null): ?array
     {
@@ -409,9 +418,9 @@ class Request
     }
 
     /**
-     * Retrieves the client IP address.
+     * Returns the client IP address.
      *
-     * @return string|null IP address or null if not available.
+     * @return string|null The IP address.
      */
     public function getIp(): ?string
     {
@@ -419,9 +428,9 @@ class Request
     }
 
     /**
-     * Retrieves the client User-Agent.
+     * Returns the client User-Agent string.
      *
-     * @return string|null User-Agent or null if not available.
+     * @return string|null The User-Agent.
      */
     public function getUserAgent(): ?string
     {
@@ -429,24 +438,24 @@ class Request
     }
 
     /**
-     * Checks if the request is an AJAX request.
+     * Checks whether the request is an AJAX request.
      *
-     * @return bool True if it is an AJAX request, false otherwise.
+     * @return bool True if AJAX, false otherwise.
      */
     public function isAjax(): bool
     {
-        return isset($this->server['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($this->server['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        return isset($this->server['HTTP_X_REQUESTED_WITH'])
+            && strtolower($this->server['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
     /**
-     * Checks if the request uses HTTPS.
+     * Checks whether the request was made over HTTPS.
      *
-     * @return bool True if HTTPS is used, false otherwise.
+     * @return bool True if secure, false otherwise.
      */
     public function isSecure(): bool
     {
-        return (!empty($this->server['HTTPS']) && $this->server['HTTPS'] !== 'off') ||
-            ($this->server['SERVER_PORT'] ?? null) === 443;
+        return (!empty($this->server['HTTPS']) && $this->server['HTTPS'] !== 'off')
+            || (($this->server['SERVER_PORT'] ?? null) == 443);
     }
 }
