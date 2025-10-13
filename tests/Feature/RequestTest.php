@@ -262,3 +262,17 @@ test('request handles JSON error after initialization', function () {
 
     expect($error)->not->toBeNull();
 });
+
+test('request getHeader is case-insensitive', function () {
+    $server = [
+        'HTTP_AUTHORIZATION' => 'Bearer ABC123',
+        'HTTP_CONTENT_TYPE' => 'application/json',
+    ];
+    $request = new Request($server);
+
+    expect($request->getHeader('Authorization'))->toBe('Bearer ABC123')
+        ->and($request->getHeader('authorization'))->toBe('Bearer ABC123')
+        ->and($request->getHeader('AUTHORIZATION'))->toBe('Bearer ABC123')
+        ->and($request->hasHeader('CoNtEnT-TyPe'))->toBeTrue()
+        ->and($request->getHeader('Content-Type'))->toBe('application/json');
+});
