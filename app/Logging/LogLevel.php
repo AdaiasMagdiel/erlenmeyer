@@ -3,16 +3,15 @@
 namespace AdaiasMagdiel\Erlenmeyer\Logging;
 
 /**
- * Logging level enumeration
+ * Enumeration of log severity levels.
  *
- * Defines different levels of logging severity for categorizing messages.
- *
- * @package AdaiasMagdiel\Erlenmeyer\Logging
+ * Defines standard logging levels used across the application to categorize
+ * messages by importance and severity.
  */
 enum LogLevel: string
 {
-	case INFO     = 'INFO';
 	case DEBUG    = 'DEBUG';
+	case INFO     = 'INFO';
 	case WARNING  = 'WARNING';
 	case ERROR    = 'ERROR';
 	case CRITICAL = 'CRITICAL';

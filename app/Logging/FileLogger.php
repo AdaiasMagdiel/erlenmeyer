@@ -5,102 +5,119 @@ namespace AdaiasMagdiel\Erlenmeyer\Logging;
 use AdaiasMagdiel\Erlenmeyer\Request;
 use Exception;
 
+/**
+ * A file-based logger implementation that writes structured log entries to disk.
+ *
+ * This logger automatically rotates files when they exceed a specified size (3MB)
+ * and keeps a configurable number of backup logs. It supports contextual exception
+ * logging, including stack traces and request metadata.
+ */
 class FileLogger implements LoggerInterface
 {
 	/**
-	 * Maximum log file size in bytes (3MB)
+	 * Maximum log file size in bytes (3 MB).
 	 */
-	private const MAX_LOG_SIZE = 3145728; // 3MB
+	private const MAX_LOG_SIZE = 3 * 1024 * 1024;
 
 	/**
-	 * Maximum number of rotated log files to keep
+	 * Maximum number of rotated log files to retain.
 	 */
 	private const MAX_LOG_FILES = 5;
 
 	/**
-	 * Path to the log directory
+	 * The directory where logs are stored, or null if logging is disabled.
 	 */
 	private ?string $logDir;
 
 	/**
-	 * Current log file path
+	 * The path to the active log file.
 	 */
 	private string $logFile;
 
 	/**
-	 * Constructs a new DefaultLogger instance.
+	 * Creates a new FileLogger instance.
 	 *
-	 * @param string $logDir [Optional] Path to the log directory. If empty, disables logging.
+	 * @param string $logDir Optional directory path for storing log files.
+	 *                       If empty, logging is disabled.
 	 */
-	public function __construct(string $logDir = "")
+	public function __construct(string $logDir = '')
 	{
-		$this->logDir = empty($logDir) ? null : $logDir;
+		$this->logDir = $logDir !== '' ? $logDir : null;
 
-		if (!is_null($this->logDir) && !empty($this->logDir)) {
-			// Ensure logs directory exists
+		if ($this->logDir !== null) {
 			if (!is_dir($this->logDir)) {
 				mkdir($this->logDir, 0755, true);
 			}
-			$this->logFile = $this->logDir . "/info.log";
+
+			$this->logFile = rtrim($this->logDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'info.log';
 		}
 	}
 
 	/**
-	 * Logs an exception with request context.
+	 * Logs an exception, including request context if available.
 	 *
-	 * @param Exception $e     The exception to log
-	 * @param Request  $request [Optional] The request object
+	 * @param Exception $exception The exception to log.
+	 * @param Request|null $request Optional request providing additional context.
 	 * @return void
 	 */
-	public function logException(Exception $e, ?Request $request = null): void
+	public function logException(Exception $exception, ?Request $request = null): void
 	{
-		// Format error message with timestamp, request details, and stack trace
 		$timestamp = date('Y-m-d H:i:s');
-		$requestInfo = $request ? "Request: {$request->getMethod()} {$request->getUri()}" : 'No request context';
-		$message = "[{$timestamp}] [ERROR] {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n";
-		$message .= "$requestInfo\n";
-		$message .= $e->getTraceAsString() . "\n\n";
+		$requestInfo = $request
+			? sprintf('Request: %s %s', $request->getMethod() ?? 'UNKNOWN', $request->getUri() ?? 'UNKNOWN')
+			: 'No request context';
 
-		// Write to log file with size check
+		$message = sprintf(
+			"[%s] [ERROR] %s in %s:%d\n%s\n%s\n\n",
+			$timestamp,
+			$exception->getMessage(),
+			$exception->getFile(),
+			$exception->getLine(),
+			$requestInfo,
+			$exception->getTraceAsString()
+		);
+
 		$this->log(LogLevel::ERROR, $message);
 	}
 
 	/**
-	 * Logs a message to the log file, ensuring the file size does not exceed 3MB.
+	 * Writes a log entry to the file, rotating if necessary.
 	 *
-	 * @param LogLevel $level Log level (e.g., INFO, ERROR, WARNING).
-	 * @param string $message Message to log.
+	 * @param LogLevel $level The log level (e.g., INFO, WARNING, ERROR).
+	 * @param string $message The message to log.
 	 * @return void
 	 */
-	public function log(LogLevel $level = LogLevel::INFO, string $message = ""): void
+	public function log(LogLevel $level = LogLevel::INFO, string $message = ''): void
 	{
-		if (is_null($this->logDir)) return;
+		if ($this->logDir === null) {
+			return; // Logging disabled
+		}
 
-		// Format log entry with timestamp and level
 		$timestamp = date('Y-m-d H:i:s');
-		$logEntry = "[{$timestamp}] [{$level->value}] $message\n";
+		$logEntry = sprintf("[%s] [%s] %s\n", $timestamp, $level->value, trim($message));
 
-		// Check if log file exists and its size
+		// Rotate file if needed
 		if (file_exists($this->logFile) && filesize($this->logFile) >= self::MAX_LOG_SIZE) {
-			// Rotate log file
 			$this->rotateLogFile();
 		}
 
-		// Write to log file
-		file_put_contents($this->logFile, $logEntry, FILE_APPEND);
+		file_put_contents($this->logFile, $logEntry, FILE_APPEND | LOCK_EX);
 	}
 
 	/**
-	 * Rotates the log file if it exceeds the maximum size.
+	 * Rotates the current log file when it exceeds the maximum size.
+	 *
+	 * Older logs are renamed with numeric suffixes (e.g., info.log.1, info.log.2).
 	 *
 	 * @return void
 	 */
 	private function rotateLogFile(): void
 	{
-		// Determine the next available log file number
+		// Rename existing rotated logs (e.g., info.log.1 → info.log.2)
 		for ($i = self::MAX_LOG_FILES - 1; $i >= 1; $i--) {
-			$oldLog = $this->logFile . '.' . $i;
-			$newLog = $this->logFile . '.' . ($i + 1);
+			$oldLog = "{$this->logFile}.{$i}";
+			$newLog = "{$this->logFile}." . ($i + 1);
+
 			if (file_exists($oldLog)) {
 				rename($oldLog, $newLog);
 			}
@@ -108,11 +125,11 @@ class FileLogger implements LoggerInterface
 
 		// Rename current log file to .1
 		if (file_exists($this->logFile)) {
-			rename($this->logFile, $this->logFile . '.1');
+			rename($this->logFile, "{$this->logFile}.1");
 		}
 
-		// Create a new empty log file
+		// Create a new, empty log file
 		file_put_contents($this->logFile, '');
-		$this->log(LogLevel::INFO, 'Log file rotated', false);
+		$this->log(LogLevel::INFO, 'Log file rotated.');
 	}
 }

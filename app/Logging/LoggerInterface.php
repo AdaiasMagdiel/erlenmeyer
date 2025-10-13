@@ -6,28 +6,28 @@ use AdaiasMagdiel\Erlenmeyer\Request;
 use Exception;
 
 /**
- * Interface for logging functionality
+ * Defines a standard interface for logging messages and exceptions.
  *
- * Provides methods for logging messages and exceptions
+ * Implementations of this interface provide consistent methods for writing
+ * log entries at various levels (e.g., INFO, WARNING, ERROR) and recording
+ * exception details, optionally including request context.
  */
 interface LoggerInterface
 {
     /**
-     * Logs a message with specified level
+     * Writes a log entry with the specified severity level.
      *
-     * @param LogLevel $level   The level of the log message
-     * @param string   $message The message to be logged
-     *
+     * @param LogLevel $level   The severity level of the message.
+     * @param string   $message The message content to log.
      * @return void
      */
     public function log(LogLevel $level, string $message): void;
 
     /**
-     * Logs an exception with optional request context
+     * Logs an exception, optionally including request context information.
      *
-     * @param Exception         $e      The exception to be logged
-     * @param Request|null      $request Optional request context
-     *
+     * @param Exception    $e       The exception to log.
+     * @param Request|null $request Optional request providing additional context.
      * @return void
      */
     public function logException(Exception $e, ?Request $request = null): void;
