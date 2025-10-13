@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Class for managing HTTP responses, including HTML, JSON, headers, and status codes.
+ * Handles HTTP responses, including headers, status codes, and body rendering.
  */
 class Response
 {
@@ -16,12 +16,12 @@ class Response
     private int $statusCode = 200;
 
     /**
-     * @var array Headers to be sent.
+     * @var array HTTP headers.
      */
     private array $headers = [];
 
     /**
-     * @var string|null Response content.
+     * @var string|null Response body content.
      */
     private ?string $body = null;
 
@@ -31,20 +31,19 @@ class Response
     private bool $isSent = false;
 
     /**
-     * @var string Default content type (Content-Type).
+     * @var string Default content type.
      */
     private string $contentType = 'text/html';
 
     /**
-     * An associative array mapping function names to their callable implementations.
-     * Used to allow overriding native PHP functions (e.g., 'header') for testing or dependency injection.
+     * Allows overriding native PHP functions (e.g., header()) for testing purposes.
      *
-     * @var array<string, string> 
+     * @var array<string, string>
      */
     private static array $functions = ["header" => 'header'];
 
     /**
-     * Constructor for the Response class.
+     * Creates a new Response instance.
      *
      * @param int $statusCode Initial HTTP status code (default: 200).
      * @param array $headers Initial headers (optional).
@@ -57,7 +56,12 @@ class Response
         }
     }
 
-    public static function updateFunctions(array $functions = [])
+    /**
+     * Updates internal callable function mappings.
+     *
+     * @param array $functions Associative array of callable replacements.
+     */
+    public static function updateFunctions(array $functions = []): void
     {
         self::$functions = array_merge(self::$functions, $functions);
     }
@@ -65,9 +69,9 @@ class Response
     /**
      * Sets the HTTP status code.
      *
-     * @param int $code Status code (e.g., 200, 404, 500).
-     * @return self For method chaining.
-     * @throws InvalidArgumentException If the status code is invalid.
+     * @param int $code The status code (100–599).
+     * @return self
+     * @throws InvalidArgumentException If the code is out of range.
      */
     public function setStatusCode(int $code): self
     {
@@ -79,9 +83,9 @@ class Response
     }
 
     /**
-     * Retrieves the HTTP status code.
+     * Returns the HTTP status code.
      *
-     * @return int Status code.
+     * @return int Current status code.
      */
     public function getStatusCode(): int
     {
@@ -93,7 +97,8 @@ class Response
      *
      * @param string $name Header name.
      * @param string $value Header value.
-     * @return self For method chaining.
+     * @return self
+     * @throws RuntimeException If headers have already been sent.
      */
     public function setHeader(string $name, string $value): self
     {
@@ -105,10 +110,11 @@ class Response
     }
 
     /**
-     * Removes an HTTP header.
+     * Removes a previously set header.
      *
      * @param string $name Header name.
-     * @return self For method chaining.
+     * @return self
+     * @throws RuntimeException If headers have already been sent.
      */
     public function removeHeader(string $name): self
     {
@@ -120,9 +126,9 @@ class Response
     }
 
     /**
-     * Retrieves all defined headers.
+     * Returns all headers.
      *
-     * @return array Headers.
+     * @return array All headers.
      */
     public function getHeaders(): array
     {
@@ -130,10 +136,10 @@ class Response
     }
 
     /**
-     * Sets the content type (Content-Type).
+     * Sets the response content type.
      *
-     * @param string $contentType Content type (e.g., text/html, application/json).
-     * @return self For method chaining.
+     * @param string $contentType MIME type (e.g., text/html, application/json).
+     * @return self
      */
     public function setContentType(string $contentType): self
     {
@@ -142,9 +148,9 @@ class Response
     }
 
     /**
-     * Retrieves the current content type.
+     * Returns the current content type.
      *
-     * @return string Content type.
+     * @return string MIME type.
      */
     public function getContentType(): string
     {
@@ -155,7 +161,7 @@ class Response
      * Sets the response body.
      *
      * @param string $body Response content.
-     * @return self For method chaining.
+     * @return self
      */
     public function setBody(string $body): self
     {
@@ -164,9 +170,9 @@ class Response
     }
 
     /**
-     * Retrieves the response body.
+     * Returns the response body.
      *
-     * @return string|null Response body or null if not set.
+     * @return string|null Response body content or null if unset.
      */
     public function getBody(): ?string
     {
@@ -174,10 +180,10 @@ class Response
     }
 
     /**
-     * Renders HTML directly.
+     * Sets an HTML response body.
      *
      * @param string $html HTML content.
-     * @return self For method chaining.
+     * @return self
      */
     public function withHtml(string $html): self
     {
@@ -187,12 +193,12 @@ class Response
     }
 
     /**
-     * Renders HTML from a template file.
+     * Renders HTML content from a template file.
      *
      * @param string $templatePath Path to the template file.
-     * @param array $data Data to be passed to the template.
-     * @return self For method chaining.
-     * @throws RuntimeException If the template is not found.
+     * @param array $data Data variables passed to the template.
+     * @return self
+     * @throws RuntimeException If the template cannot be found.
      */
     public function withTemplate(string $templatePath, array $data = []): self
     {
@@ -200,7 +206,6 @@ class Response
             throw new RuntimeException("Template not found: $templatePath");
         }
 
-        // Uses output buffering to capture template content
         ob_start();
         extract($data, EXTR_SKIP);
         include $templatePath;
@@ -210,12 +215,12 @@ class Response
     }
 
     /**
-     * Sends a JSON response.
+     * Sets a JSON response body.
      *
-     * @param mixed $data Data to be serialized as JSON.
-     * @param int $options Options for json_encode (default: JSON_PRETTY_PRINT).
-     * @return self For method chaining.
-     * @throws RuntimeException If JSON serialization fails.
+     * @param mixed $data Data to encode as JSON.
+     * @param int $options Encoding options for json_encode (default: JSON_PRETTY_PRINT).
+     * @return self
+     * @throws RuntimeException If encoding fails.
      */
     public function withJson($data, int $options = JSON_PRETTY_PRINT): self
     {
@@ -230,10 +235,10 @@ class Response
     }
 
     /**
-     * Sends a plain text response.
+     * Sets a plain text response body.
      *
      * @param string $text Text content.
-     * @return self For method chaining.
+     * @return self
      */
     public function withText(string $text): self
     {
@@ -245,10 +250,10 @@ class Response
     /**
      * Performs an HTTP redirect.
      *
-     * @param string $url URL to redirect to.
-     * @param int $statusCode Status code (default: 302).
-     * @return self For method chaining.
-     * @throws InvalidArgumentException If the status code is invalid for redirection.
+     * @param string $url Destination URL.
+     * @param int $statusCode Redirect status code (default: 302).
+     * @return self
+     * @throws InvalidArgumentException If the status code is not a valid redirect code.
      */
     public function redirect(string $url, int $statusCode = 302): self
     {
@@ -263,16 +268,16 @@ class Response
     }
 
     /**
-     * Sets a cookie in the response.
+     * Adds a Set-Cookie header to the response.
      *
      * @param string $name Cookie name.
      * @param string $value Cookie value.
-     * @param int $expire Expiration timestamp (default: 0 = session end).
-     * @param string $path Cookie path (default: /).
-     * @param string $domain Cookie domain (default: empty).
-     * @param bool $secure HTTPS only (default: false).
-     * @param bool $httpOnly Inaccessible via JavaScript (default: true).
-     * @return self For method chaining.
+     * @param int $expire Expiration timestamp (0 for session cookie).
+     * @param string $path Cookie path.
+     * @param string $domain Cookie domain.
+     * @param bool $secure If true, send only over HTTPS.
+     * @param bool $httpOnly If true, restrict cookie from JavaScript access.
+     * @return self
      */
     public function withCookie(
         string $name,
@@ -306,7 +311,6 @@ class Response
     /**
      * Sends the response to the client.
      *
-     * @return void
      * @throws RuntimeException If the response has already been sent or headers cannot be sent.
      */
     public function send(): void
@@ -319,15 +323,12 @@ class Response
             throw new RuntimeException("Headers have already been sent, cannot send response.");
         }
 
-        // Sends the status code
         http_response_code($this->statusCode);
 
-        // Sends the headers
         foreach ($this->headers as $name => $value) {
             self::$functions['header']("$name: $value", true);
         }
 
-        // Sends the body, if any
         if ($this->body !== null) {
             echo $this->body;
         }
@@ -336,9 +337,9 @@ class Response
     }
 
     /**
-     * Checks if the response has been sent.
+     * Returns whether the response has already been sent.
      *
-     * @return bool True if the response has been sent, false otherwise.
+     * @return bool True if sent, false otherwise.
      */
     public function isSent(): bool
     {
@@ -346,9 +347,9 @@ class Response
     }
 
     /**
-     * Clears the response body and headers, keeping the status code.
+     * Clears headers and body but retains the current status code.
      *
-     * @return self For method chaining.
+     * @return self
      * @throws RuntimeException If the response has already been sent.
      */
     public function clear(): self
@@ -364,12 +365,12 @@ class Response
     }
 
     /**
-     * Sets an error response with a status code and message.
+     * Sets an error response with an optional message and logger callback.
      *
-     * @param int $statusCode Status code (e.g., 404, 500).
-     * @param string $message Error message (optional).
-     * @param callable|null $logger An optional callback to log the error. It should accept two parameters: the status code and the message.
-     * @return self For method chaining.
+     * @param int $statusCode HTTP status code.
+     * @param string $message Optional error message.
+     * @param callable|null $logger Optional callback for logging (receives code and message).
+     * @return self
      */
     public function withError(int $statusCode, string $message = '', ?callable $logger = null): self
     {
@@ -384,15 +385,10 @@ class Response
     }
 
     /**
-     * Sets the response to send a file as an attachment.
+     * Sends a file as a downloadable attachment.
      *
-     * This method checks if the specified file is readable. If it is, it sets the
-     * 'Content-Disposition' header to prompt the client to download the file,
-     * determines the MIME type using Assets::detectMimeType, and sets the response
-     * body to the file's contents.
-     *
-     * @param string $filePath The path to the file to be sent.
-     * @return self For method chaining.
+     * @param string $filePath Absolute file path.
+     * @return self
      * @throws RuntimeException If the file is not readable.
      */
     public function withFile(string $filePath): self
@@ -407,16 +403,16 @@ class Response
     }
 
     /**
-     * Configures CORS headers based on the provided options.
+     * Configures Cross-Origin Resource Sharing (CORS) headers.
      *
-     * @param array $options CORS options:
-     *   - 'origin' => Who can access (e.g., '*', 'https://my-site.com')
-     *   - 'methods' => Allowed methods (e.g., 'GET,POST' or ['GET', 'POST'])
-     *   - 'headers' => Allowed headers (e.g., 'Content-Type')
-     *   - 'credentials' => If true, allows cookies/authentication
-     *   - 'max_age' => Cache time in seconds (e.g., 86400 for 1 day)
-     * @return self For method chaining.
-     * @throws RuntimeException If CORS is configured after the response has been sent.
+     * @param array $options Supported keys:
+     *  - origin: Allowed origin(s)
+     *  - methods: Allowed HTTP methods
+     *  - headers: Allowed request headers
+     *  - credentials: Boolean, allow credentials
+     *  - max_age: Cache duration in seconds
+     * @return self
+     * @throws RuntimeException If called after the response has been sent.
      */
     public function setCORS(array $options): self
     {
@@ -439,12 +435,12 @@ class Response
             $this->setHeader('Access-Control-Allow-Headers', $headers);
         }
 
-        if (isset($options['credentials']) && $options['credentials'] === true) {
+        if (!empty($options['credentials'])) {
             $this->setHeader('Access-Control-Allow-Credentials', 'true');
         }
 
         if (isset($options['max_age'])) {
-            $this->setHeader('Access-Control-Max-Age', (string)$options['max_age']);
+            $this->setHeader('Access-Control-Max-Age', (string) $options['max_age']);
         }
 
         return $this;
