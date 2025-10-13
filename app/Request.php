@@ -113,14 +113,15 @@ class Request
 
         foreach ($this->server as $name => $value) {
             if (strpos($name, 'HTTP_') === 0) {
-                $headerName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                $headerName = strtolower(str_replace('_', '-', substr($name, 5)));
                 $this->headers[$headerName] = trim((string) $value);
             } elseif (in_array($name, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
-                $headerName = str_replace('_', '-', $name);
+                $headerName = strtolower(str_replace('_', '-', $name));
                 $this->headers[$headerName] = trim((string) $value);
             }
         }
     }
+
 
     /**
      * Determines the HTTP request method.
@@ -236,13 +237,14 @@ class Request
     }
 
     /**
-     * Returns a header value by name.
+     * Returns a header value by name (case-insensitive).
      *
      * @param string $name The header name.
      * @return string|null The header value or null if not found.
      */
     public function getHeader(string $name): ?string
     {
+        $name = strtolower($name);
         return $this->headers[$name] ?? null;
     }
 
@@ -257,13 +259,14 @@ class Request
     }
 
     /**
-     * Checks if a specific header exists.
+     * Checks if a specific header exists (case-insensitive).
      *
      * @param string $name Header name.
      * @return bool True if the header exists, false otherwise.
      */
     public function hasHeader(string $name): bool
     {
+        $name = strtolower($name);
         return isset($this->headers[$name]);
     }
 
