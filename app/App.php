@@ -16,7 +16,7 @@ use Exception;
  *
  * This class serves as the core of the application, managing routes, serving static assets,
  * applying middlewares, and handling exceptions. It supports dynamic routes, custom error
- * handling, and is designed for extensibility in projects like a landing page generator.
+ * handling, and is designed for extensibility in projects.
  */
 class App
 {
@@ -55,14 +55,13 @@ class App
 	 * and fallback route for handling asset requests or 404 errors.
 	 *
 	 * @param ?Assets $assets An optional Assets instance for managing static assets. Set to null to disable assets.
-	 * @param ?string $logDir Directory for logs. Set to null to disable logging.
-	 * @throws InvalidArgumentException If the assets configuration or log directory is invalid.
+	 * @param ?LoggerInterface $logger Logger instance for application logging.
+	 * @throws InvalidArgumentException If the assets configuration is invalid.
 	 */
 	public function __construct(
 		?Assets $assets = null,
 		?LoggerInterface $logger = null
 	) {
-		// Start the session
 		if (session_status() === PHP_SESSION_NONE) {
 			session_start();
 		}
@@ -76,10 +75,8 @@ class App
 			$this->logger = $logger;
 		}
 
-		// Log application startup
 		$this->logger->log(LogLevel::INFO, 'Application initialized' . ($this->assets ? ' with assets enabled' : ' without assets'));
 
-		// Validate assets configuration if provided
 		if ($this->assets) {
 			$assetsDir = realpath($this->assets->getAssetsDirectory());
 			if ($assetsDir === false || !is_dir($assetsDir) || !is_readable($assetsDir)) {
@@ -94,7 +91,6 @@ class App
 			$this->logger->log(LogLevel::INFO, 'Asset manager initialized for route: ' . $assetsRoute);
 		}
 
-		// Set default 404 handler
 		$this->set404Handler(function (Request $req, Response $res, $params): void {
 			$res
 				->setStatusCode(404)
@@ -102,7 +98,6 @@ class App
 				->send();
 		});
 
-		// Set default handler for generic exceptions
 		$this->setExceptionHandler(Exception::class, function (Request $req, Response $res, Exception $e) {
 			$res
 				->setStatusCode(500)
@@ -111,34 +106,35 @@ class App
 			$this->logger->logException($e, $req);
 		});
 
-		// Initialize routes with 404 and fallback handlers
 		$this->routes['404'] = $this->_404;
-		$this->routes['fallback'] = function () {
-			// Serve assets if enabled and the request matches the assets route
-			if ($this->assets && $this->assets->isAssetRequest()) {
-				$this->logger->log(LogLevel::INFO, 'Serving asset: ' . $_SERVER['REQUEST_URI']);
-				$this->assets->serveAsset();
+		$this->routes['fallback'] = function (?Request $req = null, ?Response $res = null, ?stdClass $params = null) {
+			if ($this->assets && $this->assets->isAssetRequest($req)) {
+				$this->logger->log(LogLevel::INFO, 'Serving asset: ' . $req->getUri());
+				$this->assets->serveAsset($req);
 				return;
 			}
-			// Apply global middlewares and execute 404 handler
-			$this->logger->log(LogLevel::WARNING, 'No route matched, executing 404 handler for URI: ' . $_SERVER['REQUEST_URI']);
+
+			$this->logger->log(LogLevel::WARNING, 'No route matched, executing 404 handler for URI: ' . $req->getUri());
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
-			$params = new stdClass();
-			$handler(new Request(), new Response(), $params);
+
+			if (is_null($req)) $req = new Request();
+			if (is_null($res)) $res = new Response();
+			if (is_null($params)) $params = new stdClass();
+
+			$handler($req, $res, $params);
 		};
 	}
 
 	/**
 	 * Registers a handler for a specific exception type.
 	 *
-	 * @param string $exceptionClass Fully qualified name of the exception class (e.g., Exception::class).
+	 * @param string $exceptionClass Fully qualified name of the exception class.
 	 * @param callable $handler Callable that accepts Request, Response, and the Exception.
 	 * @return void
 	 * @throws InvalidArgumentException If the exception class does not exist or is not a subclass of Exception.
 	 */
 	public function setExceptionHandler(string $exceptionClass, callable $handler): void
 	{
-		// Validate that the class exists and is either Exception or a subclass
 		if (!class_exists($exceptionClass) || (
 			$exceptionClass !== Exception::class &&
 			!is_subclass_of($exceptionClass, Exception::class)
@@ -146,7 +142,7 @@ class App
 			$this->logger->log(LogLevel::ERROR, "Invalid exception class: $exceptionClass");
 			throw new InvalidArgumentException("Invalid exception class: $exceptionClass");
 		}
-		// Store the handler as a Closure
+
 		$this->exceptionHandlers[$exceptionClass] = Closure::fromCallable($handler);
 		$this->logger->log(LogLevel::INFO, "Exception handler registered for class: $exceptionClass");
 	}
@@ -159,13 +155,11 @@ class App
 	 */
 	public function getExceptionHandler(Exception $e): ?Closure
 	{
-		// Check for a direct handler match
 		$class = get_class($e);
 		while ($class && isset($this->exceptionHandlers[$class])) {
 			return $this->exceptionHandlers[$class];
 		}
 
-		// Traverse parent classes for a handler
 		$parent = get_parent_class($class);
 		while ($parent) {
 			if (isset($this->exceptionHandlers[$parent])) {
@@ -174,7 +168,6 @@ class App
 			$parent = get_parent_class($parent);
 		}
 
-		// Fallback to generic Exception handler
 		return $this->exceptionHandlers[Exception::class] ?? null;
 	}
 
@@ -190,30 +183,23 @@ class App
 	 */
 	public function route(string $method, string $route, callable $action, array $middlewares = []): void
 	{
-		// Normalize and validate HTTP method
 		$method = strtoupper(trim($method));
 		if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'], true)) {
 			$this->logger->log(LogLevel::ERROR, "Invalid HTTP method: $method for route: $route");
 			throw new InvalidArgumentException("Invalid HTTP method: $method");
 		}
 
-		// Convert route to regex pattern
 		$formattedRoute = $this->parseRoute($route);
-
-		// Combine global and route-specific middlewares
 		$allMiddlewares = array_merge($this->globalMiddlewares, $middlewares);
 		$handler = $this->applyMiddlewares($action, $allMiddlewares);
 
-		// Initialize method-specific routes array if not set
 		if (!isset($this->routes[$method])) {
 			$this->routes[$method] = [];
 		}
 
-		// Extract parameter names from the route
 		preg_match_all('/\[([a-zA-Z0-9\.\-_]+)\]/', $route, $matches);
 		$paramNames = $matches[1] ?? [];
 
-		// Store route data
 		$this->routes[$method][$formattedRoute] = [
 			'handler' => $handler,
 			'paramNames' => $paramNames
@@ -344,7 +330,6 @@ class App
 		}
 	}
 
-
 	/**
 	 * Registers a redirect from one route to another.
 	 *
@@ -355,11 +340,10 @@ class App
 	 */
 	public function redirect(string $from, string $to, bool $permanent = false): void
 	{
-		// Initialize redirects array if not set
 		if (!isset($this->routes['redirects'])) {
 			$this->routes['redirects'] = [];
 		}
-		// Store redirect configuration
+
 		$this->routes['redirects'][] = [
 			'from' => $from,
 			'to' => $to,
@@ -376,7 +360,6 @@ class App
 	 */
 	public function set404Handler(callable $action): void
 	{
-		// Store and register the 404 handler
 		$this->_404 = Closure::fromCallable($action);
 		$this->routes['404'] = $this->_404;
 		$this->logger->log(LogLevel::INFO, 'Custom 404 handler set');
@@ -390,7 +373,6 @@ class App
 	 */
 	public function addMiddleware(callable $middleware): void
 	{
-		// Append middleware to global list
 		$this->globalMiddlewares[] = $middleware;
 		$this->logger->log(LogLevel::INFO, 'Global middleware added');
 	}
@@ -404,32 +386,91 @@ class App
 	public function run(): void
 	{
 		$this->logger->log(LogLevel::INFO, 'Application started');
-
-		// Convert PHP errors to exceptions
 		set_error_handler(function ($severity, $message, $file, $line) {
 			$this->logger->log(LogLevel::ERROR, "PHP error: $message in $file:$line (severity: $severity)");
 			throw new \ErrorException($message, 500, $severity, $file, $line);
 		});
 
 		try {
-			// Dispatch the route
-			$this->dispatchRoute();
-		} catch (Exception $e) {
-			// Handle the exception using the registered handler
+			$request = new Request();
+			$response = new Response();
+
+			$this->handle($request, $response)->send();
+		} catch (\Exception $e) {
 			$handler = $this->getExceptionHandler($e);
 			if ($handler) {
 				$handler(new Request(), new Response(), $e);
 			} else {
-				// Fallback for unhandled exceptions
 				$this->logger->log(LogLevel::ERROR, "Unhandled exception: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
 				http_response_code(500);
 				echo "<p>Unexpected error occurred.</p>";
 				$this->logger->logException($e);
 			}
 		} finally {
-			// Restore default PHP error handler
 			restore_error_handler();
 			$this->logger->log(LogLevel::INFO, 'Application execution completed');
+		}
+	}
+
+	/**
+	 * Handles a custom request and returns the response.
+	 *
+	 * @param Request $req The request to handle.
+	 * @param Response $res The response object.
+	 * @return Response The processed response.
+	 */
+	public function handle(Request $req, Response $res): Response
+	{
+		$this->logger->log(LogLevel::INFO, 'Handling custom request via handle()');
+
+		try {
+			$method = $req->getMethod();
+			$uri = $req->getUri();
+			$params = [];
+
+			$this->logger->log(LogLevel::INFO, "Handling request: $method $uri");
+
+			if (isset($this->routes['redirects'])) {
+				foreach ($this->routes['redirects'] as $redirect) {
+					if ($uri === $redirect['from']) {
+						$statusCode = $redirect['permanent'] ? 301 : 302;
+						return $res->redirect($redirect['to'], $statusCode);
+					}
+				}
+			}
+
+			if (!isset($this->routes[$method])) {
+				$this->logger->log(LogLevel::WARNING, "No routes defined for method: $method");
+				$this->handleFallbackOrNotFound($req, $res);
+				return $res;
+			}
+
+			foreach ($this->routes[$method] as $route => $routeData) {
+				if (preg_match($route, $uri, $params)) {
+					array_shift($params);
+					$paramObj = new \stdClass();
+					foreach ($routeData['paramNames'] as $i => $name) {
+						$paramObj->$name = $params[$i] ?? null;
+					}
+
+					$handler = $routeData['handler'];
+					$handler($req, $res, $paramObj);
+					return $res;
+				}
+			}
+
+			$this->logger->log(LogLevel::WARNING, "No route matched for: $method $uri");
+			$this->handleFallbackOrNotFound($req, $res);
+			return $res;
+		} catch (\Exception $e) {
+			$handler = $this->getExceptionHandler($e);
+			if ($handler) {
+				$handler($req, $res, $e);
+			} else {
+				$this->logger->log(LogLevel::ERROR, "Unhandled exception: {$e->getMessage()}");
+				$res->setStatusCode(500)->withText("Unexpected error: {$e->getMessage()}");
+			}
+			return $res;
 		}
 	}
 
@@ -441,97 +482,38 @@ class App
 	 */
 	private function parseRoute(string $route): string
 	{
-		// Normalize route by removing trailing slash
 		$route = strlen($route) > 1 ? rtrim($route, '/') : $route;
-		// Replace parameter placeholders with regex
 		$route = preg_replace($this->routePattern, $this->paramPattern, $route);
-		// Escape forward slashes and wrap in regex delimiters
 		$route = str_replace('/', '\/', $route);
 		$this->logger->log(LogLevel::INFO, "Parsed route: $route");
 		return "/^{$route}$/";
 	}
 
 	/**
-	 * Dispatches the route matching the current request.
+	 * Handles unmatched routes or fallback scenarios.
 	 *
+	 * @param Request $req The request object.
+	 * @param Response $res The response object.
 	 * @return void
 	 */
-	private function dispatchRoute(): void
+	private function handleFallbackOrNotFound(Request $req, Response $res): void
 	{
-		// Get request method and URI
-		$method = $this->getMethod();
-		$uri = $this->getUri();
-		$params = [];
-
-		// Log incoming request
-		$this->logger->log(LogLevel::INFO, "Handling request: $method $uri");
-
-		// Check for redirects
-		if (isset($this->routes['redirects'])) {
-			foreach ($this->routes['redirects'] as $redirect) {
-				if ($uri === $redirect['from']) {
-					$statusCode = $redirect['permanent'] ? 301 : 302;
-					$this->logger->log(LogLevel::INFO, "Redirecting from $uri to {$redirect['to']} ($statusCode)");
-					$res = new Response();
-					$res->redirect($redirect['to'], $statusCode)->send();
-					return;
-				}
-			}
-		}
-
-		// Check if routes exist for the method
-		if (!isset($this->routes[$method])) {
-			$this->logger->log(LogLevel::WARNING, "No routes defined for method: $method");
-			$this->handleFallbackOrNotFound();
-			return;
-		}
-
-		// Match route and execute handler
-		foreach ($this->routes[$method] as $route => $routeData) {
-			if (preg_match($route, $uri, $params)) {
-				// Remove full match from parameters
-				array_shift($params);
-				$handler = $routeData['handler'];
-				$paramNames = $routeData['paramNames'];
-
-				// Create request, response, and parameter objects
-				$request = new Request();
-				$response = new Response();
-				$paramObj = new stdClass();
-				foreach ($paramNames as $index => $name) {
-					$paramObj->$name = $params[$index] ?? null;
-				}
-
-				// Log route match and parameters
-				$paramList = json_encode((array)$paramObj);
-				$this->logger->log(LogLevel::INFO, "Route matched: $method $route with parameters: $paramList");
-
-				// Execute the handler
-				$handler($request, $response, $paramObj);
+		if ($this->assets) {
+			$assetsRequest = $this->assets->isAssetRequest($req);
+			if ($assetsRequest) {
+				$this->logger->log(LogLevel::INFO, 'Serving asset: ' . $req->getUri());
+				$this->assets->serveAsset($req);
 				return;
 			}
 		}
 
-		// Handle unmatched routes
-		$this->logger->log(LogLevel::WARNING, "No route matched for: $method $uri");
-		$this->handleFallbackOrNotFound();
-	}
-
-	/**
-	 * Handles unmatched routes or fallback scenarios.
-	 *
-	 * @return void
-	 */
-	private function handleFallbackOrNotFound(): void
-	{
-		// Use fallback handler if defined, otherwise apply 404 handler
 		if (isset($this->routes['fallback'])) {
 			$this->logger->log(LogLevel::INFO, 'Executing fallback handler');
-			$this->routes['fallback']();
+			$this->routes['fallback']($req, $res, new stdClass());
 		} else {
 			$this->logger->log(LogLevel::INFO, 'Executing 404 handler');
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
-			$handler(new Request(), new Response(), new stdClass());
+			$handler($req, $res, new stdClass());
 		}
 	}
 
@@ -568,7 +550,6 @@ class App
 		$next = $handler;
 		$middlewares = array_reverse($middlewares);
 
-		// Wrap each middleware around the handler
 		foreach ($middlewares as $middleware) {
 			$next = function (Request $req, Response $res, $params) use ($middleware, $next): void {
 				$this->logger->log(LogLevel::INFO, 'Applying middleware for request: ' . $req->getUri());
