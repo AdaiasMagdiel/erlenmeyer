@@ -5,7 +5,7 @@ namespace AdaiasMagdiel\Erlenmeyer;
 use InvalidArgumentException;
 
 /**
- * Class for managing and serving static assets.
+ * Manages and serves static asset files.
  */
 class Assets
 {
@@ -20,7 +20,7 @@ class Assets
 	private string $assetsRoute;
 
 	/**
-	 * Constructs an Assets instance.
+	 * Creates a new Assets instance.
 	 *
 	 * @param string $assetsDirectory The directory where assets are stored. Default is "/public".
 	 * @param string $assetsRoute The route prefix for asset requests. Default is "/assets".
@@ -31,20 +31,18 @@ class Assets
 		$this->assetsDirectory = $assetsDirectory;
 		$this->assetsRoute = ltrim($assetsRoute, "/");
 
-		// Validate assets directory
 		$realDir = realpath($this->assetsDirectory);
 		if ($realDir === false || !is_dir($realDir) || !is_readable($realDir)) {
 			throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDirectory");
 		}
 
-		// Validate assets route
 		if (!preg_match('/^\/?[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $this->assetsRoute)) {
 			throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
 		}
 	}
 
 	/**
-	 * Gets the assets directory.
+	 * Returns the assets directory path.
 	 *
 	 * @return string The assets directory.
 	 */
@@ -54,35 +52,40 @@ class Assets
 	}
 
 	/**
-	 * Gets the assets route.
+	 * Returns the route prefix used for assets.
 	 *
 	 * @return string The assets route.
 	 */
 	public function getAssetsRoute(): string
 	{
-		return '/' . $this->assetsRoute; // Ensure leading slash for consistency
+		return '/' . $this->assetsRoute;
 	}
 
 	/**
-	 * Checks if the current request is for an asset.
+	 * Determines whether the request targets an asset route.
 	 *
-	 * @return bool True if the request URI starts with the assets route, false otherwise.
+	 * @param Request $req The current request instance.
+	 * @return bool True if the request is for an asset, false otherwise.
 	 */
-	public function isAssetRequest(): bool
+	public function isAssetRequest(Request $req): bool
 	{
-		$requestPath = ltrim($_SERVER["REQUEST_URI"], "/");
-		return str_starts_with($requestPath, $this->assetsRoute);
+		$assetsRoute = $this->getAssetsRoute();
+		$requestUri = $req->getUri();
+
+		return str_starts_with($requestUri, $assetsRoute);
 	}
 
 	/**
 	 * Serves the requested asset if it exists and is accessible.
 	 *
-	 * @return bool True if the asset was served successfully, false otherwise.
+	 * @param Request $req The current request instance.
+	 * @return bool True if the asset was successfully served, false otherwise.
 	 */
-	public function serveAsset(): bool
+	public function serveAsset(Request $req): bool
 	{
-		$requestedPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-		if (!$requestedPath) {
+		$requestedPath = parse_url($req->getUri() ?? '', PHP_URL_PATH);
+
+		if (!$requestedPath || $requestedPath === '') {
 			http_response_code(400);
 			echo "Invalid request";
 			return false;
@@ -116,10 +119,10 @@ class Assets
 	}
 
 	/**
-	 * Checks if the given path is a valid asset file.
+	 * Validates that the specified path points to a file.
 	 *
-	 * @param string $path The full path to the file.
-	 * @return bool True if the path is a file and exists, false otherwise.
+	 * @param string $path The path to validate.
+	 * @return bool True if the path is a valid file, false otherwise.
 	 */
 	private static function isValidAsset(string $path): bool
 	{
@@ -127,12 +130,12 @@ class Assets
 	}
 
 	/**
-	 * Sends the file to the client with appropriate headers.
+	 * Sends the given file to the client with appropriate headers.
 	 *
-	 * This method sets the Content-Type, Content-Length, and caching headers
-	 * (Cache-Control, ETag, Last-Modified). It also checks if the client already
-	 * has the latest version using If-None-Match and If-Modified-Since headers,
-	 * and sends a 304 Not Modified response if appropriate.
+	 * This method sets standard headers such as Content-Type, Content-Length,
+	 * Cache-Control, ETag, and Last-Modified. It also handles conditional requests
+	 * (If-None-Match and If-Modified-Since) to support browser caching and may
+	 * return a 304 Not Modified response when applicable.
 	 *
 	 * @param string $filePath The full path to the file to send.
 	 */
@@ -151,7 +154,9 @@ class Assets
 		$ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? null;
 		$ifModifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? null;
 
-		if (($ifNoneMatch && $ifNoneMatch === $etag) || ($ifModifiedSince && strtotime($ifModifiedSince) >= $lastModified)) {
+		if (($ifNoneMatch && $ifNoneMatch === $etag) ||
+			($ifModifiedSince && strtotime($ifModifiedSince) >= $lastModified)
+		) {
 			http_response_code(304);
 			return;
 		}
@@ -163,15 +168,15 @@ class Assets
 	/**
 	 * Detects the MIME type of a file based on its extension.
 	 *
-	 * @param string $filePath The path to the file.
-	 * @return string The MIME type of the file.
+	 * @param string $filePath The file path to check.
+	 * @return string The corresponding MIME type.
 	 */
 	public static function detectMimeType(string $filePath): string
 	{
 		$extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
 		return match ($extension) {
-			// Texts and Codes
+			// Text and code files
 			'css'   => 'text/css',
 			'js'    => 'application/javascript',
 			'txt'   => 'text/plain',
@@ -213,7 +218,7 @@ class Assets
 			'pptx'  => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 			'odt'   => 'application/vnd.oasis.opendocument.text',
 
-			// Audio/Video
+			// Audio and video
 			'mp3'   => 'audio/mpeg',
 			'wav'   => 'audio/wav',
 			'ogg'   => 'audio/ogg',
@@ -226,7 +231,7 @@ class Assets
 			'json'  => 'application/json',
 			'yml', 'yaml' => 'application/x-yaml',
 
-			default => 'application/octet-stream'
+			default => 'application/octet-stream',
 		};
 	}
 }
