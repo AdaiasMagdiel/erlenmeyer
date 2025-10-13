@@ -1,4 +1,5 @@
 vendor/
 .phpunit.cache/
+.coverage/
 *.bat
 index.php
