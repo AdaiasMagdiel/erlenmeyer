@@ -395,11 +395,17 @@ class App
 			$request = new Request();
 			$response = new Response();
 
-			$this->handle($request, $response)->send();
+			$res = $this->handle($request, $response);
+			if ($res && !$res->isSent()) {
+				$res->send();
+			}
 		} catch (\Exception $e) {
 			$handler = $this->getExceptionHandler($e);
 			if ($handler) {
-				$handler(new Request(), new Response(), $e);
+				$res = $handler(new Request(), new Response(), $e);
+				if ($res && !$res->isSent()) {
+					$res->send();
+				}
 			} else {
 				$this->logger->log(LogLevel::ERROR, "Unhandled exception: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
 				http_response_code(500);
