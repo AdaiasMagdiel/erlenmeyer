@@ -4,6 +4,97 @@ A record of all notable changes to **Erlenmeyer**.
 
 ---
 
+## [4.1.0] – 2025-10-15
+
+### ⚙️ **Core**
+
+- **Unified Throwable Handling**
+
+  - All exception handling in the framework (`App`) now supports **any** `Throwable` type — including both traditional `Exception` and PHP `Error` classes.
+  - Replaces previous `Exception`-only logic, ensuring consistent capture of fatal errors, parse errors, and type errors.
+  - Default handler updated to:
+
+    ```php
+    $app->setExceptionHandler(Throwable::class, function (Request $req, Response $res, Throwable $e) {
+        $res->setStatusCode(500)
+            ->withHtml("<h1>500 Internal Server Error</h1><p>Error: {$e->getMessage()}</p>")
+            ->send();
+    });
+    ```
+
+- **Improved Runtime Resilience**
+
+  - Added `register_shutdown_function()` to gracefully handle **fatal PHP errors** that are not catchable (e.g. `E_ERROR`, `E_PARSE`, `E_COMPILE_ERROR`).
+  - Integrated into `App::run()`, this ensures the framework responds with a `500 Internal Server Error` even when a fatal error occurs outside the main exception flow.
+
+- **Safer Error Handling**
+
+  - Added `ErrorException` mapping inside `set_error_handler()` to unify PHP runtime errors and exceptions.
+  - Guarantees consistent logging through the `LoggerInterface` implementation, even for non-recoverable runtime issues.
+
+- **Cleaner Exception Validation**
+
+  - Updated internal validation in `setExceptionHandler()`:
+
+    - Now properly supports both `class_exists()` and `interface_exists()` to handle `Throwable` (which is an interface, not a class).
+    - Simplified with `is_a($throwableClass, Throwable::class, true)` to verify valid error/exception classes more safely.
+
+  - Prevents accidental registration of invalid exception handler targets.
+
+### 🧩 **Improved Logging**
+
+- All runtime and error events in `App::run()` are now properly logged before being re-thrown or displayed.
+- Adds detailed logs for:
+
+  - PHP runtime errors.
+  - Fatal shutdown exceptions.
+  - Registration of custom exception handlers.
+
+### 🧠 **Behavioral Summary**
+
+- Any `Throwable` (e.g. `TypeError`, `ParseError`, `Exception`, etc.) is now safely caught and passed to the most specific handler available.
+- When no specific handler is registered, `App` falls back to the default `Throwable` handler.
+- Gracefully handles both recoverable and fatal errors during shutdown, improving reliability for production environments.
+
+### 🧰 **Other Changes**
+
+- **composer.json**
+
+  - Added `"version": "v4.1.0"` for explicit release tracking.
+
+### ✅ **Tests**
+
+- Framework tests continue to pass with updated error model.
+- Verified compatibility with both `Exception` and `Error` types in user-defined handlers.
+
+---
+
+### 🧾 Summary
+
+| Area               | Type        | Description                            |
+| ------------------ | ----------- | -------------------------------------- |
+| Exception Handling | 🔧 Change   | Support for full `Throwable` hierarchy |
+| Error Capture      | ✨ Added    | Shutdown handling for fatal errors     |
+| Logging            | 🧠 Improved | Unified error and exception logging    |
+| Validation         | 🧹 Refactor | Cleaner `setExceptionHandler()` logic  |
+| Metadata           | 📦 Added    | Version field to `composer.json`       |
+| Documentation      | 🗒️ Added    | Introduced `CHANGELOG.md` file         |
+
+---
+
+💡 **Upgrade Notes**
+
+- No breaking changes — all previous `Exception` handlers continue to work as-is.
+- If you wish to catch PHP errors like `TypeError` or `ParseError`, register them explicitly:
+
+  ```php
+  $app->setExceptionHandler(TypeError::class, function ($req, $res, $e) {
+      $res->withText('Type error: ' . $e->getMessage())->setStatusCode(400)->send();
+  });
+  ```
+
+---
+
 ## [4.0.2] – 2025-10-13
 
 ### 🧩 **Request Header Normalization & Case-Insensitive Access**

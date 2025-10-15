@@ -30,6 +30,7 @@
 Erlenmeyer is a lightweight PHP framework designed for simplicity and efficiency in building web applications. Inspired by the minimalism of Python's Flask, Erlenmeyer is not a direct clone but a unique solution tailored for PHP developers. It is currently in its early stages, making it perfect for small projects, APIs, or microservices where a lean setup is preferred. I created Erlenmeyer to streamline my own projects, but it's open for anyone seeking a straightforward, no-frills framework.
 
 **Key Characteristics:**
+
 - **Minimalist**: Small footprint, easy to learn and use.
 - **Flexible**: Supports various use cases, from simple scripts to full applications.
 - **Extensible**: Built with extensibility in mind, allowing custom functionality.
@@ -181,7 +182,7 @@ $app = new App(assets: $assets);
 Access assets via `/assets/file.ext`. For example:
 
 ```html
-<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/style.css" />
 ```
 
 ## Session Management
@@ -269,12 +270,12 @@ $app = new App(logger: $logger);
 
 The logging system supports the following levels, defined in the `LogLevel` enum:
 
-| Level      | Description                                   |
-|------------|-----------------------------------------------|
-| `INFO`     | General operational information               |
-| `DEBUG`    | Detailed debug information                    |
-| `WARNING`  | Indicates something unexpected but recoverable |
-| `ERROR`    | Indicates a serious error affecting functionality |
+| Level      | Description                                                        |
+| ---------- | ------------------------------------------------------------------ |
+| `INFO`     | General operational information                                    |
+| `DEBUG`    | Detailed debug information                                         |
+| `WARNING`  | Indicates something unexpected but recoverable                     |
+| `ERROR`    | Indicates a serious error affecting functionality                  |
 | `CRITICAL` | Indicates a critical error that may cause the application to crash |
 
 These levels can be used when logging messages to categorize their severity.
@@ -341,12 +342,12 @@ Erlenmeyer uses PestPHP for testing. Run tests with:
 
 Erlenmeyer is suitable for a wide range of web applications. Here are some example use cases:
 
-| Use Case | Description |
-|----------|-------------|
-| **Simple REST API** | Create an API with endpoints for GET, POST, PUT, and DELETE, returning JSON responses. |
-| **Basic Web Application** | Develop an application with routes for HTML pages and session management. |
-| **Static Page Generator** | Serve static assets like CSS and JavaScript for landing pages. |
-| **Forms and Uploads** | Handle POST forms and file uploads with validation. |
+| Use Case                  | Description                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| **Simple REST API**       | Create an API with endpoints for GET, POST, PUT, and DELETE, returning JSON responses. |
+| **Basic Web Application** | Develop an application with routes for HTML pages and session management.              |
+| **Static Page Generator** | Serve static assets like CSS and JavaScript for landing pages.                         |
+| **Forms and Uploads**     | Handle POST forms and file uploads with validation.                                    |
 
 **Example REST API:**
 
@@ -367,6 +368,16 @@ $app->post('/submit', function (Request $req, Response $res, $params) {
 });
 ```
 
+## Development
+
+Documentation using mkdocs
+
+```
+py -m venv .venv
+.venv/bin/activate  # .venv\Scripts\activate (on windows)
+pip install mkdocs mkdocs-material
+```
+
 ## License
 
 Erlenmeyer is licensed under the GPLv3. See the [LICENSE](LICENSE) and the [COPYRIGHT](COPYRIGHT) files for details.
@@ -375,81 +386,81 @@ Erlenmeyer is licensed under the GPLv3. See the [LICENSE](LICENSE) and the [COPY
 
 ### App
 
-| Method | Description |
-|--------|-------------|
-| `__construct(?Assets $assets = null, ?string $logDir = null)` | Initializes the application. |
-| `route(string $method, string $route, callable $action, array $middlewares = [])` | Registers a route for an HTTP method. |
-| `get(string $route, callable $action, array $middlewares = [])` | Registers a GET route. |
-| `post(string $route, callable $action, array $middlewares = [])` | Registers a POST route. |
-| `any(string $route, callable $action, array $middlewares = [])` | Registers a route for any HTTP method. |
+| Method                                                                            | Description                              |
+| --------------------------------------------------------------------------------- | ---------------------------------------- |
+| `__construct(?Assets $assets = null, ?string $logDir = null)`                     | Initializes the application.             |
+| `route(string $method, string $route, callable $action, array $middlewares = [])` | Registers a route for an HTTP method.    |
+| `get(string $route, callable $action, array $middlewares = [])`                   | Registers a GET route.                   |
+| `post(string $route, callable $action, array $middlewares = [])`                  | Registers a POST route.                  |
+| `any(string $route, callable $action, array $middlewares = [])`                   | Registers a route for any HTTP method.   |
 | `match(array $methods, string $route, callable $action, array $middlewares = [])` | Registers a route for specified methods. |
-| `redirect(string $from, string $to, bool $permanent = false)` | Registers a redirect. |
-| `set404Handler(callable $action)` | Sets the 404 error handler. |
-| `addMiddleware(callable $middleware)` | Adds a global middleware. |
-| `setExceptionHandler(string $exceptionClass, callable $handler)` | Sets an exception handler. |
-| `run()` | Runs the application. |
+| `redirect(string $from, string $to, bool $permanent = false)`                     | Registers a redirect.                    |
+| `set404Handler(callable $action)`                                                 | Sets the 404 error handler.              |
+| `addMiddleware(callable $middleware)`                                             | Adds a global middleware.                |
+| `setExceptionHandler(string $exceptionClass, callable $handler)`                  | Sets an exception handler.               |
+| `run()`                                                                           | Runs the application.                    |
 
 ### Assets
 
-| Method | Description |
-|--------|-------------|
-| `__construct(string $assetsDirectory = "/public", string $assetsRoute = "/assets")` | Initializes the asset manager. |
-| `getAssetsDirectory(): string` | Returns the assets directory. |
-| `getAssetsRoute(): string` | Returns the assets route. |
-| `isAssetRequest(): bool` | Checks if the request is for an asset. |
-| `serveAsset(): bool` | Serves the requested asset. |
+| Method                                                                              | Description                            |
+| ----------------------------------------------------------------------------------- | -------------------------------------- |
+| `__construct(string $assetsDirectory = "/public", string $assetsRoute = "/assets")` | Initializes the asset manager.         |
+| `getAssetsDirectory(): string`                                                      | Returns the assets directory.          |
+| `getAssetsRoute(): string`                                                          | Returns the assets route.              |
+| `isAssetRequest(): bool`                                                            | Checks if the request is for an asset. |
+| `serveAsset(): bool`                                                                | Serves the requested asset.            |
 
 ### Session
 
-| Method | Description |
-|--------|-------------|
-| `static get(string $key, $default = null)` | Gets a session value. |
-| `static set(string $key, $value)` | Sets a session value. |
-| `static has(string $key): bool` | Checks if a session key exists. |
-| `static remove(string $key)` | Removes a session key. |
-| `static flash(string $key, $value)` | Sets a flash message. |
+| Method                                          | Description                       |
+| ----------------------------------------------- | --------------------------------- |
+| `static get(string $key, $default = null)`      | Gets a session value.             |
+| `static set(string $key, $value)`               | Sets a session value.             |
+| `static has(string $key): bool`                 | Checks if a session key exists.   |
+| `static remove(string $key)`                    | Removes a session key.            |
+| `static flash(string $key, $value)`             | Sets a flash message.             |
 | `static getFlash(string $key, $default = null)` | Gets and removes a flash message. |
-| `static hasFlash(string $key): bool` | Checks if a flash message exists. |
+| `static hasFlash(string $key): bool`            | Checks if a flash message exists. |
 
 ### Request
 
-| Method | Description |
-|--------|-------------|
-| `__construct(?array $server = null, ?array $get = null, ?array $post = null, ?array $files = null, string $inputStream = 'php://input')` | Initializes the request. |
-| `getHeader(string $name): ?string` | Gets a specific header. |
-| `getHeaders(): array` | Gets all headers. |
-| `getMethod(): string` | Gets the HTTP method. |
-| `getUri(): string` | Gets the request URI. |
-| `getQueryParams(): array` | Gets query parameters. |
-| `getFormData(): array` | Gets form data. |
-| `getJson(): mixed` | Gets JSON data from the body. |
-| `getFiles(): array` | Gets uploaded files. |
-| `isAjax(): bool` | Checks if the request is AJAX. |
-| `isSecure(): bool` | Checks if the request is secure (HTTPS). |
+| Method                                                                                                                                   | Description                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `__construct(?array $server = null, ?array $get = null, ?array $post = null, ?array $files = null, string $inputStream = 'php://input')` | Initializes the request.                 |
+| `getHeader(string $name): ?string`                                                                                                       | Gets a specific header.                  |
+| `getHeaders(): array`                                                                                                                    | Gets all headers.                        |
+| `getMethod(): string`                                                                                                                    | Gets the HTTP method.                    |
+| `getUri(): string`                                                                                                                       | Gets the request URI.                    |
+| `getQueryParams(): array`                                                                                                                | Gets query parameters.                   |
+| `getFormData(): array`                                                                                                                   | Gets form data.                          |
+| `getJson(): mixed`                                                                                                                       | Gets JSON data from the body.            |
+| `getFiles(): array`                                                                                                                      | Gets uploaded files.                     |
+| `isAjax(): bool`                                                                                                                         | Checks if the request is AJAX.           |
+| `isSecure(): bool`                                                                                                                       | Checks if the request is secure (HTTPS). |
 
 ### Response
 
-| Method | Description |
-|--------|-------------|
-| `__construct(int $statusCode = 200, array $headers = [])` | Initializes the response. |
-| `setStatusCode(int $code): self` | Sets the HTTP status code. |
-| `getStatusCode(): int` | Gets the HTTP status code. |
-| `setHeader(string $name, string $value): self` | Sets an HTTP header. |
-| `removeHeader(string $name): self` | Removes an HTTP header. |
-| `getHeaders(): array` | Gets all headers. |
-| `setContentType(string $contentType): self` | Sets the content type. |
-| `getContentType(): string` | Gets the content type. |
-| `setBody(string $body): self` | Sets the response body. |
-| `getBody(): ?string` | Gets the response body. |
-| `withHtml(string $html): self` | Sets HTML content. |
-| `withTemplate(string $templatePath, array $data = []): self` | Sets content from a template. |
-| `withJson($data, int $options = JSON_PRETTY_PRINT): self` | Sets JSON content. |
-| `withText(string $text): self` | Sets plain text content. |
-| `redirect(string $url, int $statusCode = 302): self` | Sets a redirect. |
-| `withCookie(string $name, string $value, int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httpOnly = true): self` | Sets a cookie. |
-| `send(): void` | Sends the response. |
-| `isSent(): bool` | Checks if the response has been sent. |
-| `clear(): self` | Clears the response body and headers. |
-| `withError(int $statusCode, string $message = '', ?callable $logger = null): self` | Sets an error response. |
-| `withFile(string $filePath): self` | Sets the response to send a file. |
-| `setCORS(array $options): self` | Configures CORS headers. |
+| Method                                                                                                                                                 | Description                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| `__construct(int $statusCode = 200, array $headers = [])`                                                                                              | Initializes the response.             |
+| `setStatusCode(int $code): self`                                                                                                                       | Sets the HTTP status code.            |
+| `getStatusCode(): int`                                                                                                                                 | Gets the HTTP status code.            |
+| `setHeader(string $name, string $value): self`                                                                                                         | Sets an HTTP header.                  |
+| `removeHeader(string $name): self`                                                                                                                     | Removes an HTTP header.               |
+| `getHeaders(): array`                                                                                                                                  | Gets all headers.                     |
+| `setContentType(string $contentType): self`                                                                                                            | Sets the content type.                |
+| `getContentType(): string`                                                                                                                             | Gets the content type.                |
+| `setBody(string $body): self`                                                                                                                          | Sets the response body.               |
+| `getBody(): ?string`                                                                                                                                   | Gets the response body.               |
+| `withHtml(string $html): self`                                                                                                                         | Sets HTML content.                    |
+| `withTemplate(string $templatePath, array $data = []): self`                                                                                           | Sets content from a template.         |
+| `withJson($data, int $options = JSON_PRETTY_PRINT): self`                                                                                              | Sets JSON content.                    |
+| `withText(string $text): self`                                                                                                                         | Sets plain text content.              |
+| `redirect(string $url, int $statusCode = 302): self`                                                                                                   | Sets a redirect.                      |
+| `withCookie(string $name, string $value, int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httpOnly = true): self` | Sets a cookie.                        |
+| `send(): void`                                                                                                                                         | Sends the response.                   |
+| `isSent(): bool`                                                                                                                                       | Checks if the response has been sent. |
+| `clear(): self`                                                                                                                                        | Clears the response body and headers. |
+| `withError(int $statusCode, string $message = '', ?callable $logger = null): self`                                                                     | Sets an error response.               |
+| `withFile(string $filePath): self`                                                                                                                     | Sets the response to send a file.     |
+| `setCORS(array $options): self`                                                                                                                        | Configures CORS headers.              |

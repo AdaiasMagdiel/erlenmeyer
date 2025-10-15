@@ -1,0 +1,2094 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A lightweight, modular PHP microframework for routing, requests, responses, and testing.">
+      
+      
+        <meta name="author" content="Adaias Magdiel">
+      
+      
+      
+        <link rel="prev" href="../Assets/">
+      
+      
+        <link rel="next" href="../Response/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Request - Erlenmeyer</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#class-adaiasmagdielerlenmeyerrequest" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="Erlenmeyer" class="md-header__button md-logo" aria-label="Erlenmeyer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1c0-.21-.07-.41-.18-.57L13 8.35V4h-2v4.35L5.18 18.43c-.11.16-.18.36-.18.57m1 3a3 3 0 0 1-3-3c0-.6.18-1.16.5-1.63L9 7.81V6a1 1 0 0 1-1-1V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1v1.81l5.5 9.56c.32.47.5 1.03.5 1.63a3 3 0 0 1-3 3zm7-6 1.34-1.34L16.27 18H7.73l2.66-4.61zm-.5-4a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5.5.5 0 0 1-.5-.5.5.5 0 0 1 .5-.5"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Erlenmeyer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Request
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="cyan"  aria-label="Modo escuro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Modo escuro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AdaiasMagdiel/Erlenmeyer" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AdaiasMagdiel/Erlenmeyer
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/routing/" class="md-tabs__link">
+          
+  
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/building-an-api/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../App/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../advanced/logging/" class="md-tabs__link">
+          
+  
+  
+  Advanced
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Erlenmeyer" class="md-nav__button md-logo" aria-label="Erlenmeyer" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1c0-.21-.07-.41-.18-.57L13 8.35V4h-2v4.35L5.18 18.43c-.11.16-.18.36-.18.57m1 3a3 3 0 0 1-3-3c0-.6.18-1.16.5-1.63L9 7.81V6a1 1 0 0 1-1-1V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1v1.81l5.5 9.56c.32.47.5 1.03.5 1.63a3 3 0 0 1-3 3zm7-6 1.34-1.34L16.27 18H7.73l2.66-4.61zm-.5-4a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5.5.5 0 0 1-.5-.5.5.5 0 0 1 .5-.5"/></svg>
+
+    </a>
+    Erlenmeyer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AdaiasMagdiel/Erlenmeyer" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AdaiasMagdiel/Erlenmeyer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Routing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/middleware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Middleware
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Requests
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/responses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Responses
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Handling
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/assets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Assets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sessions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sessions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/building-an-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building an API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/handling-cors-and-auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Handling CORS & Auth
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../App/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    App
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Assets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Assets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Request
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Request
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constructor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__constructarray-server-null-array-get-null-array-post-null-array-files-null-string-inputstream-phpinput-string-rawbody-null" class="md-nav__link">
+    <span class="md-ellipsis">
+      __construct(?array $server = null, ?array $get = null, ?array $post = null, ?array $files = null, string $inputStream = 'php://input', ?string $rawBody = null)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="__construct(?array $server = null, ?array $get = null, ?array $post = null, ?array $files = null, string $inputStream = &#39;php://input&#39;, ?string $rawBody = null)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Public Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Public Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getheaderstring-name-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getHeader(string $name): ?string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getheaders-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      getHeaders(): array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasheaderstring-name-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      hasHeader(string $name): bool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getmethod-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getMethod(): string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geturi-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getUri(): string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getqueryparams-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      getQueryParams(): array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getqueryparamstring-key-mixed-default-null-mixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      getQueryParam(string $key, mixed $default = null): mixed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getformdata-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      getFormData(): array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getformdataparamstring-key-mixed-default-null-mixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      getFormDataParam(string $key, mixed $default = null): mixed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getjsonbool-assoc-true-bool-ignorecontenttype-false-mixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      getJson(bool $assoc = true, bool $ignoreContentType = false): mixed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="getJson(bool $assoc = true, bool $ignoreContentType = false): mixed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Behavior
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getjsonerror-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getJsonError(): ?string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getrawbody-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getRawBody(): ?string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getfiles-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      getFiles(): array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getfilestring-key-int-index-null-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      getFile(string $key, ?int $index = null): ?array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getip-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getIp(): ?string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getuseragent-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      getUserAgent(): ?string
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isajax-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      isAjax(): bool
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issecure-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      isSecure(): bool
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Behavior Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Response
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Session/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Session
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Logging
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Logging
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Logging/ConsoleLogger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ConsoleLogger
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Logging/FileLogger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FileLogger
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Logging/LoggerInterface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LoggerInterface
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Logging/LogLevel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LogLevel
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Testing/ErlenClient/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ErlenClient
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Logging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/custom-handlers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Custom Handlers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/AdaiasMagdiel/Erlenmeyer/edit/master/docs/reference/Request.md" title="Editar esta página" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+    
+      
+    
+    <a href="https://github.com/AdaiasMagdiel/Erlenmeyer/raw/master/docs/reference/Request.md" title="Exibir fonte desta página" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
+    </a>
+  
+
+
+<h1 id="class-adaiasmagdielerlenmeyerrequest">Class: <code>AdaiasMagdiel\Erlenmeyer\Request</code><a class="headerlink" href="#class-adaiasmagdielerlenmeyerrequest" title="Permanent link">&para;</a></h1>
+<p><strong>Namespace:</strong> <code>AdaiasMagdiel\Erlenmeyer</code><br />
+<strong>Defined in:</strong> <code>app/Request.php</code></p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The <code>Request</code> class represents an HTTP request and provides access to all request-related data,<br />
+including headers, URI, method, query parameters, POST form data, JSON body, uploaded files,<br />
+and client information such as IP address and User-Agent.</p>
+<p>This class is used internally by the <code>App</code> during route dispatching and can be used<br />
+for manual request handling and testing.</p>
+<hr />
+<h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Visibility</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$headers</code></td>
+<td>private</td>
+<td><code>array</code></td>
+<td>HTTP request headers.</td>
+</tr>
+<tr>
+<td><code>$method</code></td>
+<td>private</td>
+<td><code>string</code></td>
+<td>HTTP method (e.g., <code>GET</code>, <code>POST</code>, etc.).</td>
+</tr>
+<tr>
+<td><code>$uri</code></td>
+<td>private</td>
+<td><code>string</code></td>
+<td>Normalized URI path (without query string).</td>
+</tr>
+<tr>
+<td><code>$queryParams</code></td>
+<td>private</td>
+<td><code>array</code></td>
+<td>Parsed query parameters.</td>
+</tr>
+<tr>
+<td><code>$formData</code></td>
+<td>private</td>
+<td><code>array</code></td>
+<td>POST form data.</td>
+</tr>
+<tr>
+<td><code>$jsonData</code></td>
+<td>private</td>
+<td><code>?array</code></td>
+<td>Lazily decoded JSON body data.</td>
+</tr>
+<tr>
+<td><code>$jsonError</code></td>
+<td>private</td>
+<td><code>?string</code></td>
+<td>JSON decoding error message (if any).</td>
+</tr>
+<tr>
+<td><code>$rawBody</code></td>
+<td>private</td>
+<td><code>?string</code></td>
+<td>Raw request body content.</td>
+</tr>
+<tr>
+<td><code>$files</code></td>
+<td>private</td>
+<td><code>array</code></td>
+<td>Uploaded file data (<code>$_FILES</code>).</td>
+</tr>
+<tr>
+<td><code>$ip</code></td>
+<td>private</td>
+<td><code>?string</code></td>
+<td>Client IP address.</td>
+</tr>
+<tr>
+<td><code>$userAgent</code></td>
+<td>private</td>
+<td><code>?string</code></td>
+<td>Client User-Agent string.</td>
+</tr>
+<tr>
+<td><code>$server</code></td>
+<td>private</td>
+<td><code>array</code></td>
+<td>Server environment data (<code>$_SERVER</code>).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="constructor">Constructor<a class="headerlink" href="#constructor" title="Permanent link">&para;</a></h2>
+<h3 id="__constructarray-server-null-array-get-null-array-post-null-array-files-null-string-inputstream-phpinput-string-rawbody-null"><code>__construct(?array $server = null, ?array $get = null, ?array $post = null, ?array $files = null, string $inputStream = 'php://input', ?string $rawBody = null)</code><a class="headerlink" href="#__constructarray-server-null-array-get-null-array-post-null-array-files-null-string-inputstream-phpinput-string-rawbody-null" title="Permanent link">&para;</a></h3>
+<p>Creates a new <code>Request</code> instance, optionally using custom superglobals<br />
+(useful for testing or CLI simulation).</p>
+<h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$server</code></td>
+<td><code>?array</code></td>
+<td>Server array (usually <code>$_SERVER</code>).</td>
+</tr>
+<tr>
+<td><code>$get</code></td>
+<td><code>?array</code></td>
+<td>Query string parameters (<code>$_GET</code>).</td>
+</tr>
+<tr>
+<td><code>$post</code></td>
+<td><code>?array</code></td>
+<td>POST data (<code>$_POST</code>).</td>
+</tr>
+<tr>
+<td><code>$files</code></td>
+<td><code>?array</code></td>
+<td>Uploaded files (<code>$_FILES</code>).</td>
+</tr>
+<tr>
+<td><code>$inputStream</code></td>
+<td><code>string</code></td>
+<td>Input stream path (default: <code>'php://input'</code>).</td>
+</tr>
+<tr>
+<td><code>$rawBody</code></td>
+<td><code>?string</code></td>
+<td>Optional raw body data override.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="public-methods">Public Methods<a class="headerlink" href="#public-methods" title="Permanent link">&para;</a></h2>
+<h3 id="getheaderstring-name-string"><code>getHeader(string $name): ?string</code><a class="headerlink" href="#getheaderstring-name-string" title="Permanent link">&para;</a></h3>
+<p>Retrieves a header value by name (case-insensitive).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$name</code></td>
+<td><code>string</code></td>
+<td>Header name.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>?string</code> – Header value or <code>null</code> if not found.</p>
+<hr />
+<h3 id="getheaders-array"><code>getHeaders(): array</code><a class="headerlink" href="#getheaders-array" title="Permanent link">&para;</a></h3>
+<p>Returns all HTTP request headers.</p>
+<p><strong>Returns:</strong> <code>array</code> – Associative array of all headers.</p>
+<hr />
+<h3 id="hasheaderstring-name-bool"><code>hasHeader(string $name): bool</code><a class="headerlink" href="#hasheaderstring-name-bool" title="Permanent link">&para;</a></h3>
+<p>Checks whether a specific header exists.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$name</code></td>
+<td><code>string</code></td>
+<td>Header name.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>bool</code> – <code>true</code> if header exists, otherwise <code>false</code>.</p>
+<hr />
+<h3 id="getmethod-string"><code>getMethod(): string</code><a class="headerlink" href="#getmethod-string" title="Permanent link">&para;</a></h3>
+<p>Returns the HTTP request method.<br />
+Supports <code>_method</code> override via POST or <code>X-HTTP-Method-Override</code> header.</p>
+<p><strong>Returns:</strong> <code>string</code> – HTTP method (e.g., <code>GET</code>, <code>POST</code>, <code>PUT</code>, etc.).</p>
+<hr />
+<h3 id="geturi-string"><code>getUri(): string</code><a class="headerlink" href="#geturi-string" title="Permanent link">&para;</a></h3>
+<p>Returns the normalized request URI path (without query string).</p>
+<p><strong>Returns:</strong> <code>string</code> – URI path.</p>
+<hr />
+<h3 id="getqueryparams-array"><code>getQueryParams(): array</code><a class="headerlink" href="#getqueryparams-array" title="Permanent link">&para;</a></h3>
+<p>Returns all query string parameters.</p>
+<p><strong>Returns:</strong> <code>array</code> – Associative array of query parameters.</p>
+<hr />
+<h3 id="getqueryparamstring-key-mixed-default-null-mixed"><code>getQueryParam(string $key, mixed $default = null): mixed</code><a class="headerlink" href="#getqueryparamstring-key-mixed-default-null-mixed" title="Permanent link">&para;</a></h3>
+<p>Retrieves a specific query parameter.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$key</code></td>
+<td><code>string</code></td>
+<td>Parameter name.</td>
+</tr>
+<tr>
+<td><code>$default</code></td>
+<td><code>mixed</code></td>
+<td>Default value if not found.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>mixed</code> – Parameter value or default.</p>
+<hr />
+<h3 id="getformdata-array"><code>getFormData(): array</code><a class="headerlink" href="#getformdata-array" title="Permanent link">&para;</a></h3>
+<p>Returns all POST form data.</p>
+<p><strong>Returns:</strong> <code>array</code> – Associative array of form fields.</p>
+<hr />
+<h3 id="getformdataparamstring-key-mixed-default-null-mixed"><code>getFormDataParam(string $key, mixed $default = null): mixed</code><a class="headerlink" href="#getformdataparamstring-key-mixed-default-null-mixed" title="Permanent link">&para;</a></h3>
+<p>Retrieves a specific POST form value.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$key</code></td>
+<td><code>string</code></td>
+<td>Form field key.</td>
+</tr>
+<tr>
+<td><code>$default</code></td>
+<td><code>mixed</code></td>
+<td>Default value if not found.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>mixed</code> – Form value or default.</p>
+<hr />
+<h3 id="getjsonbool-assoc-true-bool-ignorecontenttype-false-mixed"><code>getJson(bool $assoc = true, bool $ignoreContentType = false): mixed</code><a class="headerlink" href="#getjsonbool-assoc-true-bool-ignorecontenttype-false-mixed" title="Permanent link">&para;</a></h3>
+<p>Decodes and returns the JSON body of the request.</p>
+<h4 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Automatically validates <code>Content-Type: application/json</code> unless <code>$ignoreContentType</code> is <code>true</code>.</li>
+<li>Returns decoded array or object depending on <code>$assoc</code>.</li>
+<li>Throws exception if decoding fails or content type is invalid.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$assoc</code></td>
+<td><code>bool</code></td>
+<td>Whether to return associative array (<code>true</code>) or object (<code>false</code>).</td>
+</tr>
+<tr>
+<td><code>$ignoreContentType</code></td>
+<td><code>bool</code></td>
+<td>Whether to ignore content-type validation.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>mixed</code> – Parsed JSON data (array or object).<br />
+<strong>Throws:</strong> <code>RuntimeException</code> – On decoding errors or invalid <code>Content-Type</code>.</p>
+<hr />
+<h3 id="getjsonerror-string"><code>getJsonError(): ?string</code><a class="headerlink" href="#getjsonerror-string" title="Permanent link">&para;</a></h3>
+<p>Returns the last JSON decoding error message, if any.</p>
+<p><strong>Returns:</strong> <code>?string</code> – Error message or <code>null</code>.</p>
+<hr />
+<h3 id="getrawbody-string"><code>getRawBody(): ?string</code><a class="headerlink" href="#getrawbody-string" title="Permanent link">&para;</a></h3>
+<p>Returns the raw request body string.</p>
+<p><strong>Returns:</strong> <code>?string</code> – Raw body or <code>null</code> if empty.</p>
+<hr />
+<h3 id="getfiles-array"><code>getFiles(): array</code><a class="headerlink" href="#getfiles-array" title="Permanent link">&para;</a></h3>
+<p>Returns all uploaded files.</p>
+<p><strong>Returns:</strong> <code>array</code> – Same structure as PHP’s <code>$_FILES</code>.</p>
+<hr />
+<h3 id="getfilestring-key-int-index-null-array"><code>getFile(string $key, ?int $index = null): ?array</code><a class="headerlink" href="#getfilestring-key-int-index-null-array" title="Permanent link">&para;</a></h3>
+<p>Returns an uploaded file’s metadata by key (and index for multiple uploads).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$key</code></td>
+<td><code>string</code></td>
+<td>File key.</td>
+</tr>
+<tr>
+<td><code>$index</code></td>
+<td><code>?int</code></td>
+<td>Optional index for multi-file uploads.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>?array</code> – File info (<code>name</code>, <code>type</code>, <code>tmp_name</code>, <code>error</code>, <code>size</code>) or <code>null</code>.</p>
+<hr />
+<h3 id="getip-string"><code>getIp(): ?string</code><a class="headerlink" href="#getip-string" title="Permanent link">&para;</a></h3>
+<p>Returns the detected client IP address.</p>
+<p><strong>Returns:</strong> <code>?string</code> – IP address or <code>null</code>.</p>
+<hr />
+<h3 id="getuseragent-string"><code>getUserAgent(): ?string</code><a class="headerlink" href="#getuseragent-string" title="Permanent link">&para;</a></h3>
+<p>Returns the client’s User-Agent string.</p>
+<p><strong>Returns:</strong> <code>?string</code> – User-Agent or <code>null</code>.</p>
+<hr />
+<h3 id="isajax-bool"><code>isAjax(): bool</code><a class="headerlink" href="#isajax-bool" title="Permanent link">&para;</a></h3>
+<p>Checks whether the request is an AJAX request<br />
+(<code>X-Requested-With: XMLHttpRequest</code>).</p>
+<p><strong>Returns:</strong> <code>bool</code> – <code>true</code> if AJAX, otherwise <code>false</code>.</p>
+<hr />
+<h3 id="issecure-bool"><code>isSecure(): bool</code><a class="headerlink" href="#issecure-bool" title="Permanent link">&para;</a></h3>
+<p>Checks whether the request was made via HTTPS.</p>
+<p><strong>Returns:</strong> <code>bool</code> – <code>true</code> if secure (HTTPS), otherwise <code>false</code>.</p>
+<hr />
+<h2 id="behavior-summary">Behavior Summary<a class="headerlink" href="#behavior-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Header Parsing</strong></td>
+<td>Extracts headers from <code>$_SERVER</code> keys and normalizes names.</td>
+</tr>
+<tr>
+<td><strong>Method Detection</strong></td>
+<td>Supports overrides via <code>_method</code> field or <code>X-HTTP-Method-Override</code>.</td>
+</tr>
+<tr>
+<td><strong>JSON Handling</strong></td>
+<td>Safely decodes body JSON with detailed error reporting.</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Sanitizes query and form input to prevent injection.</td>
+</tr>
+<tr>
+<td><strong>Client Info</strong></td>
+<td>Detects IP, User-Agent, and proxy-forwarded addresses.</td>
+</tr>
+<tr>
+<td><strong>Testing Support</strong></td>
+<td>Constructor allows custom <code>$_SERVER</code>, <code>$_GET</code>, <code>$_POST</code>, and <code>$_FILES</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../Response/"><code>Response</code></a></li>
+<li><a href="../App/"><code>App</code></a></li>
+<li><a href="../Assets/"><code>Assets</code></a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.instant", "navigation.tabs", "toc.integrate", "content.code.copy", "content.action.edit", "content.action.view"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

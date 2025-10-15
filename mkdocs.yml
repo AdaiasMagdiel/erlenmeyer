@@ -1,0 +1,90 @@
+site_name: Erlenmeyer
+site_description: "A lightweight, modular PHP microframework for routing, requests, responses, and testing."
+site_author: Adaias Magdiel
+repo_url: https://github.com/AdaiasMagdiel/Erlenmeyer
+repo_name: AdaiasMagdiel/Erlenmeyer
+
+theme:
+  name: material
+  highlightjs: true
+  hljs_languages:
+    - php
+    - bash
+    - json
+  language: pt-BR
+  features:
+    - navigation.sections
+    - navigation.instant
+    - navigation.tabs
+    - toc.integrate
+    - content.code.copy
+    - content.action.edit
+    - content.action.view
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Modo escuro
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    logo: material/flask-outline
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Concepts:
+      - Routing: concepts/routing.md
+      - Middleware: concepts/middleware.md
+      - Requests: concepts/requests.md
+      - Responses: concepts/responses.md
+      - Error Handling: concepts/errors.md
+      - Assets: concepts/assets.md
+      - Sessions: concepts/sessions.md
+  - Guides:
+      - Building an API: guides/building-an-api.md
+      - Handling CORS & Auth: guides/handling-cors-and-auth.md
+      - Testing: guides/testing.md
+  - Reference:
+      - Core:
+          - App: reference/App.md
+          - Assets: reference/Assets.md
+          - Request: reference/Request.md
+          - Response: reference/Response.md
+          - Session: reference/Session.md
+      - Logging:
+          - ConsoleLogger: reference/Logging/ConsoleLogger.md
+          - FileLogger: reference/Logging/FileLogger.md
+          - LoggerInterface: reference/Logging/LoggerInterface.md
+          - LogLevel: reference/Logging/LogLevel.md
+      - Testing:
+          - ErlenClient: reference/Testing/ErlenClient.md
+  - Advanced:
+      - Logging: advanced/logging.md
+      - Custom Handlers: advanced/custom-handlers.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+      title: "On this page"
+  - admonition
+  - codehilite
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.tasklist
+  - pymdownx.emoji
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - def_list
+
+plugins:
+  - search
