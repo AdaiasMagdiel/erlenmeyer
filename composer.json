@@ -1,31 +1,32 @@
 {
-    "name": "adaiasmagdiel/erlenmeyer",
-    "description": "Erlenmeyer is a lightweight PHP framework designed to create web applications simply and efficiently.",
-    "type": "library",
-    "license": "GPL-3.0-only",
-    "autoload": {
-        "psr-4": {
-            "AdaiasMagdiel\\Erlenmeyer\\": "app/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Adaías Magdiel",
-            "email": "adaiasmagdiell@gmail.com"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require-dev": {
-        "pestphp/pest": "^3.8"
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
+  "name": "adaiasmagdiel/erlenmeyer",
+  "description": "Erlenmeyer is a lightweight PHP framework designed to create web applications simply and efficiently.",
+  "type": "library",
+  "license": "GPL-3.0-only",
+  "version": "v4.1.0",
+  "autoload": {
+    "psr-4": {
+      "AdaiasMagdiel\\Erlenmeyer\\": "app/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Adaías Magdiel",
+      "email": "adaiasmagdiell@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require-dev": {
+    "pestphp/pest": "^3.8"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
 }

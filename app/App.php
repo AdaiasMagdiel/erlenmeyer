@@ -6,10 +6,12 @@ use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use Closure;
+use ErrorException;
 use InvalidArgumentException;
 use RuntimeException;
 use stdClass;
 use Exception;
+use Throwable;
 
 /**
  * Main application class for handling HTTP routing, assets, middlewares, and exception handling.
@@ -98,13 +100,15 @@ class App
 				->send();
 		});
 
-		$this->setExceptionHandler(Exception::class, function (Request $req, Response $res, Exception $e) {
+		$this->setExceptionHandler(Throwable::class, function (Request $req, Response $res, Throwable $e) {
 			$res
 				->setStatusCode(500)
 				->withHtml("<h1>500 Internal Server Error</h1><p>Error: {$e->getMessage()}</p>")
 				->send();
+
 			$this->logger->logException($e, $req);
 		});
+
 
 		$this->routes['404'] = $this->_404;
 		$this->routes['fallback'] = function (?Request $req = null, ?Response $res = null, ?stdClass $params = null) {
@@ -126,34 +130,48 @@ class App
 	}
 
 	/**
-	 * Registers a handler for a specific exception type.
+	 * Registers a handler for a specific throwable type (Exception or Error).
 	 *
-	 * @param string $exceptionClass Fully qualified name of the exception class.
-	 * @param callable $handler Callable that accepts Request, Response, and the Exception.
+	 * This allows customizing the application's behavior for different
+	 * error or exception types. Handlers are executed in order of specificity,
+	 * meaning subclasses are matched before their parent types.
+	 *
+	 * Example:
+	 * ```php
+	 * $app->setExceptionHandler(TypeError::class, function ($req, $res, $e) {
+	 *     $res->withText("Invalid type: {$e->getMessage()}")->setStatusCode(400)->send();
+	 * });
+	 * ```
+	 *
+	 * @param string $throwableClass Fully qualified class name of the Throwable to handle.
+	 * @param callable $handler A callable that receives (Request $req, Response $res, Throwable $e).
 	 * @return void
-	 * @throws InvalidArgumentException If the exception class does not exist or is not a subclass of Exception.
+	 *
+	 * @throws InvalidArgumentException If the class does not exist or is not a subclass of Throwable.
 	 */
-	public function setExceptionHandler(string $exceptionClass, callable $handler): void
+	public function setExceptionHandler(string $throwableClass, callable $handler): void
 	{
-		if (!class_exists($exceptionClass) || (
-			$exceptionClass !== Exception::class &&
-			!is_subclass_of($exceptionClass, Exception::class)
-		)) {
-			$this->logger->log(LogLevel::ERROR, "Invalid exception class: $exceptionClass");
-			throw new InvalidArgumentException("Invalid exception class: $exceptionClass");
+		if (
+			(!class_exists($throwableClass) && !interface_exists($throwableClass)) ||
+			($throwableClass !== Throwable::class && !is_subclass_of($throwableClass, Throwable::class))
+		) {
+			$this->logger->log(LogLevel::ERROR, "Invalid throwable class: $throwableClass");
+			throw new InvalidArgumentException("Invalid throwable class: $throwableClass");
 		}
 
-		$this->exceptionHandlers[$exceptionClass] = Closure::fromCallable($handler);
-		$this->logger->log(LogLevel::INFO, "Exception handler registered for class: $exceptionClass");
+		$this->exceptionHandlers[$throwableClass] = Closure::fromCallable($handler);
+		$this->logger->log(LogLevel::INFO, "Exception handler registered for class: $throwableClass");
 	}
 
+
+
 	/**
-	 * Retrieves the handler for a thrown exception, traversing the class hierarchy.
+	 * Retrieves the handler for a thrown Throwable, traversing the class hierarchy.
 	 *
-	 * @param Exception $e The thrown exception.
+	 * @param Throwable $e The thrown error or exception.
 	 * @return Closure|null The corresponding handler or null if none is found.
 	 */
-	public function getExceptionHandler(Exception $e): ?Closure
+	public function getExceptionHandler(Throwable $e): ?Closure
 	{
 		$class = get_class($e);
 		while ($class && isset($this->exceptionHandlers[$class])) {
@@ -168,7 +186,7 @@ class App
 			$parent = get_parent_class($parent);
 		}
 
-		return $this->exceptionHandlers[Exception::class] ?? null;
+		return $this->exceptionHandlers[Throwable::class] ?? null;
 	}
 
 	/**
@@ -386,9 +404,23 @@ class App
 	public function run(): void
 	{
 		$this->logger->log(LogLevel::INFO, 'Application started');
+
 		set_error_handler(function ($severity, $message, $file, $line) {
 			$this->logger->log(LogLevel::ERROR, "PHP error: $message in $file:$line (severity: $severity)");
-			throw new \ErrorException($message, 500, $severity, $file, $line);
+			throw new ErrorException($message, 500, $severity, $file, $line);
+		});
+
+		register_shutdown_function(function () {
+			$error = error_get_last();
+			if ($error !== null && in_array($error['type'], [
+				E_ERROR,
+				E_PARSE,
+				E_CORE_ERROR,
+				E_COMPILE_ERROR
+			], true)) {
+				http_response_code(500);
+				echo "<h1>Fatal Error</h1><p>{$error['message']}</p>";
+			}
 		});
 
 		try {
@@ -399,7 +431,7 @@ class App
 			if ($res && !$res->isSent()) {
 				$res->send();
 			}
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$handler = $this->getExceptionHandler($e);
 			if ($handler) {
 				$res = $handler(new Request(), new Response(), $e);
@@ -468,7 +500,7 @@ class App
 			$this->logger->log(LogLevel::WARNING, "No route matched for: $method $uri");
 			$this->handleFallbackOrNotFound($req, $res);
 			return $res;
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$handler = $this->getExceptionHandler($e);
 			if ($handler) {
 				$handler($req, $res, $e);
