@@ -151,13 +151,10 @@ class App
 	 */
 	public function setExceptionHandler(string $throwableClass, callable $handler): void
 	{
-		if (
-			(!class_exists($throwableClass) && !interface_exists($throwableClass)) ||
-			($throwableClass !== Throwable::class && !is_subclass_of($throwableClass, Throwable::class))
-		) {
-			$this->logger->log(LogLevel::ERROR, "Invalid throwable class: $throwableClass");
+		if (!is_a($throwableClass, Throwable::class, true)) {
 			throw new InvalidArgumentException("Invalid throwable class: $throwableClass");
 		}
+
 
 		$this->exceptionHandlers[$throwableClass] = Closure::fromCallable($handler);
 		$this->logger->log(LogLevel::INFO, "Exception handler registered for class: $throwableClass");
