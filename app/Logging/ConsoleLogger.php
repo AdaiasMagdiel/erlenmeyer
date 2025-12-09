@@ -3,108 +3,116 @@
 namespace AdaiasMagdiel\Erlenmeyer\Logging;
 
 use AdaiasMagdiel\Erlenmeyer\Request;
-use Exception;
+use InvalidArgumentException;
+use Throwable;
 
 /**
- * A console-based logger implementation that writes log entries to the PHP error log.
- *
- * This logger supports different log levels and can be configured to exclude specific
- * levels. It also provides contextual logging for exceptions, including request details
- * and stack traces.
+ * Logger que escreve no console/error_log com suporte a níveis e exclusões.
  */
 class ConsoleLogger implements LoggerInterface
 {
-	/**
-	 * Timestamp format used for all log entries.
-	 */
+	/** Timestamp format. */
 	private const TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
 
-	/**
-	 * @var LogLevel[] Log levels that should be excluded from logging.
-	 */
-	public array $excludedLogLevels = [];
+	/** @var LogLevel[] Lista de níveis excluídos. */
+	private array $excludedLogLevels = [];
 
 	/**
-	 * Creates a new ConsoleLogger instance.
-	 *
-	 * @param LogLevel[] $excludedLogLevels An array of LogLevel enums to exclude from logging.
-	 * @throws \InvalidArgumentException If any element in $excludedLogLevels is not a LogLevel instance.
+	 * @param LogLevel[] $excludedLogLevels Lista de níveis a ignorar.
 	 */
 	public function __construct(array $excludedLogLevels = [])
 	{
-		foreach ($excludedLogLevels as $level) {
-			if (!$level instanceof LogLevel) {
-				throw new \InvalidArgumentException('All excluded log levels must be instances of LogLevel.');
-			}
-		}
-
+		$this->validateExcludedLogLevels($excludedLogLevels);
 		$this->excludedLogLevels = $excludedLogLevels;
 	}
 
 	/**
-	 * Logs an exception, including context about the originating request if available.
-	 *
-	 * @param Exception $exception The exception to log.
-	 * @param Request|null $request Optional request object providing additional context.
-	 * @return void
+	 * Registra exceções com contexto opcional da request.
 	 */
-	public function logException(Exception $exception, ?Request $request = null): void
+	public function logException(Throwable $exception, ?Request $request = null): void
 	{
-		$timestamp = date(self::TIMESTAMP_FORMAT);
-
-		$requestInfo = $request
-			? sprintf('Request: %s %s', $request->getMethod() ?? 'UNKNOWN', $request->getUri() ?? 'UNKNOWN')
-			: 'No request context';
-
-		// Escape message to prevent log injection
-		$message = sprintf(
-			"[%s] [ERROR] %s in %s:%d\n%s\n%s\n\n",
-			$timestamp,
-			htmlspecialchars($exception->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-			$exception->getFile(),
-			$exception->getLine(),
-			$requestInfo,
-			$this->formatStackTrace($exception->getTraceAsString())
-		);
-
+		$message = $this->formatExceptionMessage($exception, $request);
 		$this->log(LogLevel::ERROR, $message);
 	}
 
 	/**
-	 * Logs a message to the PHP error log or STDERR.
+	 * Registra uma mensagem de log.
 	 *
-	 * @param LogLevel $level The log level (e.g., INFO, WARNING, ERROR).
-	 * @param string $message The message to log. Must not be empty.
-	 * @return void
-	 * @throws \InvalidArgumentException If the message is empty.
+	 * @throws InvalidArgumentException
 	 */
 	public function log(LogLevel $level = LogLevel::INFO, string $message = ''): void
 	{
-		if (trim($message) === '') {
-			throw new \InvalidArgumentException('Log message cannot be empty.');
+		$message = trim($message);
+		if ($message === '') {
+			throw new InvalidArgumentException('Log message cannot be empty.');
 		}
 
-		if (in_array($level, $this->excludedLogLevels, true)) {
+		if ($this->shouldSkipLevel($level)) {
 			return;
 		}
 
-		$timestamp = date(self::TIMESTAMP_FORMAT);
-		$logEntry = sprintf("[%s] [%s] %s\n", $timestamp, $level->value, $message);
+		$logEntry = sprintf(
+			"[%s] [%s] %s\n",
+			date(self::TIMESTAMP_FORMAT),
+			$level->value,
+			$message
+		);
 
-		// Attempt to log; fallback to STDERR if error_log() fails
 		if (!@error_log($logEntry)) {
-			fprintf(STDERR, "Failed to write log: %s", $logEntry);
+			// Fallback robusto
+			@fwrite(STDERR, "Failed to write log entry:\n" . $logEntry);
 		}
 	}
 
 	/**
-	 * Formats a stack trace for improved readability.
-	 *
-	 * @param string $stackTrace The raw stack trace.
-	 * @return string The formatted stack trace.
+	 * Verifica se o nível deve ser ignorado.
 	 */
-	private function formatStackTrace(string $stackTrace): string
+	private function shouldSkipLevel(LogLevel $level): bool
 	{
-		return implode("\n  ", explode("\n", trim($stackTrace)));
+		return in_array($level, $this->excludedLogLevels, true);
+	}
+
+	/**
+	 * Valida o array de níveis excluídos.
+	 *
+	 * @throws InvalidArgumentException
+	 */
+	private function validateExcludedLogLevels(array $levels): void
+	{
+		foreach ($levels as $level) {
+			if (!$level instanceof LogLevel) {
+				throw new InvalidArgumentException(
+					'All excluded log levels must be instances of LogLevel.'
+				);
+			}
+		}
+	}
+
+	/**
+	 * Monta mensagem formatada para exceção.
+	 */
+	private function formatExceptionMessage(Throwable $e, ?Request $req): string
+	{
+		$requestInfo = $req
+			? sprintf('Request: %s %s', $req->getMethod() ?? 'UNKNOWN', $req->getUri() ?? 'UNKNOWN')
+			: 'No request context';
+
+		return sprintf(
+			"%s in %s:%d\n%s\n%s",
+			htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+			$e->getFile(),
+			$e->getLine(),
+			$requestInfo,
+			$this->formatStackTrace($e->getTraceAsString())
+		);
+	}
+
+	/**
+	 * Formata stack trace para melhor leitura.
+	 */
+	private function formatStackTrace(string $trace): string
+	{
+		$lines = array_filter(array_map('trim', explode("\n", $trace)));
+		return "Stack trace:\n  " . implode("\n  ", $lines);
 	}
 }
