@@ -5,6 +5,7 @@ namespace AdaiasMagdiel\Erlenmeyer;
 use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
+use AdaiasMagdiel\Erlenmeyer\Logging\NullLogger;
 use Closure;
 use ErrorException;
 use InvalidArgumentException;
@@ -71,13 +72,11 @@ class App
 		$this->assets = $assets;
 
 		if (is_null($logger)) {
-			$defaultLogger = new FileLogger();
+			$defaultLogger = new NullLogger();
 			$this->logger = $defaultLogger;
 		} else {
 			$this->logger = $logger;
 		}
-
-		$this->logger->log(LogLevel::INFO, 'Application initialized' . ($this->assets ? ' with assets enabled' : ' without assets'));
 
 		if ($this->assets) {
 			$assetsDir = realpath($this->assets->getAssetsDirectory());
@@ -219,7 +218,6 @@ class App
 			'handler' => $handler,
 			'paramNames' => $paramNames
 		];
-		$this->logger->log(LogLevel::INFO, "Route registered: $method $route");
 	}
 
 	/**
@@ -364,7 +362,6 @@ class App
 			'to' => $to,
 			'permanent' => $permanent
 		];
-		$this->logger->log(LogLevel::INFO, "Redirect registered: $from to $to (permanent: " . ($permanent ? 'true' : 'false') . ")");
 	}
 
 	/**
@@ -400,8 +397,6 @@ class App
 	 */
 	public function run(): void
 	{
-		$this->logger->log(LogLevel::INFO, 'Application started');
-
 		set_error_handler(function ($severity, $message, $file, $line) {
 			$this->logger->log(LogLevel::ERROR, "PHP error: $message in $file:$line (severity: $severity)");
 			throw new ErrorException($message, 500, $severity, $file, $line);
@@ -436,14 +431,12 @@ class App
 					$res->send();
 				}
 			} else {
-				$this->logger->log(LogLevel::ERROR, "Unhandled exception: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
 				http_response_code(500);
 				echo "<p>Unexpected error occurred.</p>";
 				$this->logger->logException($e);
 			}
 		} finally {
 			restore_error_handler();
-			$this->logger->log(LogLevel::INFO, 'Application execution completed');
 		}
 	}
 
@@ -462,8 +455,6 @@ class App
 			$method = $req->getMethod();
 			$uri = $req->getUri();
 			$params = [];
-
-			$this->logger->log(LogLevel::INFO, "Handling request: $method $uri");
 
 			if (isset($this->routes['redirects'])) {
 				foreach ($this->routes['redirects'] as $redirect) {
@@ -520,7 +511,6 @@ class App
 		$route = strlen($route) > 1 ? rtrim($route, '/') : $route;
 		$route = preg_replace($this->routePattern, $this->paramPattern, $route);
 		$route = str_replace('/', '\/', $route);
-		$this->logger->log(LogLevel::INFO, "Parsed route: $route");
 		return "/^{$route}$/";
 	}
 
