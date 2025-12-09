@@ -3,7 +3,7 @@
 namespace AdaiasMagdiel\Erlenmeyer\Logging;
 
 use AdaiasMagdiel\Erlenmeyer\Request;
-use Exception;
+use Throwable;
 
 /**
  * Defines a standard interface for logging messages and exceptions.
@@ -26,9 +26,9 @@ interface LoggerInterface
     /**
      * Logs an exception, optionally including request context information.
      *
-     * @param Exception    $e       The exception to log.
+     * @param Throwable    $e       The exception to log.
      * @param Request|null $request Optional request providing additional context.
      * @return void
      */
-    public function logException(Exception $e, ?Request $request = null): void;
+    public function logException(Throwable $e, ?Request $request = null): void;
 }
