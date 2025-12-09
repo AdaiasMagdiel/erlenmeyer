@@ -3,7 +3,7 @@
   "description": "Erlenmeyer is a lightweight PHP framework designed to create web applications simply and efficiently.",
   "type": "library",
   "license": "GPL-3.0-only",
-  "version": "v4.1.0",
+  "version": "v4.1.2",
   "autoload": {
     "psr-4": {
       "AdaiasMagdiel\\Erlenmeyer\\": "app/"
