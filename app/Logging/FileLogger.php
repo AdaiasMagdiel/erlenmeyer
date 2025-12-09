@@ -3,73 +3,60 @@
 namespace AdaiasMagdiel\Erlenmeyer\Logging;
 
 use AdaiasMagdiel\Erlenmeyer\Request;
-use Exception;
+use Throwable;
 
 /**
- * A file-based logger implementation that writes structured log entries to disk.
+ * File-based logger with automatic log rotation.
  *
- * This logger automatically rotates files when they exceed a specified size (3MB)
- * and keeps a configurable number of backup logs. It supports contextual exception
- * logging, including stack traces and request metadata.
+ * Writes timestamped, structured log lines to disk and rotates the main log
+ * file when exceeding a configured size (3 MB). Retains up to 5 backups.
  */
 class FileLogger implements LoggerInterface
 {
-	/**
-	 * Maximum log file size in bytes (3 MB).
-	 */
+	/** @var int Maximum log file size in bytes (3 MB). */
 	private const MAX_LOG_SIZE = 3 * 1024 * 1024;
 
-	/**
-	 * Maximum number of rotated log files to retain.
-	 */
+	/** @var int Maximum number of rotated files to keep. */
 	private const MAX_LOG_FILES = 5;
 
-	/**
-	 * The directory where logs are stored, or null if logging is disabled.
-	 */
+	/** @var string|null Directory where logs are stored. Null disables logging. */
 	private ?string $logDir;
 
-	/**
-	 * The path to the active log file.
-	 */
+	/** @var string Path to the active log file. */
 	private string $logFile;
 
 	/**
-	 * Creates a new FileLogger instance.
-	 *
-	 * @param string $logDir Optional directory path for storing log files.
-	 *                       If empty, logging is disabled.
+	 * @param string $logDir Directory where logs will be stored.
+	 *                       Empty string disables logging completely.
 	 */
 	public function __construct(string $logDir = '')
 	{
-		$this->logDir = $logDir !== '' ? $logDir : null;
+		$this->logDir = $logDir !== '' ? rtrim($logDir, DIRECTORY_SEPARATOR) : null;
 
 		if ($this->logDir !== null) {
 			if (!is_dir($this->logDir)) {
-				mkdir($this->logDir, 0755, true);
+				@mkdir($this->logDir, 0755, true);
 			}
 
-			$this->logFile = rtrim($this->logDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'info.log';
+			$this->logFile = $this->logDir . DIRECTORY_SEPARATOR . 'info.log';
 		}
 	}
 
 	/**
-	 * Logs an exception, including request context if available.
-	 *
-	 * @param Exception $exception The exception to log.
-	 * @param Request|null $request Optional request providing additional context.
-	 * @return void
+	 * Logs an exception with optional request info.
 	 */
-	public function logException(Exception $exception, ?Request $request = null): void
+	public function logException(Throwable $exception, ?Request $request = null): void
 	{
-		$timestamp = date('Y-m-d H:i:s');
 		$requestInfo = $request
-			? sprintf('Request: %s %s', $request->getMethod() ?? 'UNKNOWN', $request->getUri() ?? 'UNKNOWN')
+			? sprintf(
+				'Request: %s %s',
+				$request->getMethod() ?? 'UNKNOWN',
+				$request->getUri() ?? 'unknown-uri'
+			)
 			: 'No request context';
 
 		$message = sprintf(
-			"[%s] [ERROR] %s in %s:%d\n%s\n%s\n\n",
-			$timestamp,
+			"%s in %s:%d\n%s\n%s",
 			$exception->getMessage(),
 			$exception->getFile(),
 			$exception->getLine(),
@@ -81,11 +68,7 @@ class FileLogger implements LoggerInterface
 	}
 
 	/**
-	 * Writes a log entry to the file, rotating if necessary.
-	 *
-	 * @param LogLevel $level The log level (e.g., INFO, WARNING, ERROR).
-	 * @param string $message The message to log.
-	 * @return void
+	 * Writes a log entry and rotates the file when needed.
 	 */
 	public function log(LogLevel $level = LogLevel::INFO, string $message = ''): void
 	{
@@ -93,43 +76,74 @@ class FileLogger implements LoggerInterface
 			return; // Logging disabled
 		}
 
-		$timestamp = date('Y-m-d H:i:s');
-		$logEntry = sprintf("[%s] [%s] %s\n", $timestamp, $level->value, trim($message));
-
-		// Rotate file if needed
-		if (file_exists($this->logFile) && filesize($this->logFile) >= self::MAX_LOG_SIZE) {
-			$this->rotateLogFile();
+		// Normalize multi-line logs nicely
+		$message = trim($message);
+		if ($message === '') {
+			return;
 		}
 
-		file_put_contents($this->logFile, $logEntry, FILE_APPEND | LOCK_EX);
+		$entry = sprintf(
+			"[%s] [%s] %s\n",
+			date('Y-m-d H:i:s'),
+			$level->value,
+			$message
+		);
+
+		$this->rotateIfNeeded();
+
+		@file_put_contents($this->logFile, $entry, FILE_APPEND | LOCK_EX);
 	}
 
 	/**
-	 * Rotates the current log file when it exceeds the maximum size.
-	 *
-	 * Older logs are renamed with numeric suffixes (e.g., info.log.1, info.log.2).
-	 *
-	 * @return void
+	 * Rotate the active log file if it exceeds MAX_LOG_SIZE.
+	 */
+	private function rotateIfNeeded(): void
+	{
+		if (!file_exists($this->logFile)) {
+			return;
+		}
+
+		if (filesize($this->logFile) < self::MAX_LOG_SIZE) {
+			return;
+		}
+
+		$this->rotateLogFile();
+	}
+
+	/**
+	 * Perform log rotation:
+	 *   info.log      → info.log.1
+	 *   info.log.1    → info.log.2
+	 *   ...
+	 *   info.log.5    → deleted
 	 */
 	private function rotateLogFile(): void
 	{
-		// Rename existing rotated logs (e.g., info.log.1 → info.log.2)
-		for ($i = self::MAX_LOG_FILES - 1; $i >= 1; $i--) {
-			$oldLog = "{$this->logFile}.{$i}";
-			$newLog = "{$this->logFile}." . ($i + 1);
+		// Delete oldest file if beyond retention
+		$oldest = "{$this->logFile}." . self::MAX_LOG_FILES;
+		if (file_exists($oldest)) {
+			@unlink($oldest);
+		}
 
-			if (file_exists($oldLog)) {
-				rename($oldLog, $newLog);
+		// Shift rotated files: .4 → .5, .3 → .4, etc.
+		for ($i = self::MAX_LOG_FILES - 1; $i >= 1; $i--) {
+			$source = "{$this->logFile}.{$i}";
+			$target = "{$this->logFile}." . ($i + 1);
+
+			if (file_exists($source)) {
+				@rename($source, $target);
 			}
 		}
 
-		// Rename current log file to .1
+		// Move main log to .1
 		if (file_exists($this->logFile)) {
-			rename($this->logFile, "{$this->logFile}.1");
+			@rename($this->logFile, "{$this->logFile}.1");
 		}
 
-		// Create a new, empty log file
-		file_put_contents($this->logFile, '');
+		// Touch a fresh file
+		@file_put_contents($this->logFile, '');
+
+		// Log that rotation occurred
 		$this->log(LogLevel::INFO, 'Log file rotated.');
 	}
 }
