@@ -4,6 +4,60 @@ A record of all notable changes to **Erlenmeyer**.
 
 ---
 
+## [4.2.3] – 2025-12-12
+
+### 🚀 **New Features**
+
+- **Output Control in ErlenClient for Testing**
+  - Added `$showOutput` property to control output display during testing
+  - New constructor parameter `bool $showOutput = false` to maintain backward compatibility
+  - Added `showOutput()` method for enabling/disabling output display on-demand
+  - Output buffering automatically manages `echo` statements and `Response::send()` calls from routes
+
+### 🔧 **Improvements**
+
+- **Enhanced ErlenClient Request Handling**
+  - Updated `request()` method to automatically send responses if not already sent
+  - Proper output buffering when `showOutput` is disabled (`ob_start()` / `ob_end_clean()`)
+  - Clean buffer management with `try-finally` pattern for reliability
+  - Smart handling of responses that may have been sent internally (e.g., 404 handlers)
+
+### 📚 **API Changes**
+
+- **ErlenClient Constructor** (backward compatible)
+
+  ```php
+  // Old usage still works
+  new ErlenClient($app);
+
+  // New usage with output control
+  new ErlenClient($app, false); // Default - no output (for tests)
+  new ErlenClient($app, true);  // Show output (for debugging)
+  ```
+
+- **New Method**
+  ```php
+  $client->showOutput(true);  // Enable output display
+  $client->showOutput(false); // Disable output display
+  ```
+
+### 🧪 **Testing Benefits**
+
+- **Silent Testing**: By default (`showOutput = false`), all route output is captured and discarded
+- **Debug Mode**: Set `showOutput(true)` to see actual HTML/JSON responses during development
+- **No Modification Needed**: Existing tests continue to work without changes
+- **Clean Test Output**: Eliminates clutter from 404 pages and other route outputs in test suites
+
+### 🏗️ **Implementation Details**
+
+- Added private property `bool $showOutput` to `ErlenClient` class
+- Updated constructor signature with optional parameter
+- Added fluent `showOutput()` method
+- Modified `request()` method to conditionally buffer output
+- Ensures `Response::send()` is called only if response hasn't been sent yet
+
+---
+
 ## [4.2.2] – 2025-12-11
 
 ### 🐛 **Bug Fixes**
