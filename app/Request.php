@@ -157,12 +157,55 @@ class Request
 
     /**
      * Initializes query string parameters.
+     * Preserves dots (.) in parameter names that PHP normally converts to underscores (_).
      *
      * @param array $get Query string parameters ($_GET).
      */
     private function initQueryParams(array $get): void
     {
-        $this->queryParams = array_map(fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'), $get);
+        $this->queryParams = [];
+
+        // 1. First try to get from the original QUERY_STRING (preserves dots)
+        $queryString = $this->server['QUERY_STRING'] ?? '';
+
+        if ($queryString !== '') {
+            // Parse while maintaining the damn dots
+            parse_str($queryString, $parsedWithDots);
+
+            foreach ($parsedWithDots as $key => $value) {
+                $this->queryParams[$key] = $this->sanitizeValue($value);
+            }
+        }
+
+        // 2. Add what came from $get (could be from tests)
+        // But CORRECT: if it came with _ but we already have with ., don't overwrite
+        foreach ($get as $key => $value) {
+            $keyWithDot = str_replace('_', '.', $key);
+
+            // If we already have the key with a DOT (the correct version), ignore the underscore one
+            if (isset($this->queryParams[$keyWithDot])) {
+                // The dot version already exists, ignore the fucking underscore
+                continue;
+            }
+
+            // If we DON'T have it with a dot, add it as it came (could be with _ or another character)
+            $this->queryParams[$key] = $this->sanitizeValue($value);
+        }
+    }
+
+    /**
+     * Sanitizes a value for safe output.
+     *
+     * @param mixed $value The value to sanitize
+     * @return mixed The sanitized value
+     */
+    private function sanitizeValue($value): mixed
+    {
+        if (is_array($value)) {
+            return array_map(fn($v) => $this->sanitizeValue($v), $value);
+        }
+
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
 
     /**
