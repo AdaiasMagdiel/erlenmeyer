@@ -157,7 +157,8 @@ class Request
 
     /**
      * Initializes query string parameters.
-     * Preserves dots (.) in parameter names that PHP normally converts to underscores (_).
+     * Ensures preservation of dots (.) in parameter names, which PHP would normally
+     * convert to underscores (_).
      *
      * @param array $get Query string parameters ($_GET).
      */
@@ -165,30 +166,35 @@ class Request
     {
         $this->queryParams = [];
 
-        // 1. First try to get from the original QUERY_STRING (preserves dots)
+        // 1. Prefer values derived directly from QUERY_STRING (preserves dots)
         $queryString = $this->server['QUERY_STRING'] ?? '';
 
         if ($queryString !== '') {
-            // Parse while maintaining the damn dots
+            // Apply temporary substitutions to preserve dots and spaces during parse_str
+            $queryString = str_replace([".", " "], ["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], $queryString);
+
             parse_str($queryString, $parsedWithDots);
+            var_dump($parsedWithDots);
 
             foreach ($parsedWithDots as $key => $value) {
+                // Restore original characters in parameter names
+                $key = str_replace(["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], [".", " "], $key);
+
                 $this->queryParams[$key] = $this->sanitizeValue($value);
             }
         }
 
-        // 2. Add what came from $get (could be from tests)
-        // But CORRECT: if it came with _ but we already have with ., don't overwrite
+        // 2. Incorporate parameters from $get (used primarily in test scenarios)
+        // If a version with dots is already present, do not overwrite it with an underscore variant.
         foreach ($get as $key => $value) {
             $keyWithDot = str_replace('_', '.', $key);
 
-            // If we already have the key with a DOT (the correct version), ignore the underscore one
+            // Skip if the parameter with dots is already defined
             if (isset($this->queryParams[$keyWithDot])) {
-                // The dot version already exists, ignore the fucking underscore
                 continue;
             }
 
-            // If we DON'T have it with a dot, add it as it came (could be with _ or another character)
+            // Otherwise, accept the key as provided
             $this->queryParams[$key] = $this->sanitizeValue($value);
         }
     }
@@ -207,6 +213,7 @@ class Request
 
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
+
 
     /**
      * Initializes POST form data.
