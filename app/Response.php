@@ -3,6 +3,7 @@
 namespace AdaiasMagdiel\Erlenmeyer;
 
 use InvalidArgumentException;
+use JsonException;
 use RuntimeException;
 
 /**
@@ -90,6 +91,22 @@ class Response
     public function getStatusCode(): int
     {
         return $this->statusCode;
+    }
+
+    /**
+     * Decodes the response body as JSON and returns an associative array.
+     * Returns null if decoding fails.
+     *
+     * @return array|null Associative array with decoded data or null on error.
+     */
+    public function getJson(): array|null
+    {
+        try {
+            $raw = $this->getBody();
+            return json_decode($raw, true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            return null;
+        }
     }
 
     /**
