@@ -4,7 +4,7 @@ A record of all notable changes to **Erlenmeyer**.
 
 ---
 
-## [4.2.3] – 2025-12-12
+## [4.2.3] – 2025-12-11
 
 ### 🚀 **New Features**
 
