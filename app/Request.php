@@ -174,7 +174,6 @@ class Request
             $queryString = str_replace([".", " "], ["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], $queryString);
 
             parse_str($queryString, $parsedWithDots);
-            var_dump($parsedWithDots);
 
             foreach ($parsedWithDots as $key => $value) {
                 // Restore original characters in parameter names
