@@ -4,6 +4,80 @@ A record of all notable changes to **Erlenmeyer**.
 
 ---
 
+## [4.2.1] – 2025-12-11
+
+### 🚀 **New Features**
+
+- **`getJson()` Method for Response**
+
+  - Added new `getJson()` method to the `Response` class for easier JSON response data retrieval
+  - Simplifies JSON response parsing in tests and HTTP clients
+  - Usage example: `$response->getJson()` returns response body as array/object
+
+- **`NullLogger` Implementation**
+
+  - New `NullLogger` class implementing `LoggerInterface` without performing any logging
+  - Useful for testing environments or when logging is unnecessary
+  - Implements all required interface methods with null behavior
+
+- **Automatic Log Rotation in `FileLogger`**
+  - Automatic log rotation system when files reach size limits
+  - `rotateIfNeeded()` method checks and executes rotation when necessary
+  - `rotateLogFile()` logic renames old logs and removes the oldest ones
+  - Simplified file path configuration with error suppression for file operations
+
+### 🔧 **Improvements & Refactoring**
+
+- **Complete Refactoring for `Throwable` Support**
+
+  - Replacement of `Exception` with `Throwable` throughout the codebase for broader error handling
+  - `LoggerInterface::logException()` now accepts `Throwable` instead of just `Exception`
+  - `App` and error handlers now capture both PHP `Exception` and `Error` types
+  - Added `register_shutdown_function()` for graceful handling of fatal PHP errors
+
+- **`ConsoleLogger` Improvements**
+
+  - Made `$excludedLogLevels` property private to encapsulate exclusion logic
+  - Added `validateExcludedLogLevels()` method to validate excluded log levels
+  - New helper methods: `shouldSkipLevel()`, `formatExceptionMessage()`, `formatStackTrace()`
+  - Updated documentation with cleaner formatting
+
+- **Removed Extraneous Logging from `App`**
+  - Cleanup of unnecessary logs that cluttered output
+  - Cleaner, more focused code on core functionality
+
+### 📚 **Documentation**
+
+- Added comprehensive documentation for new features
+- Updated examples and usage guides
+- Improved code comments and method documentation
+
+### ⚠️ **BREAKING CHANGES**
+
+- **`LoggerInterface::logException()` signature change**
+
+  - Old: `logException(Exception $exception, ...)`
+  - New: `logException(Throwable $throwable, ...)`
+  - **Action required:** Update any custom logger implementations to accept `Throwable` instead of `Exception`
+
+- **`FileLogger::logException()` parameter type change**
+  - Now accepts `Throwable` instead of `Exception`
+  - Update call sites if extending or calling this method directly
+
+### 🐛 **Fixed**
+
+- Removed unnecessary logging that could affect performance
+- Improved error handling consistency across the framework
+- Cleaner separation of concerns in logging components
+
+### 🔄 **Maintenance**
+
+- Removed `version` key from `composer.json` to rely solely on Git tags
+- Bumped version to 4.2.0
+- Code cleanup and standardization
+
+---
+
 ## [4.1.0] – 2025-10-15
 
 ### ⚙️ **Core**
