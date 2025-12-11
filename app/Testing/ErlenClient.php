@@ -26,13 +26,31 @@ class ErlenClient
     private array $defaultHeaders = [];
 
     /**
+     * @var bool Flag to enable or disable output display in routes.
+     */
+    private bool $showOutput = false;
+
+    /**
      * Creates a new ErlenClient instance.
      *
      * @param App $app The application instance to handle requests.
      */
-    public function __construct(App $app)
+    public function __construct(App $app, bool $showOutput = false)
     {
         $this->app = $app;
+        $this->showOutput = $showOutput;
+    }
+
+    /**
+     * Enable or disable output display for routes.
+     *
+     * @param bool $show The flag value.
+     * @return self
+     */
+    public function showOutput(bool $show = true): self
+    {
+        $this->showOutput = $show;
+        return $this;
     }
 
     /**
@@ -189,8 +207,28 @@ class ErlenClient
 
         $response = new Response();
 
+        // If output should NOT be displayed, start output buffering
+        if (!$this->showOutput) {
+            ob_start();
+        }
+
         // Delegate to the application
-        return $this->app->handle($request, $response);
+        try {
+            // Process the request
+            $result = $this->app->handle($request, $response);
+
+            // If response hasn't been sent yet, send it now
+            if (!$result->isSent()) {
+                $result->send();
+            }
+
+            return $result;
+        } finally {
+            // If output was being captured, clean the buffer
+            if (!$this->showOutput) {
+                ob_end_clean();
+            }
+        }
     }
 
     /**
