@@ -4,6 +4,35 @@ A record of all notable changes to **Erlenmeyer**.
 
 ---
 
+## [4.2.2] – 2025-12-11
+
+### 🐛 **Bug Fixes**
+
+- **Fixed: Dot Preservation in Query Parameters**
+  - Previously, PHP automatically converted dots (`.`) to underscores (`_`) in query parameter names
+  - Now preserves dots in parameter names (e.g., `name.eq=batman` stays as `name.eq`, not `name_eq`)
+  - Updated `Request::initQueryParams()` to first parse raw `QUERY_STRING` for accurate dot preservation
+  - Added `sanitizeValue()` helper method to properly handle nested arrays and sanitize values with `htmlspecialchars`
+  - Backward compatible: underscores in parameter names are still preserved when intentionally used
+
+### 🔧 **Technical Improvements**
+
+- **Enhanced Query Parameter Processing**
+  - Query parameters are now properly sanitized with HTML entity encoding
+  - Support for nested array values in query parameters
+  - Improved handling of edge cases in parameter name conversion
+  - Better separation of concerns with dedicated `sanitizeValue()` method
+
+### 📚 **Code Quality**
+
+- Updated method documentation with clearer explanations
+- Improved error resilience in query parameter parsing
+- Cleaner code structure with focused single-responsibility methods
+
+**Note:** This fix is particularly important for REST API endpoints that use dot notation in query parameters for filtering, sorting, and other operations.
+
+---
+
 ## [4.2.1] – 2025-12-11
 
 ### 🚀 **New Features**
