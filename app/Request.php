@@ -179,6 +179,9 @@ class Request
                 // Restore original characters in parameter names
                 $key = str_replace(["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], [".", " "], $key);
 
+                // Restore original characters in parameter values
+                $value = $this->restorePlaceholders($value);
+
                 $this->queryParams[$key] = $this->sanitizeValue($value);
             }
         }
@@ -196,6 +199,21 @@ class Request
             // Otherwise, accept the key as provided
             $this->queryParams[$key] = $this->sanitizeValue($value);
         }
+    }
+
+    /**
+     * Restores placeholders in parameter values (supports nested arrays).
+     *
+     * @param mixed $value The value to restore
+     * @return mixed The restored value
+     */
+    private function restorePlaceholders($value): mixed
+    {
+        if (is_array($value)) {
+            return array_map(fn($v) => $this->restorePlaceholders($v), $value);
+        }
+
+        return str_replace(["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], [".", " "], (string) $value);
     }
 
     /**
