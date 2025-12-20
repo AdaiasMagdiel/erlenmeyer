@@ -2,6 +2,32 @@
 
 A record of all notable changes to **Erlenmeyer**.
 
+## [4.2.6] – 2025-12-20
+
+### 🐛 **Bug Fixes**
+
+- **Fixed: Placeholder Restoration in Query Parameter Values**
+  - Fixed bug where internal placeholders (`__Z4k9T2c8N3__` and `__T8B3k0W9r1__`) used for dot/space preservation were not being restored in parameter **values**
+  - Previously only parameter **names** had placeholders restored, leaving values with visible placeholder strings
+  - Added `restorePlaceholders()` helper method to recursively handle nested arrays
+  - Now both parameter names and values have dots (`.`) and spaces properly preserved throughout the parsing process
+
+### 🔧 **Technical Improvements**
+
+- **Enhanced Placeholder Management**
+  - New `restorePlaceholders()` private method with recursive array support
+  - Proper handling of nested array values in query parameters
+  - Consistent restoration of special characters across all parameter data
+  - Improved code organization with dedicated restoration logic
+
+### 📚 **Code Quality**
+
+- Better separation of concerns between placeholder restoration and sanitization
+- Recursive implementation ensures deep nested structures are handled correctly
+- More maintainable code with clear, single-purpose methods
+
+**Impact:** This fix ensures that query parameter values containing dots or spaces are correctly preserved and displayed, completing the dot-preservation feature introduced in v4.2.2.
+
 ---
 
 ## [4.2.3] – 2025-12-11
