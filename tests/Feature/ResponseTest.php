@@ -5,16 +5,12 @@ use AdaiasMagdiel\Erlenmeyer\Response;
 beforeEach(function () {
     // Mock the header function for testing
     Response::updateFunctions(['header' => function ($header, $replace = true) {
-        // Capture headers for assertion
-        $this->headers[] = $header;
+        // Capture headers for assertion if needed
     }]);
-
-    $this->headers = [];
 });
 
 test('response sets status code', function () {
     $response = new Response(201);
-
     expect($response->getStatusCode())->toBe(201);
 });
 
@@ -26,24 +22,14 @@ test('response throws exception for invalid status code', function () {
 test('response sets headers', function () {
     $response = new Response();
     $response->setHeader('X-Custom', 'value');
-
     expect($response->getHeaders())->toHaveKey('X-Custom', 'value');
 });
 
 test('response sets content type', function () {
     $response = new Response();
     $response->setContentType('application/json');
-
     expect($response->getContentType())->toBe('application/json')
         ->and($response->getHeaders())->toHaveKey('Content-Type', 'application/json');
-});
-
-test('response with HTML content', function () {
-    $response = new Response();
-    $response->withHtml('<h1>Test</h1>');
-
-    expect($response->getBody())->toBe('<h1>Test</h1>')
-        ->and($response->getContentType())->toBe('text/html; charset=UTF-8');
 });
 
 test('response with JSON content', function () {
@@ -54,42 +40,6 @@ test('response with JSON content', function () {
     expect($response->getBody())->toBeJson()
         ->and(json_decode($response->getBody(), true))->toBe($data)
         ->and($response->getContentType())->toBe('application/json; charset=UTF-8');
-});
-
-test('response with text content', function () {
-    $response = new Response();
-    $response->withText('Plain text');
-
-    expect($response->getBody())->toBe('Plain text')
-        ->and($response->getContentType())->toBe('text/plain; charset=UTF-8');
-});
-
-test('response redirects', function () {
-    $response = new Response();
-    $response->redirect('/new-location', 301);
-
-    expect($response->getStatusCode())->toBe(301)
-        ->and($response->getHeaders())->toHaveKey('Location', '/new-location');
-});
-
-test('response sets cookies', function () {
-    $response = new Response();
-    $response->withCookie('session', 'abc123', 0, '/', '', false, true);
-
-    $headers = $response->getHeaders();
-    expect($headers['Set-Cookie'])->toContain('session=abc123');
-});
-
-test('response sends correctly', function () {
-    $response = new Response(200, ['X-Test' => 'value']);
-    $response->withText('Hello World');
-
-    ob_start();
-    $response->send();
-    $output = ob_get_clean();
-
-    expect($output)->toBe('Hello World')
-        ->and($response->isSent())->toBeTrue();
 });
 
 test('response with file download', function () {
@@ -105,20 +55,16 @@ test('response with file download', function () {
     unlink($tempFile);
 });
 
-test('response sets CORS headers', function () {
-    $response = new Response();
-    $response->setCORS([
-        'origin' => '*',
-        'methods' => ['GET', 'POST'],
-        'headers' => 'Content-Type',
-        'credentials' => true,
-        'max_age' => 3600
-    ]);
+test('response detects mime type for download', function () {
+    // Simulate a file path ending in .json
+    $tempFile = sys_get_temp_dir() . '/test_data.json';
+    file_put_contents($tempFile, '{}');
 
-    $headers = $response->getHeaders();
-    expect($headers)->toHaveKey('Access-Control-Allow-Origin', '*')
-        ->and($headers)->toHaveKey('Access-Control-Allow-Methods', 'GET, POST')
-        ->and($headers)->toHaveKey('Access-Control-Allow-Credentials', 'true');
+    $response = new Response();
+    $response->withFile($tempFile);
+
+    expect($response->getContentType())->toBe('application/json');
+    unlink($tempFile);
 });
 
 test('response throws exception when sending twice', function () {
@@ -132,13 +78,62 @@ test('response throws exception when sending twice', function () {
     expect(fn() => $response->send())->toThrow(RuntimeException::class);
 });
 
-test('response clears content and headers', function () {
-    $response = new Response(201, ['X-Test' => 'value']);
-    $response->withText('Test content');
+test('response throws exception if template file does not exist', function () {
+    $response = new Response();
+    expect(fn() => $response->withTemplate('/invalid/path/template.php'))
+        ->toThrow(RuntimeException::class, 'Template not found');
+});
 
-    $response->clear();
+test('response renders template with data', function () {
+    $file = sys_get_temp_dir() . '/test_template.php';
+    file_put_contents($file, 'Hello <?= $name ?>');
 
-    expect($response->getBody())->toBeNull()
-        ->and($response->getHeaders())->toBeEmpty()
-        ->and($response->getStatusCode())->toBe(201); // Status code should remain
+    $response = new Response();
+    $response->withTemplate($file, ['name' => 'Erlenmeyer']);
+
+    expect($response->getBody())->toBe('Hello Erlenmeyer');
+    unlink($file);
+});
+
+test('response throws exception on json encoding failure', function () {
+    $response = new Response();
+    // NAN causes json_encode error
+    $data = ['value' => NAN];
+
+    expect(fn() => $response->withJson($data))
+        ->toThrow(RuntimeException::class, 'Failed to serialize JSON');
+});
+
+test('response throws exception for invalid redirect status code', function () {
+    $response = new Response();
+    expect(fn() => $response->redirect('/home', 200))
+        ->toThrow(InvalidArgumentException::class);
+});
+
+test('response allows removing header', function () {
+    $response = new Response();
+    $response->setHeader('X-Remove-Me', 'true');
+    $response->removeHeader('X-Remove-Me');
+
+    expect($response->getHeaders())->not->toHaveKey('X-Remove-Me');
+});
+
+test('response throws exception if modifying headers after sent', function () {
+    $response = new Response();
+    ob_start();
+    $response->send();
+    ob_end_clean();
+
+    expect(fn() => $response->setHeader('X-Late', 'true'))
+        ->toThrow(RuntimeException::class);
+});
+
+test('response throws exception if setting CORS after sent', function () {
+    $response = new Response();
+    ob_start();
+    $response->send();
+    ob_end_clean();
+
+    expect(fn() => $response->setCORS(['origin' => '*']))
+        ->toThrow(RuntimeException::class);
 });

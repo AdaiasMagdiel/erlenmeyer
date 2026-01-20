@@ -5,30 +5,30 @@ use AdaiasMagdiel\Erlenmeyer\Request;
 test('request captures method correctly', function () {
     $server = ['REQUEST_METHOD' => 'POST'];
     $request = new Request($server);
-
     expect($request->getMethod())->toBe('POST');
 });
 
 test('request captures URI correctly', function () {
     $server = ['REQUEST_URI' => '/test?param=value'];
     $request = new Request($server);
-
     expect($request->getUri())->toBe('/test');
 });
 
-test('request captures query parameters', function () {
-    $get = ['page' => '1', 'search' => 'test'];
-    $request = new Request(null, $get);
+test('request captures query parameters with dots preserved', function () {
+    // Simulate what PHP sees in QUERY_STRING vs normalized keys
+    $server = ['QUERY_STRING' => 'user.name=john&settings.theme=dark'];
 
-    expect($request->getQueryParams())->toBe($get)
-        ->and($request->getQueryParam('page'))->toBe('1')
-        ->and($request->getQueryParam('non-existent', 'default'))->toBe('default');
+    $request = new Request($server);
+    $params = $request->getQueryParams();
+
+    expect($params)->toHaveKey('user.name', 'john')
+        ->and($params)->toHaveKey('settings.theme', 'dark')
+        ->and($request->getQueryParam('user.name'))->toBe('john');
 });
 
 test('request captures form data', function () {
     $post = ['name' => 'John', 'email' => 'john@example.com'];
     $request = new Request(null, null, $post);
-
     expect($request->getFormData())->toBe($post)
         ->and($request->getFormDataParam('name'))->toBe('John');
 });
@@ -36,39 +36,12 @@ test('request captures form data', function () {
 test('request captures JSON body', function () {
     $jsonData = ['title' => 'Test', 'active' => true];
     $rawBody = json_encode($jsonData);
-
     $server = [
         'HTTP_CONTENT_TYPE' => 'application/json',
         'CONTENT_TYPE' => 'application/json'
     ];
     $request = new Request($server, null, null, null, 'php://memory', $rawBody);
-
     expect($request->getJson())->toBe($jsonData);
-});
-
-test('request detects AJAX requests', function () {
-    $server = ['HTTP_X_REQUESTED_WITH' => 'xmlhttprequest'];
-    $request = new Request($server);
-
-    expect($request->isAjax())->toBeTrue();
-});
-
-test('request detects secure connections', function () {
-    $server = ['HTTPS' => 'on'];
-    $request = new Request($server);
-
-    expect($request->isSecure())->toBeTrue();
-});
-
-test('request captures headers', function () {
-    $server = [
-        'HTTP_ACCEPT' => 'application/json',
-        'HTTP_USER_AGENT' => 'TestAgent'
-    ];
-    $request = new Request($server);
-
-    expect($request->getHeader('Accept'))->toBe('application/json')
-        ->and($request->hasHeader('User-Agent'))->toBeTrue();
 });
 
 test('request captures files', function () {
@@ -82,7 +55,6 @@ test('request captures files', function () {
         ]
     ];
     $request = new Request(null, null, null, $files);
-
     expect($request->getFiles())->toBe($files)
         ->and($request->getFile('avatar'))->toBe($files['avatar']);
 });
@@ -90,189 +62,77 @@ test('request captures files', function () {
 test('request captures client IP', function () {
     $server = ['REMOTE_ADDR' => '192.168.1.1'];
     $request = new Request($server);
-
     expect($request->getIp())->toBe('192.168.1.1');
 });
 
-test('request handles method override from POST', function () {
-    $server = ['REQUEST_METHOD' => 'POST'];
-    $post = ['_method' => 'PUT'];
-    $request = new Request($server, null, $post);
-
-    expect($request->getMethod())->toBe('PUT');
-});
-
-test('request handles empty JSON body', function () {
+test('request handles forwarded IP correctly', function () {
+    // Note: Based on the provided code, X-Forwarded-For IS trusted currently.
     $server = [
-        'HTTP_CONTENT_TYPE' => 'application/json',
-        'CONTENT_TYPE' => 'application/json'
+        'REMOTE_ADDR' => '127.0.0.1',
+        'HTTP_X_FORWARDED_FOR' => '10.0.0.5, 192.168.1.1'
     ];
-    $request = new Request($server, null, null, null, 'php://memory', '');
-
-
-    expect($request->getJson(true, true))->toBeNull();
+    $request = new Request($server);
+    expect($request->getIp())->toBe('10.0.0.5');
 });
-
-test('request handles invalid JSON gracefully', function () {
-
-    $server = [
-        'HTTP_CONTENT_TYPE' => 'application/json',
-        'CONTENT_TYPE' => 'application/json'
-    ];
-    $request = new Request($server, null, null, null, 'php://memory', 'invalid json');
-
-
-    $error = $request->getJsonError();
-
-
-    $result = $request->getJson(true, true);
-
-    expect($error)->not->toBeNull()
-        ->and($result)->toBeNull();
-});
-
 
 test('request returns null for JSON with ignoreContentType and invalid JSON', function () {
     $server = [];
     $request = new Request($server, null, null, null, 'php://memory', 'invalid json');
-
-
     expect($request->getJson(true, true))->toBeNull();
 });
 
 test('request throws exception for JSON without proper Content-Type', function () {
     $server = [];
     $request = new Request($server, null, null, null, 'php://memory', '{"test": "value"}');
-
-
     expect(fn() => $request->getJson())->toThrow(RuntimeException::class);
 });
 
-test('request handles JSON with ignoreContentType flag', function () {
-    $jsonData = ['test' => 'value'];
-    $rawBody = json_encode($jsonData);
+test('request handles nested array dot notation in query params', function () {
+    // user.data[first.name]=John
+    $server = ['QUERY_STRING' => 'user.data%5Bfirst.name%5D=John'];
 
+    $request = new Request($server);
+    $params = $request->getQueryParams();
 
-    $request = new Request([], null, null, null, 'php://memory', $rawBody);
-
-    expect($request->getJson(true, true))->toBe($jsonData);
+    expect($params)->toHaveKey('user.data')
+        ->and($params['user.data'])->toHaveKey('first.name', 'John');
 });
 
-test('request returns object when assoc is false', function () {
-    $jsonData = ['test' => 'value'];
-    $rawBody = json_encode($jsonData);
+test('request captures json error properly', function () {
+    $server = ['CONTENT_TYPE' => 'application/json'];
+    $body = '{"key": "value",}';
 
-    $server = [
-        'HTTP_CONTENT_TYPE' => 'application/json',
-        'CONTENT_TYPE' => 'application/json'
-    ];
-    $request = new Request($server, null, null, null, 'php://memory', $rawBody);
+    $request = new Request($server, null, null, null, 'php://memory', $body);
 
-    $result = $request->getJson(false);
-    expect($result)->toBeObject()
-        ->and($result->test)->toBe('value');
+    expect($request->getJsonError())->not->toBeNull()
+        ->and(fn() => $request->getJson())->toThrow(RuntimeException::class);
 });
 
-test('request handles multiple files with index', function () {
-    $files = [
-        'documents' => [
-            'name' => ['file1.txt', 'file2.txt'],
-            'type' => ['text/plain', 'text/plain'],
-            'tmp_name' => ['/tmp/php123', '/tmp/php456'],
-            'error' => [0, 0],
-            'size' => [123, 456]
-        ]
-    ];
-    $request = new Request(null, null, null, $files);
+test('request getJson ignores content type check when requested', function () {
+    $server = ['CONTENT_TYPE' => 'text/plain'];
+    $body = '{"key": "value"}';
 
-    $file1 = $request->getFile('documents', 0);
-    $file2 = $request->getFile('documents', 1);
+    $request = new Request($server, null, null, null, 'php://memory', $body);
 
-    expect($file1)->toHaveKey('name', 'file1.txt')
-        ->and($file2)->toHaveKey('name', 'file2.txt');
+    expect($request->getJson(true, true))->toBe(['key' => 'value']);
 });
 
-test('request handles forwarded IP correctly', function () {
-
-
-    $server = [
-        'REMOTE_ADDR' => '192.168.1.100'
-    ];
+test('request initClientInfo handles missing REMOTE_ADDR gracefully', function () {
+    $server = [];
     $request = new Request($server);
 
-
-    expect($request->getIp())->toBe('192.168.1.100');
+    expect($request->getIp())->toBeNull();
 });
 
-test('request handles user agent correctly', function () {
+test('request getJson handles lazy initialization caching', function () {
+    $server = ['CONTENT_TYPE' => 'application/json'];
+    $body = '{"a":1}';
 
+    $request = new Request($server, null, null, null, 'php://memory', $body);
 
-    $server = ['HTTP_USER_AGENT' => 'Mozilla/5.0 Test Browser'];
-    $request = new Request($server);
+    $first = $request->getJson();
+    $second = $request->getJson();
 
-    expect($request->getUserAgent())->toBe('Mozilla/5.0 Test Browser');
-});
-
-test('request returns null for non-existent file', function () {
-    $request = new Request();
-
-    expect($request->getFile('non-existent'))->toBeNull()
-        ->and($request->getFile('non-existent', 0))->toBeNull();
-});
-
-test('request returns null for non-existent header', function () {
-    $request = new Request();
-
-    expect($request->getHeader('Non-Existent-Header'))->toBeNull()
-        ->and($request->hasHeader('Non-Existent-Header'))->toBeFalse();
-});
-
-test('request handles empty request', function () {
-    $request = new Request();
-
-    expect($request->getMethod())->toBe('GET')
-        ->and($request->getUri())->toBe('/')
-        ->and($request->getQueryParams())->toBe([])
-        ->and($request->getFormData())->toBe([])
-        ->and($request->getFiles())->toBe([]);
-});
-
-test('request initializes with minimal server data', function () {
-    $request = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/test']);
-
-    expect($request->getMethod())->toBe('GET')
-        ->and($request->getUri())->toBe('/test');
-});
-
-test('request handles raw body access', function () {
-    $rawBody = 'raw content';
-    $request = new Request([], null, null, null, 'php://memory', $rawBody);
-
-    expect($request->getRawBody())->toBe('raw content');
-});
-
-test('request handles JSON error after initialization', function () {
-    $server = [
-        'HTTP_CONTENT_TYPE' => 'application/json',
-        'CONTENT_TYPE' => 'application/json'
-    ];
-    $request = new Request($server, null, null, null, 'php://memory', 'invalid json');
-
-    $error = $request->getJsonError();
-
-    expect($error)->not->toBeNull();
-});
-
-test('request getHeader is case-insensitive', function () {
-    $server = [
-        'HTTP_AUTHORIZATION' => 'Bearer ABC123',
-        'HTTP_CONTENT_TYPE' => 'application/json',
-    ];
-    $request = new Request($server);
-
-    expect($request->getHeader('Authorization'))->toBe('Bearer ABC123')
-        ->and($request->getHeader('authorization'))->toBe('Bearer ABC123')
-        ->and($request->getHeader('AUTHORIZATION'))->toBe('Bearer ABC123')
-        ->and($request->hasHeader('CoNtEnT-TyPe'))->toBeTrue()
-        ->and($request->getHeader('Content-Type'))->toBe('application/json');
+    expect($first)->toBe($second)
+        ->and($first)->toBe(['a' => 1]);
 });

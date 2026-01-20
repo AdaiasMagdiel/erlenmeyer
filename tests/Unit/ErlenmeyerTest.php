@@ -1,15 +1,13 @@
 <?php
-// tests/Unit/ErlenmeyerTest.php
 
 use AdaiasMagdiel\Erlenmeyer\App;
-use AdaiasMagdiel\Erlenmeyer\Assets;
 use AdaiasMagdiel\Erlenmeyer\Testing\ErlenClient;
 use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 
 test('full application flow with routing and middleware', function () {
     $logger = new ConsoleLogger([LogLevel::INFO]);
-    $app = new App(null, $logger);
+    $app = new App($logger);
 
     // Add global middleware
     $app->addMiddleware(function ($req, $res, $next) {
@@ -17,7 +15,7 @@ test('full application flow with routing and middleware', function () {
         $next($req, $res, new stdClass());
     });
 
-    // Add routes with route-specific middleware
+    // Add routes
     $app->get('/users', function ($req, $res) {
         $res->withJson(['users' => ['john', 'jane']]);
     });
@@ -49,12 +47,13 @@ test('full application flow with routing and middleware', function () {
 
 test('application handles errors and exceptions gracefully', function () {
     $logger = new ConsoleLogger([LogLevel::INFO]);
-    $app = new App(null, $logger);
+    $app = new App($logger);
 
     $app->get('/error', function () {
         throw new RuntimeException('Something went wrong');
     });
 
+    // Register exception handler for RuntimeException
     $app->setExceptionHandler(RuntimeException::class, function ($req, $res, $e) {
         $res->setStatusCode(500)->withJson(['error' => $e->getMessage()]);
     });
@@ -65,30 +64,4 @@ test('application handles errors and exceptions gracefully', function () {
     expect($response->getStatusCode())->toBe(500)
         ->and($response->getBody())->toBeJson()
         ->and(json_decode($response->getBody(), true))->toHaveKey('error', 'Something went wrong');
-});
-
-test('application with assets integration', function () {
-    $testDir = dirname(__DIR__) . '/fixtures/public';
-    if (!is_dir($testDir)) {
-        mkdir($testDir, 0755, true);
-    }
-    file_put_contents($testDir . '/style.css', 'body { color: red; }');
-
-    $assets = new Assets($testDir, 'static');
-    $logger = new ConsoleLogger([LogLevel::INFO]);
-    $app = new App($assets, $logger);
-
-    $client = new ErlenClient($app);
-
-    // Test that normal routes still work
-    $app->get('/api/data', function ($req, $res) {
-        $res->withJson(['data' => 'test']);
-    });
-
-    $apiResponse = $client->get('/api/data');
-    expect($apiResponse->getStatusCode())->toBe(200);
-
-    // Cleanup
-    unlink($testDir . '/style.css');
-    rmdir($testDir);
 });
