@@ -100,6 +100,22 @@ class Session
     }
 
     /**
+     * Regenerates the session ID to prevent session fixation attacks.
+     *
+     * This method should be called immediately after any change in privilege
+     * level, such as a user logging in or out. It replaces the current
+     * session ID with a new one and optionally deletes the old session file.
+     *
+     * @param bool $deleteOldSession Whether to delete the old session data file.
+     * @return void
+     */
+    public static function regenerate(bool $deleteOldSession = true): void
+    {
+        self::ensureSessionStarted();
+        session_regenerate_id($deleteOldSession);
+    }
+
+    /**
      * Sets a flash message available for the next request only.
      *
      * Flash messages are automatically removed after being retrieved.
