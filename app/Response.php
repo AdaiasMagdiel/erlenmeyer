@@ -17,7 +17,7 @@ class Response
     private int $statusCode = 200;
 
     /**
-     * @var array HTTP headers.
+     * @var array<string, string> HTTP headers as key-value pairs.
      */
     private array $headers = [];
 
@@ -27,19 +27,19 @@ class Response
     private ?string $body = null;
 
     /**
-     * @var bool Indicates whether the response has been sent.
+     * @var bool Indicates whether the response has been sent to the client.
      */
     private bool $isSent = false;
 
     /**
-     * @var string Default content type.
+     * @var string The default content type for the response.
      */
     private string $contentType = 'text/html';
 
     /**
-     * Allows overriding native PHP functions (e.g., header()) for testing purposes.
+     * Allows overriding native PHP functions for testing purposes (e.g., mocking header()).
      *
-     * @var array<string, string>
+     * @var array<string, callable>
      */
     private static array $functions = ["header" => 'header'];
 
@@ -47,7 +47,7 @@ class Response
      * Creates a new Response instance.
      *
      * @param int $statusCode Initial HTTP status code (default: 200).
-     * @param array $headers Initial headers (optional).
+     * @param array<string, string> $headers Initial headers as an associative array.
      */
     public function __construct(int $statusCode = 200, array $headers = [])
     {
@@ -58,9 +58,9 @@ class Response
     }
 
     /**
-     * Updates internal callable function mappings.
+     * Updates internal callable function mappings for testing/mocking.
      *
-     * @param array $functions Associative array of callable replacements.
+     * @param array<string, callable> $functions Associative array of function names and their callables.
      */
     public static function updateFunctions(array $functions = []): void
     {
@@ -70,9 +70,9 @@ class Response
     /**
      * Sets the HTTP status code.
      *
-     * @param int $code The status code (100–599).
+     * @param int $code The status code (must be between 100 and 599).
      * @return self
-     * @throws InvalidArgumentException If the code is out of range.
+     * @throws InvalidArgumentException If the code is out of the valid HTTP range.
      */
     public function setStatusCode(int $code): self
     {
@@ -84,9 +84,9 @@ class Response
     }
 
     /**
-     * Returns the HTTP status code.
+     * Returns the current HTTP status code.
      *
-     * @return int Current status code.
+     * @return int
      */
     public function getStatusCode(): int
     {
@@ -94,17 +94,18 @@ class Response
     }
 
     /**
-     * Decodes the response body as JSON and returns an associative array.
-     * Returns null if decoding fails.
+     * Decodes the response body as JSON.
      *
-     * @return array|null Associative array with decoded data or null on error.
+     * @return array<mixed>|null Associative array of decoded data, or null if decoding fails.
      */
     public function getJson(): array|null
     {
         try {
             $raw = $this->getBody();
+            if (is_null($raw)) return null;
+
             return json_decode($raw, true, flags: JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (JsonException) {
             return null;
         }
     }
@@ -112,10 +113,10 @@ class Response
     /**
      * Sets an HTTP header.
      *
-     * @param string $name Header name.
+     * @param string $name Header name (e.g., "X-Custom-Header").
      * @param string $value Header value.
      * @return self
-     * @throws RuntimeException If headers have already been sent.
+     * @throws RuntimeException If headers have already been sent to the client.
      */
     public function setHeader(string $name, string $value): self
     {
@@ -127,7 +128,7 @@ class Response
     }
 
     /**
-     * Removes a previously set header.
+     * Removes a previously set header by name.
      *
      * @param string $name Header name.
      * @return self
@@ -143,9 +144,9 @@ class Response
     }
 
     /**
-     * Returns all headers.
+     * Returns all currently set headers.
      *
-     * @return array All headers.
+     * @return array<string, string>
      */
     public function getHeaders(): array
     {
@@ -153,9 +154,9 @@ class Response
     }
 
     /**
-     * Sets the response content type.
+     * Sets the response Content-Type header.
      *
-     * @param string $contentType MIME type (e.g., text/html, application/json).
+     * @param string $contentType MIME type (e.g., "application/json").
      * @return self
      */
     public function setContentType(string $contentType): self
@@ -165,9 +166,9 @@ class Response
     }
 
     /**
-     * Returns the current content type.
+     * Gets the current Content-Type value.
      *
-     * @return string MIME type.
+     * @return string
      */
     public function getContentType(): string
     {
@@ -175,9 +176,9 @@ class Response
     }
 
     /**
-     * Sets the response body.
+     * Sets the raw response body.
      *
-     * @param string $body Response content.
+     * @param string $body Content to be sent.
      * @return self
      */
     public function setBody(string $body): self
@@ -189,7 +190,7 @@ class Response
     /**
      * Returns the response body.
      *
-     * @return string|null Response body content or null if unset.
+     * @return string|null Raw body content or null if not set.
      */
     public function getBody(): ?string
     {
@@ -197,7 +198,7 @@ class Response
     }
 
     /**
-     * Sets an HTML response body.
+     * Prepares an HTML response with the appropriate Content-Type.
      *
      * @param string $html HTML content.
      * @return self
@@ -210,12 +211,12 @@ class Response
     }
 
     /**
-     * Renders HTML content from a template file.
+     * Renders a template from PHP file and sets it as the response body.
      *
-     * @param string $templatePath Path to the template file.
-     * @param array $data Data variables passed to the template.
+     * @param string $templatePath Absolute path to the template file.
+     * @param array<string, mixed> $data Associative array of variables to extract into the template scope.
      * @return self
-     * @throws RuntimeException If the template cannot be found.
+     * @throws RuntimeException If the template file does not exist.
      */
     public function withTemplate(string $templatePath, array $data = []): self
     {
@@ -232,12 +233,12 @@ class Response
     }
 
     /**
-     * Sets a JSON response body.
+     * Sets a JSON-encoded response body.
      *
-     * @param mixed $data Data to encode as JSON.
-     * @param int $options Encoding options for json_encode (default: JSON_PRETTY_PRINT).
+     * @param mixed $data Data to be encoded.
+     * @param int $options Bitmask of JSON encoding options (default: JSON_PRETTY_PRINT).
      * @return self
-     * @throws RuntimeException If encoding fails.
+     * @throws RuntimeException If JSON encoding fails.
      */
     public function withJson($data, int $options = JSON_PRETTY_PRINT): self
     {
@@ -254,7 +255,7 @@ class Response
     /**
      * Sets a plain text response body.
      *
-     * @param string $text Text content.
+     * @param string $text Plain text content.
      * @return self
      */
     public function withText(string $text): self
@@ -265,12 +266,12 @@ class Response
     }
 
     /**
-     * Performs an HTTP redirect.
+     * Sets up an HTTP redirect.
      *
-     * @param string $url Destination URL.
-     * @param int $statusCode Redirect status code (default: 302).
+     * @param string $url Target URL to redirect to.
+     * @param int $statusCode Redirect status code (typically 301 or 302).
      * @return self
-     * @throws InvalidArgumentException If the status code is not a valid redirect code.
+     * @throws InvalidArgumentException If the status code is not in the 3xx range.
      */
     public function redirect(string $url, int $statusCode = 302): self
     {
@@ -289,11 +290,11 @@ class Response
      *
      * @param string $name Cookie name.
      * @param string $value Cookie value.
-     * @param int $expire Expiration timestamp (0 for session cookie).
-     * @param string $path Cookie path.
-     * @param string $domain Cookie domain.
-     * @param bool $secure If true, send only over HTTPS.
-     * @param bool $httpOnly If true, restrict cookie from JavaScript access.
+     * @param int $expire Expiration time as a Unix timestamp (default: 0 for session).
+     * @param string $path Scope path (default: "/").
+     * @param string $domain Cookie domain scope.
+     * @param bool $secure Whether the cookie should only be transmitted over HTTPS.
+     * @param bool $httpOnly Whether the cookie should be inaccessible to client-side scripts.
      * @return self
      */
     public function withCookie(
@@ -326,9 +327,9 @@ class Response
     }
 
     /**
-     * Sends the response to the client.
+     * Sends headers and the body to the client.
      *
-     * @throws RuntimeException If the response has already been sent or headers cannot be sent.
+     * @throws RuntimeException If response was already sent or headers are already emitted by PHP.
      */
     public function send(): void
     {
@@ -354,9 +355,9 @@ class Response
     }
 
     /**
-     * Returns whether the response has already been sent.
+     * Checks if the response has already been sent.
      *
-     * @return bool True if sent, false otherwise.
+     * @return bool
      */
     public function isSent(): bool
     {
@@ -364,7 +365,7 @@ class Response
     }
 
     /**
-     * Clears headers and body but retains the current status code.
+     * Resets headers and body to default values, preserving the status code.
      *
      * @return self
      * @throws RuntimeException If the response has already been sent.
@@ -382,18 +383,23 @@ class Response
     }
 
     /**
-     * Sets an error response with an optional message and logger callback.
+     * Sets an error response with a custom message and optional logging.
      *
-     * @param int $statusCode HTTP status code.
-     * @param string $message Optional error message.
-     * @param callable|null $logger Optional callback for logging (receives code and message).
+     * @param int $statusCode HTTP error status code.
+     * @param string $message Error message.
+     * @param bool $json Whether to return the error as JSON (default: true).
+     * @param callable|null $logger Callback for logging (params: int $code, string $message).
      * @return self
      */
-    public function withError(int $statusCode, string $message = '', ?callable $logger = null): self
+    public function withError(int $statusCode, string $message = '', bool $json = true, ?callable $logger = null): self
     {
         $this->setStatusCode($statusCode);
         if ($message) {
-            $this->withText($message);
+            if ($json) {
+                $this->withJson(['error' => $message]);
+            } else {
+                $this->withText($message);
+            }
         }
         if ($logger) {
             $logger($statusCode, $message);
@@ -402,11 +408,11 @@ class Response
     }
 
     /**
-     * Sends a file as a downloadable attachment.
+     * Prepares a file download response.
      *
-     * @param string $filePath Absolute file path.
+     * @param string $filePath Full path to the file.
      * @return self
-     * @throws RuntimeException If the file is not readable.
+     * @throws RuntimeException If the file is not found or not readable.
      */
     public function withFile(string $filePath): self
     {
@@ -414,22 +420,23 @@ class Response
             throw new RuntimeException("File not readable: $filePath");
         }
         $this->setHeader('Content-Disposition', 'attachment; filename="' . basename($filePath) . '"');
-        $this->setContentType(Assets::detectMimeType($filePath));
+        $this->setContentType($this->detectMimeType($filePath));
         $this->setBody(file_get_contents($filePath));
         return $this;
     }
 
     /**
-     * Configures Cross-Origin Resource Sharing (CORS) headers.
+     * Configures CORS (Cross-Origin Resource Sharing) headers.
      *
-     * @param array $options Supported keys:
-     *  - origin: Allowed origin(s)
-     *  - methods: Allowed HTTP methods
-     *  - headers: Allowed request headers
-     *  - credentials: Boolean, allow credentials
-     *  - max_age: Cache duration in seconds
+     * @param array{
+     * origin?: string|string[],
+     * methods?: string|string[],
+     * headers?: string|string[],
+     * credentials?: bool,
+     * max_age?: int
+     * } $options CORS configuration options.
      * @return self
-     * @throws RuntimeException If called after the response has been sent.
+     * @throws RuntimeException If headers have already been sent.
      */
     public function setCORS(array $options): self
     {
@@ -461,5 +468,40 @@ class Response
         }
 
         return $this;
+    }
+
+    /**
+     * Detects the MIME type of a file.
+     *
+     * @param string $filePath Path to the file.
+     * @return string Detected MIME type.
+     */
+    private function detectMimeType(string $filePath): string
+    {
+        // 1. Try native PHP detection
+        if (function_exists('mime_content_type')) {
+            $mime = @mime_content_type($filePath);
+            if ($mime) {
+                return $mime;
+            }
+        }
+
+        // 2. Simple fallback for common types
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        return match ($extension) {
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'json' => 'application/json',
+            'xml' => 'application/xml',
+            'txt' => 'text/plain',
+            'html', 'htm' => 'text/html',
+            'pdf' => 'application/pdf',
+            'zip' => 'application/zip',
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            default => 'application/octet-stream',
+        };
     }
 }
