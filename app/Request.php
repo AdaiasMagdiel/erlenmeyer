@@ -70,6 +70,8 @@ class Request
      */
     private array $server;
 
+    private const DOT_PLACEHOLDER = '_w_ERLEN_DOT_RPL_w_';
+
     /**
      * Creates a new Request instance.
      *
@@ -156,79 +158,63 @@ class Request
     }
 
     /**
-     * Initializes query string parameters.
-     * Ensures preservation of dots (.) in parameter names, which PHP would normally
-     * convert to underscores (_).
-     *
-     * @param array $get Query string parameters ($_GET).
+     * Initializes query string parameters keeping dots in keys.
+     * 
+     * PHP natively converts dots in keys to underscores. To fix this, 
+     * we parse the raw QUERY_STRING, temporarily protecting the dots 
+     * inside keys, parsing, and then restoring them.
      */
     private function initQueryParams(array $get): void
     {
-        $this->queryParams = [];
-
-        // 1. Prefer values derived directly from QUERY_STRING (preserves dots)
         $queryString = $this->server['QUERY_STRING'] ?? '';
 
-        if ($queryString !== '') {
-            // Apply temporary substitutions to preserve dots and spaces during parse_str
-            $queryString = str_replace([".", " "], ["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], $queryString);
-
-            parse_str($queryString, $parsedWithDots);
-
-            foreach ($parsedWithDots as $key => $value) {
-                // Restore original characters in parameter names
-                $key = str_replace(["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], [".", " "], $key);
-
-                // Restore original characters in parameter values
-                $value = $this->restorePlaceholders($value);
-
-                $this->queryParams[$key] = $this->sanitizeValue($value);
-            }
+        if ($queryString === '') {
+            $this->queryParams = [];
+            return;
         }
 
-        // 2. Incorporate parameters from $get (used primarily in test scenarios)
-        // If a version with dots is already present, do not overwrite it with an underscore variant.
-        foreach ($get as $key => $value) {
-            $keyWithDot = str_replace('_', '.', $key);
+        // 1. Protect dots ONLY in keys (before the first '=' of each pair)
+        // Regex logic:
+        // (^|&)       -> Start of string or '&' separator
+        // ([^=&]+)    -> The Key (any char except '=' or '&')
+        // (?==)       -> Lookahead: must be followed by '='
+        $safeQueryString = preg_replace_callback(
+            '/(^|&)([^=&]+)(?==)/',
+            function ($matches) {
+                // $matches[1] is the separator (& or empty)
+                // $matches[2] is the key
+                return $matches[1] . str_replace('.', self::DOT_PLACEHOLDER, $matches[2]);
+            },
+            $queryString
+        );
 
-            // Skip if the parameter with dots is already defined
-            if (isset($this->queryParams[$keyWithDot])) {
-                continue;
-            }
+        // 2. Parse using PHP's native logic (handles arrays like data[key]=val)
+        parse_str($safeQueryString, $parsed);
 
-            // Otherwise, accept the key as provided
-            $this->queryParams[$key] = $this->sanitizeValue($value);
-        }
+        // 3. Restore dots in the resulting array keys
+        $this->queryParams = $this->normalizeParamsKeys($parsed);
     }
 
     /**
-     * Restores placeholders in parameter values (supports nested arrays).
-     *
-     * @param mixed $value The value to restore
-     * @return mixed The restored value
+     * Recursively restores dots in array keys.
      */
-    private function restorePlaceholders($value): mixed
+    private function normalizeParamsKeys(array $data): array
     {
-        if (is_array($value)) {
-            return array_map(fn($v) => $this->restorePlaceholders($v), $value);
+        $normalized = [];
+
+        foreach ($data as $key => $value) {
+            // Restore the dot in the key if present
+            $newKey = str_replace(self::DOT_PLACEHOLDER, '.', (string) $key);
+
+            // Recurse if the value is an array (nested params)
+            if (is_array($value)) {
+                $value = $this->normalizeParamsKeys($value);
+            }
+
+            $normalized[$newKey] = $value;
         }
 
-        return str_replace(["__Z4k9T2c8N3__", "__T8B3k0W9r1__"], [".", " "], (string) $value);
-    }
-
-    /**
-     * Sanitizes a value for safe output.
-     *
-     * @param mixed $value The value to sanitize
-     * @return mixed The sanitized value
-     */
-    private function sanitizeValue($value): mixed
-    {
-        if (is_array($value)) {
-            return array_map(fn($v) => $this->sanitizeValue($v), $value);
-        }
-
-        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        return $normalized;
     }
 
 
@@ -239,7 +225,7 @@ class Request
      */
     private function initFormData(array $post): void
     {
-        $this->formData = array_map(fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'), $post);
+        $this->formData = $post;
     }
 
     /**
