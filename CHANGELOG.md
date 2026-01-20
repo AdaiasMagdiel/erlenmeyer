@@ -2,6 +2,51 @@
 
 A record of all notable changes to **Erlenmeyer**.
 
+## [5.0.0] – 2026-01-20
+
+### ⚠️ **BREAKING CHANGES**
+
+- **Security: Strict Logging Failures**
+  - `FileLogger` now throws a `RuntimeException` if the log directory is not writable.
+  - Previously, it failed silently using the `@` operator.
+  - _Action Required:_ Ensure file permissions are correct in your deployment environment.
+
+- **Security: Output Sanitization**
+  - Exception messages in the default error handler are now HTML-escaped (`htmlspecialchars`).
+  - _Impact:_ HTML tags in exception messages will now be rendered as text instead of executed/displayed as HTML.
+
+- **Architecture: Core Refactor**
+  - The `App` class has been dismantled to follow the Single Responsibility Principle.
+  - Routing logic moved to `AdaiasMagdiel\Erlenmeyer\Router`.
+  - Exception handling logic moved to `AdaiasMagdiel\Erlenmeyer\Exception\Handler`.
+  - `Assets` class has been removed. Static asset serving should be handled by the web server (Nginx/Apache).
+
+### 🚀 **New Features**
+
+- **New Router Component**
+  - Introduced `AdaiasMagdiel\Erlenmeyer\Router` to handle route registration and matching independently.
+
+- **New Exception Handler Component**
+  - Introduced `AdaiasMagdiel\Erlenmeyer\Exception\Handler` for granular exception management.
+
+- **Session Security**
+  - Added `Session::regenerate(bool $deleteOldSession = true)` method.
+  - Provides protection against Session Fixation attacks.
+
+### 🛡️ **Security Improvements**
+
+- **XSS Prevention**: Default error pages now sanitize output to prevent Cross-Site Scripting.
+- **Session Fixation**: Added mechanisms to easily regenerate session IDs after privilege changes.
+
+### 🔧 **Technical Improvements**
+
+- **Codebase Flattening**: Moved key components (`Router`, `ExceptionHandler`) to the root namespace/directory for better simplicity.
+- **Standardized URI Normalization**: Both `Router` and `App` now consistently remove trailing slashes from URIs to ensure reliable route matching.
+- **Improved PHPDocs**: All core classes received updated, professional English documentation blocks.
+- **Dependency Updates**: Added explicit requirements for `ext-json` and `ext-mbstring` in `composer.json`.
+
+---
+
 ## [4.2.6] – 2025-12-20
 
 ### 🐛 **Bug Fixes**
@@ -118,13 +163,11 @@ A record of all notable changes to **Erlenmeyer**.
 ### 🚀 **New Features**
 
 - **`getJson()` Method for Response**
-
   - Added new `getJson()` method to the `Response` class for easier JSON response data retrieval
   - Simplifies JSON response parsing in tests and HTTP clients
   - Usage example: `$response->getJson()` returns response body as array/object
 
 - **`NullLogger` Implementation**
-
   - New `NullLogger` class implementing `LoggerInterface` without performing any logging
   - Useful for testing environments or when logging is unnecessary
   - Implements all required interface methods with null behavior
@@ -138,14 +181,12 @@ A record of all notable changes to **Erlenmeyer**.
 ### 🔧 **Improvements & Refactoring**
 
 - **Complete Refactoring for `Throwable` Support**
-
   - Replacement of `Exception` with `Throwable` throughout the codebase for broader error handling
   - `LoggerInterface::logException()` now accepts `Throwable` instead of just `Exception`
   - `App` and error handlers now capture both PHP `Exception` and `Error` types
   - Added `register_shutdown_function()` for graceful handling of fatal PHP errors
 
 - **`ConsoleLogger` Improvements**
-
   - Made `$excludedLogLevels` property private to encapsulate exclusion logic
   - Added `validateExcludedLogLevels()` method to validate excluded log levels
   - New helper methods: `shouldSkipLevel()`, `formatExceptionMessage()`, `formatStackTrace()`
@@ -164,7 +205,6 @@ A record of all notable changes to **Erlenmeyer**.
 ### ⚠️ **BREAKING CHANGES**
 
 - **`LoggerInterface::logException()` signature change**
-
   - Old: `logException(Exception $exception, ...)`
   - New: `logException(Throwable $throwable, ...)`
   - **Action required:** Update any custom logger implementations to accept `Throwable` instead of `Exception`
@@ -192,7 +232,6 @@ A record of all notable changes to **Erlenmeyer**.
 ### ⚙️ **Core**
 
 - **Unified Throwable Handling**
-
   - All exception handling in the framework (`App`) now supports **any** `Throwable` type — including both traditional `Exception` and PHP `Error` classes.
   - Replaces previous `Exception`-only logic, ensuring consistent capture of fatal errors, parse errors, and type errors.
   - Default handler updated to:
@@ -206,19 +245,15 @@ A record of all notable changes to **Erlenmeyer**.
     ```
 
 - **Improved Runtime Resilience**
-
   - Added `register_shutdown_function()` to gracefully handle **fatal PHP errors** that are not catchable (e.g. `E_ERROR`, `E_PARSE`, `E_COMPILE_ERROR`).
   - Integrated into `App::run()`, this ensures the framework responds with a `500 Internal Server Error` even when a fatal error occurs outside the main exception flow.
 
 - **Safer Error Handling**
-
   - Added `ErrorException` mapping inside `set_error_handler()` to unify PHP runtime errors and exceptions.
   - Guarantees consistent logging through the `LoggerInterface` implementation, even for non-recoverable runtime issues.
 
 - **Cleaner Exception Validation**
-
   - Updated internal validation in `setExceptionHandler()`:
-
     - Now properly supports both `class_exists()` and `interface_exists()` to handle `Throwable` (which is an interface, not a class).
     - Simplified with `is_a($throwableClass, Throwable::class, true)` to verify valid error/exception classes more safely.
 
@@ -228,7 +263,6 @@ A record of all notable changes to **Erlenmeyer**.
 
 - All runtime and error events in `App::run()` are now properly logged before being re-thrown or displayed.
 - Adds detailed logs for:
-
   - PHP runtime errors.
   - Fatal shutdown exceptions.
   - Registration of custom exception handlers.
@@ -242,7 +276,6 @@ A record of all notable changes to **Erlenmeyer**.
 ### 🧰 **Other Changes**
 
 - **composer.json**
-
   - Added `"version": "v4.1.0"` for explicit release tracking.
 
 ### ✅ **Tests**
@@ -287,7 +320,6 @@ This patch ensures that HTTP headers are now parsed, stored, and retrieved in a 
 ### 🌐 **Request Class**
 
 - **Normalized header handling**
-
   - All headers are now stored in lowercase form (e.g. `http_authorization` → `authorization`).
   - Methods `getHeader()` and `hasHeader()` were updated to perform **case-insensitive lookups**.
   - Fixes scenarios where accessing headers like `"Authorization"` vs `"authorization"` returned `null` inconsistently.
@@ -297,7 +329,6 @@ This patch ensures that HTTP headers are now parsed, stored, and retrieved in a 
 ### 🧪 **Testing**
 
 - Added dedicated test case **`request getHeader is case-insensitive`** verifying:
-
   - Case-insensitive retrieval for headers such as `Authorization` and `Content-Type`.
   - Consistent `hasHeader()` behavior across mixed-case queries.
   - Ensures backward compatibility for all header access patterns.
@@ -313,13 +344,11 @@ This patch release focuses on making the framework’s runtime (`App::run()`) mo
 ### ⚙️ **Core (`App`)**
 
 - **Improved `run()` execution flow**
-
   - Now verifies if a returned `Response` has already been sent before calling `send()` — preventing **duplicate output**.
   - When an **exception handler** returns a `Response`, it too is checked for the `isSent()` state to avoid multiple sends.
   - If no handler is defined, the app logs the unhandled exception and emits a **500 Internal Server Error** message safely.
 
 - **Enhanced safety for unhandled exceptions**
-
   - Guarantees graceful degradation instead of silent output or partial responses.
   - Handlers for subclassed exceptions (e.g. `RuntimeException` extending `Exception`) are now correctly resolved.
 
@@ -328,7 +357,6 @@ This patch release focuses on making the framework’s runtime (`App::run()`) mo
 Expanded test coverage to verify the runtime and middleware pipeline:
 
 - **`AppTest`** additions:
-
   - ✅ Tests `App::run()` for normal routes, exceptions, and 404 fallbacks.
   - ✅ Confirms `send()` is not called twice when a response is already sent.
   - ✅ Verifies correct resolution of subclass exception handlers.
@@ -339,11 +367,9 @@ Expanded test coverage to verify the runtime and middleware pipeline:
 ### 🧰 **Configuration & Housekeeping**
 
 - **`.gitignore`**
-
   - Added `.coverage/` directory to ignore code-coverage reports.
 
 - **`phpunit.xml`**
-
   - Simplified source inclusion (only `app/` directory) to streamline coverage analysis.
 
 ---
@@ -395,7 +421,6 @@ This release marks **Erlenmeyer’s transformation** into a fully testable, modu
 #### **Response**
 
 - Modernized fluent API with strong validation and chainable methods:
-
   - `withHtml()`, `withJson()`, `withText()`, `redirect()`, `withFile()`
 
 - Added `setCORS()` helper with full CORS configuration support.
@@ -408,7 +433,6 @@ This release marks **Erlenmeyer’s transformation** into a fully testable, modu
 #### **ConsoleLogger**
 
 - Added:
-
   - Configurable excluded log levels.
   - HTML-escaped messages to prevent injection.
   - Strict validation of message content.
@@ -428,7 +452,6 @@ This release marks **Erlenmeyer’s transformation** into a fully testable, modu
 ### 🧩 **Session Management**
 
 - Simplified and fully tested:
-
   - Auto-started session handling.
   - CRUD methods: `get()`, `set()`, `remove()`, `has()`.
   - Flash message support (`flash()`, `getFlash()`, `hasFlash()`).
@@ -437,7 +460,6 @@ This release marks **Erlenmeyer’s transformation** into a fully testable, modu
 ### 📦 **Assets Management**
 
 - Stronger sanitization and security:
-
   - Prevents directory traversal attacks.
   - Returns `false` for missing or invalid files.
 
@@ -453,7 +475,6 @@ A complete rewrite of the testing layer using **PestPHP** and **ErlenClient**.
 
 - New internal HTTP test client that interacts directly with `App::handle()`.
 - Supports:
-
   - JSON, form, file, and raw body payloads.
   - All HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`, etc.).
   - Header injection and middleware testing.
@@ -492,9 +513,7 @@ A complete rewrite of the testing layer using **PestPHP** and **ErlenClient**.
 ### ⚙️ **Enhanced**
 
 - **`ConsoleLogger`** received a major internal upgrade:
-
   - ✅ **Configurable Log Filtering**
-
     - Added support for excluding specific log levels using the constructor:
 
       ```php
@@ -504,31 +523,25 @@ A complete rewrite of the testing layer using **PestPHP** and **ErlenClient**.
     - Throws an exception if any excluded level is not an instance of `LogLevel`.
 
   - ✅ **Safer Exception Logging**
-
     - Exception messages are now HTML-escaped with `htmlspecialchars()` to prevent **log injection**.
     - Includes clearer contextual information:
-
       - Request method and URI (or “No request context”).
       - Fully formatted stack trace with indentation.
 
   - ✅ **Validation & Error Handling**
-
     - Throws `InvalidArgumentException` when attempting to log an empty message.
     - Skips messages for excluded log levels.
     - Fallback output to `STDERR` if `error_log()` fails, ensuring logs are never silently lost.
 
   - ✅ **Timestamp Consistency**
-
     - Introduced constant `TIMESTAMP_FORMAT = 'Y-m-d H:i:s'` for standardized log timestamps.
 
   - ✅ **Cleaner Output**
-
     - Enhanced readability of stack traces with `formatStackTrace()` helper.
 
 ### 🧾 **Documentation**
 
 - **README.md**:
-
   - Updated test command reference from:
 
     ```bash
@@ -553,33 +566,25 @@ A complete rewrite of the testing layer using **PestPHP** and **ErlenClient**.
 
 - **`tests/Feature/RequestTest.php`** — a full-coverage suite validating every aspect of the `AdaiasMagdiel\Erlenmeyer\Request` component.
   Covers more than **220 lines** of precise behavioral tests, including:
-
   - **Initialization & Defaults**
-
     - Verifies method, URI, query params, and empty defaults.
 
   - **Header Handling**
-
     - Normalization of `HTTP_` headers (e.g., `Accept`, `X-Custom`).
     - Case-insensitive access via `getHeader()`, `hasHeader()`.
 
   - **HTTP Method Overrides**
-
     - Confirms `_method` POST override behavior for `PUT` and `DELETE`.
 
   - **URI Sanitization**
-
     - Proper query stripping and fallback to `'/'` when missing.
 
   - **Query & Form Data Sanitization**
-
     - Ensures HTML entities are escaped to prevent XSS.
     - Tests default values for missing parameters.
 
   - **JSON Parsing**
-
     - Validates `getJson()` with combinations of:
-
       - Valid and invalid JSON.
       - Correct and incorrect `Content-Type`.
       - Strict and lenient (`ignoreContentType`) modes.
@@ -588,19 +593,15 @@ A complete rewrite of the testing layer using **PestPHP** and **ErlenClient**.
     - Supports both associative (`assoc = true`) and object (`assoc = false`) decoding.
 
   - **Error Reporting**
-
     - Checks `getJsonError()` content for invalid JSON input.
 
   - **Raw Body Handling**
-
     - Confirms reading from `php://input` and custom streams.
 
   - **File Uploads**
-
     - Validates single and multi-file handling, including indexing and missing keys.
 
   - **Client Metadata**
-
     - IP address resolution (including `REMOTE_ADDR` and `X-Forwarded-For`).
     - AJAX detection via `X-Requested-With`.
     - Secure request detection via `HTTPS` flag or port 443.
@@ -624,7 +625,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### ⚙️ **Core Improvements**
 
 - **Request JSON Parsing Upgraded**
-
   - `Request::getJson()` now supports an optional parameter:
 
     ```php
@@ -635,7 +635,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
     Invalid JSON returns `null` instead of throwing.
   - When `$ignoreContentType` is `false`, an explicit exception is thrown if `Content-Type` isn’t `application/json`.
   - Added more accurate exception messages:
-
     - “Invalid Content-Type …”
     - “Failed to decode JSON: …”
 
@@ -644,10 +643,8 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🧩 **Testing Framework Refactor**
 
 - Introduced a full **`RequestSimulator`** utility replacing the old global helper functions:
-
   - Centralizes GET/POST/PUT/DELETE simulation for tests.
   - Provides new helpers for JSON scenarios:
-
     - `postJson()`, `putJson()`, `deleteJson()`
 
   - Accurately emulates `php://input` via a custom **`MockPhpInputStream`** class — enabling reliable testing of raw request bodies.
@@ -655,18 +652,15 @@ This suite provides **complete behavioral assurance** for the request-parsing la
   - Restores the native `php` stream wrapper after each test to prevent side effects.
 
 - All feature tests updated to use the new class:
-
   - e.g. `RequestSimulator::get($app, '/route')`
   - Supports passing raw JSON strings, server headers, and uploaded files.
 
 ### ✅ **New Test Coverage**
 
 - Added extensive tests for:
-
   - `OPTIONS` and `PATCH` routes.
   - Middlewares that **halt execution**.
   - JSON body handling across `POST` and `PUT` with:
-
     - Valid JSON
     - Invalid JSON
     - Empty bodies
@@ -689,26 +683,22 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🧱 **Core Changes**
 
 - **Renamed and modularized the logging system:**
-
   - `DefaultLogger` has been **renamed to** `FileLogger`.
   - Introduced **`ConsoleLogger`** — a new logger that writes to the console (via `error_log()`), ideal for CLI or debugging environments.
   - `App` now defaults to a `FileLogger` (without a log directory) when no logger is provided.
 
 - Both loggers implement the shared `LoggerInterface` and support the unified `LogLevel` enum.
 - The logging subsystem now supports **pluggable strategies**:
-
   - Developers can inject either `FileLogger`, `ConsoleLogger`, or a custom logger.
   - `FileLogger` still features 3 MB rotation with 5 historical files kept.
 
 ### ✨ **Added**
 
 - **`.gitattributes`** file to clean up Composer package exports:
-
   - Excludes `/tests`, `/.gitignore`, and `/phpunit.xml` from distributed archives.
   - Ensures production builds remain lightweight.
 
 - **New `ConsoleLogger`**:
-
   - Writes logs directly to the terminal or system error log.
   - No setup required — excellent for debugging, local development, or command-line tools.
   - Fully compatible with `App` via dependency injection:
@@ -721,7 +711,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🧩 **Documentation**
 
 - Expanded the **README.md** logging section:
-
   - Rewritten as **“Using Loggers”** — covers both `FileLogger` and `ConsoleLogger`.
   - Added examples and practical use cases for each.
   - Updated “Important Note” to clarify that the default logger is now `FileLogger`.
@@ -737,7 +726,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🔧 **Changed**
 
 - **Breaking change:**
-
   - The class `AdaiasMagdiel\Erlenmeyer\Logging\DefaultLogger` has been **removed** — replaced by `FileLogger`.
     Any reference to `DefaultLogger` must now be updated:
 
@@ -750,7 +738,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 
 - All feature tests adjusted to validate `FileLogger` behavior.
 - Logging tests confirmed that:
-
   - Log files are created and rotated correctly.
   - Exceptions are logged with request context.
   - Console logs appear correctly through `error_log`.
@@ -762,18 +749,14 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🧱 **Core Refactor: Logging System Overhaul**
 
 - Introduced a brand-new **logging architecture** with interface-based design:
-
   - **`LoggerInterface`** defines the contract for all loggers, including:
-
     - `log(LogLevel $level, string $message): void`
     - `logException(Exception $e, ?Request $request = null): void`
 
   - **`LogLevel` enum** provides standardized log levels:
-
     - `INFO`, `DEBUG`, `WARNING`, `ERROR`, `CRITICAL`
 
   - **`DefaultLogger`** replaces the old file-based log methods inside `App`:
-
     - Logs messages to a file (`info.log`) with automatic rotation (max 3 MB, 5 rotated files kept).
     - Creates directories automatically.
     - Supports structured exception logging with request context.
@@ -790,7 +773,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### ✨ **Added**
 
 - Comprehensive `README.md` documentation section explaining:
-
   - How to use the `DefaultLogger`.
   - Supported log levels and when to use them.
   - How to implement a **custom logger** by extending `LoggerInterface`.
@@ -801,11 +783,9 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 - Replaced all internal `$this->logMessage()` and `$this->logError()` calls in `App` with `LoggerInterface` usage.
 - Removed legacy `logDir`, `logFile`, and manual rotation logic from `App`.
 - Every lifecycle stage now produces structured log entries:
-
   - App initialization, asset validation, route registration, middleware execution, errors, and unhandled exceptions.
 
 - Tests updated:
-
   - New test cases validate logging behavior using `DefaultLogger`.
   - All old log-directory-based tests migrated to logger-based structure.
 
@@ -825,7 +805,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 - **Completely rewritten `README.md`** to serve as a detailed, structured technical reference.
 - Included badges for **license**, **Composer package**, and **GitHub repository**.
 - Added **table of contents** and organized sections:
-
   - Introduction, Features, Requirements, Installation
   - Getting Started & Routing examples
   - Middleware, Error Handling, and Asset Management
@@ -837,7 +816,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 
 - Examples rewritten for clarity and modern PHP style (using typed class imports).
 - Added detailed code samples for:
-
   - Routing (`GET`, `POST`, `PUT`, etc.)
   - Session and Flash usage
   - Redirects, CORS, and Middleware chaining
@@ -852,30 +830,23 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🚀 Added
 
 - **Expanded HTTP Method Support**
-
   - Introduced native helpers in `App` for every HTTP method:
-
     - `put()`, `delete()`, `patch()`, `options()`, `head()`
 
   - Added:
-
     - `any()` — registers a route for **all** HTTP methods.
     - `match([...])` — registers a route for multiple specific methods.
 
 - **Redirect Handling**
-
   - Simplified redirect logic: now uses `Response::redirect()` internally with proper 301/302 status codes.
 
 - **Improved `Response` class**
-
   - Added `updateFunctions()` static method to override PHP internals such as `header()`.
     Useful for dependency injection and testing.
   - Introduced strict typing for all properties (`int`, `array`, `string|null`, etc.).
 
 - **Enhanced Test Suite**
-
   - Expanded functional tests to cover:
-
     - Static routes, dynamic parameters, and middleware behavior.
     - All new HTTP methods and the new `any()` / `match()` helpers.
     - File upload handling (`Request::getFile()`).
@@ -884,7 +855,6 @@ This suite provides **complete behavioral assurance** for the request-parsing la
     - CORS headers and redirects.
 
   - Upgraded `tests/Pest.php` utilities to simulate:
-
     - PUT, DELETE, PATCH requests.
     - File uploads and richer server environment variables.
     - Custom header interception via the new `Response::updateFunctions()`.
@@ -907,17 +877,14 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### ✨ Added
 
 - **Session Management System**
-
   - Introduced a new `Session` class for safe, static session handling.
   - Automatically starts the PHP session when the `App` instance is created.
   - Provides a clean API for working with session data:
-
     - `Session::get($key, $default)` – retrieve a value.
     - `Session::set($key, $value)` – store a value.
     - `Session::has($key)` / `Session::remove($key)` – check or delete keys.
 
   - **Flash messages support**:
-
     - `Session::flash($key, $value)` – store data for one request cycle.
     - `Session::getFlash($key)` – retrieve and remove flash data automatically.
     - `Session::hasFlash($key)` – check if a flash message exists.
@@ -938,16 +905,13 @@ This suite provides **complete behavioral assurance** for the request-parsing la
 ### 🧪 Added
 
 - **Initial automated test suite**
-
   - Introduced `phpunit.xml` configuration for PHPUnit.
   - Added integration with **PestPHP** as a higher-level testing interface.
   - Created `tests/Feature/AppTest.php` containing basic smoke tests for:
-
     - Application instantiation.
     - Log directory creation and write verification.
 
   - Added `tests/Pest.php` utilities providing helper functions for simulating HTTP requests:
-
     - `get()`, `post()`, `put()`, `delete()`, and a core `simulateRequest()` function.
 
   - Added a base `tests/TestCase.php` extending PHPUnit’s `TestCase` class.
@@ -967,17 +931,13 @@ Version 2.0.0 introduces a cleaner, more modular architecture for the `App` core
 ### ✨ Added
 
 - **Improved `Assets` class**
-
   - Now validates both the asset directory and route upon construction, throwing `InvalidArgumentException` when misconfigured.
   - Added:
-
     - `getAssetsDirectory()` – safely exposes the absolute path.
     - `getAssetsRoute()` – returns a normalized route string with a leading `/`.
 
 - **Flexible dependency injection**
-
   - The `App` constructor now accepts an optional pre-built `Assets` instance.
-
     - Pass `null` to disable static asset handling entirely.
 
   - The constructor also accepts an optional `$logDir` to customize or disable logging.
@@ -985,18 +945,15 @@ Version 2.0.0 introduces a cleaner, more modular architecture for the `App` core
 ### 🧱 Changed
 
 - **App initialization**
-
   - Replaced `($assetsDir, $assetsRoute, $autoServeAssets)` parameters with a single optional `Assets` object.
   - Assets validation is now delegated to the `Assets` class itself.
   - Updated default log setup to create the directory only when `$logDir` is defined.
 
 - **Type safety**
-
   - `$assets` is now declared as `?Assets` (nullable).
   - Improved error messages and centralized route validation.
 
 - **Fallback behavior**
-
   - The fallback route now checks `$this->assets` before attempting to serve static files, enabling full operation even when assets are disabled.
 
 ### 💥 Breaking Changes
@@ -1026,13 +983,11 @@ Version 2.0.0 introduces a cleaner, more modular architecture for the `App` core
 ### 🧹 Improved
 
 - **Optional logging directory**
-
   - `$logDir` can now be set to `null` to **disable logging entirely**.
   - The constructor now accepts a nullable `$logDir` (`?string`) instead of a required string.
   - When `$logDir` is `null`, all log-writing operations (`logMessage`, `logError`, etc.) gracefully return without writing files.
 
 - **Safer initialization**
-
   - Directory creation (`mkdir`) now runs only if `$logDir` is defined.
   - `$logFile` is initialized conditionally—only if a valid directory path exists.
 
@@ -1048,10 +1003,8 @@ Version 2.0.0 introduces a cleaner, more modular architecture for the `App` core
 ### 🧱 Changed
 
 - **Refined logging configuration**
-
   - Introduced a dedicated `$logDir` property for flexible log directory management.
   - Default log directory moved from a hard-coded path (`__DIR__/logs/error.log`) to a dynamic structure:
-
     - `$logDir` → base logs directory
     - `$logFile` → points to `$logDir/info.log`
 
@@ -1061,7 +1014,6 @@ Version 2.0.0 introduces a cleaner, more modular architecture for the `App` core
 ### 🧹 Internal
 
 - Simplified initialization flow:
-
   - Removed redundant fixed paths and unified log path assignment logic.
   - Adjusted internal logging initialization to work seamlessly with `logMessage()` from v1.0.1.
 
@@ -1076,27 +1028,22 @@ This release adds an advanced logging subsystem with rotation, size control, con
 ### ✨ Added
 
 - **Structured logging system**
-
   - Introduced `logMessage()` for unified log output with timestamps and levels (`INFO`, `ERROR`, `WARNING`).
   - Added automatic **log rotation** via `rotateLogFile()`:
-
     - Maximum file size — 3 MB (`MAX_LOG_SIZE`).
     - Keeps up to 5 rotated log files (`MAX_LOG_FILES`).
 
   - Ensures that a `/logs` directory exists on initialization.
 
 - **Enhanced exception logging**
-
   - `logError()` now accepts an optional `Request` context and logs HTTP method + URI along with stack traces.
   - Logged output includes timestamps, log level, and formatted trace information.
 
 - **Application lifecycle logging**
-
   - Logs startup, route registration, middleware application, redirects, 404 handling, and shutdown events.
   - Captures PHP errors through the error handler and records severity, file, and line.
 
 - **Informational events**
-
   - Added `INFO`-level messages for route registration, redirects, fallback handling, and middleware execution.
   - Added `WARNING` and `ERROR`-level messages for invalid configurations or runtime issues.
 
@@ -1104,7 +1051,6 @@ This release adds an advanced logging subsystem with rotation, size control, con
 
 - `logError()` rewritten to use the new `logMessage()` API and to enforce rotation.
 - Added safety checks and error messages before throwing exceptions for:
-
   - Invalid assets directories or routes.
   - Invalid exception handler classes.
   - Repeated application executions.
@@ -1114,17 +1060,14 @@ This release adds an advanced logging subsystem with rotation, size control, con
 ### 🧹 Internal
 
 - New class constants:
-
   - `MAX_LOG_SIZE = 3 MB`
   - `MAX_LOG_FILES = 5`
 
 - Added utility methods:
-
   - `rotateLogFile()` – rotates and renames old logs.
   - `logMessage()` – central logging function used throughout the framework.
 
 - Added detailed `INFO` logs in:
-
   - `__construct()`, `route()`, `redirect()`, `set404Handler()`, `addMiddleware()`,
     `run()`, `parseRoute()`, `dispatchRoute()`, and `applyMiddlewares()`.
 
@@ -1139,79 +1082,63 @@ A complete refactor of the core `App` class, transforming Erlenmeyer from a mini
 ### ✨ Added
 
 - **Exception handling system**:
-
   - Introduced `setExceptionHandler()` and `getExceptionHandler()` for registering custom exception types and handlers.
   - Added default handler for uncaught exceptions that logs errors and returns a 500 response.
 
 - **Error logging**:
-
   - Added internal `logError()` method to write detailed exception traces to `logs/error.log`.
 
 - **Custom routing engine** (removed dependency on `Hermes\Router`):
-
   - The `App` class now includes its own routing system with pattern matching for dynamic parameters (`/users/[id]`).
   - New private methods:
-
     - `parseRoute()` – Converts route patterns into regex.
     - `dispatchRoute()` – Handles request routing internally.
     - `handleFallbackOrNotFound()` – Manages fallback and 404 responses.
 
 - **Redirect system**:
-
   - Added `redirect()` method to define permanent (`301`) or temporary (`302`) redirects between routes.
 
 - **Internal helpers**:
-
   - Added `getMethod()` and `getUri()` methods for cleaner request dispatching.
 
 - **Better 404 handling**:
-
   - Default 404 handler now supports `$params` to stay consistent with other route callbacks.
 
 ### 🧱 Changed
 
 - **Router dependency removed**:
-
   - `use AdaiasMagdiel\Hermes\Router;` and all references to it have been eliminated.
   - Routing and dispatching are now handled internally.
 
 - **Middleware system enhanced**:
-
   - Middleware wrapping logic improved with cleaner closure composition.
   - Global and route-specific middlewares now apply uniformly to 404 and fallback handlers.
 
 - **Assets initialization**:
-
   - Asset directory and route validation now occur **only if** `autoServeAssets` is enabled.
 
 - **Default exception handling**:
-
   - Unhandled PHP errors are now converted into `ErrorException`s.
   - Generic fallback for unhandled exceptions now logs the error and returns a minimal HTML error message.
 
 - **Code clarity**:
-
   - Added detailed docblocks for every public and private method.
   - Standardized naming conventions and inline comments for maintainability.
 
 ### 🧹 Minor Fixes
 
 - **Request class**:
-
   - Fixed potential `null` handling for `User-Agent` header — now sanitized only if not null.
 
 - **404 Handling consistency**:
-
   - 404 and fallback handlers now properly create a `$params` (`stdClass`) object before execution.
 
 ### ⚙️ Internal
 
 - Added new private class properties for better structure:
-
   - `$routes`, `$exceptionHandlers`, `$globalMiddlewares`, `$routePattern`, `$paramPattern`, `$logFile`.
 
 - Improved internal safety and validation in multiple areas:
-
   - Stricter method normalization (`GET`, `POST`, etc.).
   - Safer file path resolution for assets.
   - Defensive programming around route parsing and parameter extraction.
@@ -1237,7 +1164,6 @@ A complete refactor of the core `App` class, transforming Erlenmeyer from a mini
 - **Dynamic route parameters** support (e.g., `/user/[id]`, `/blog/[category]/[slug]`).
 - New `autoServeAssets` option in the `App` constructor to control automatic asset serving.
 - Comprehensive and restructured `README.md` documentation:
-
   - New sections: _Why Erlenmeyer_, _Dynamic Routes_, _Using Templates_, _Advanced Usage_, _Error Handling_, and _Contributing_.
   - Complete examples for Apache/Nginx configuration, middlewares, and static asset management.
 
