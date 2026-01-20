@@ -1,3 +1,18 @@
-/tests export-ignore
-/.gitignore export-ignore
-/phpunit.xml export-ignore
+# Documentation and static site
+/docs                         export-ignore
+/site                         export-ignore
+/mkdocs.yml                   export-ignore
+
+# Tests and development tools
+/tests                        export-ignore
+/phpunit.xml                  export-ignore
+/phpstan.neon                 export-ignore
+/.php-cs-fixer.dist.php       export-ignore
+
+# CI/CD and Git configuration
+/.github                      export-ignore
+/.gitignore                   export-ignore
+/.gitattributes               export-ignore
+
+# Legal and changelog
+/CHANGELOG.md                 export-ignore
