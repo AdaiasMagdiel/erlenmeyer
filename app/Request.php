@@ -275,7 +275,7 @@ class Request
      */
     private function initClientInfo(): void
     {
-        $this->ip = filter_var($this->server['REMOTE_ADDR'] ?? null, FILTER_VALIDATE_IP);
+        $this->ip = filter_var($this->server['REMOTE_ADDR'] ?? null, FILTER_VALIDATE_IP) ?: null;
 
         if (isset($this->server['HTTP_X_FORWARDED_FOR'])) {
             $forwarded = $this->server['HTTP_X_FORWARDED_FOR'];
