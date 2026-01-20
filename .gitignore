@@ -4,3 +4,4 @@ vendor/
 .venv/
 *.bat
 index.php
+repomix*
