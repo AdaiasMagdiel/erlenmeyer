@@ -75,9 +75,10 @@ class App
 		});
 
 		$this->setExceptionHandler(Throwable::class, function (Request $req, Response $res, Throwable $e) {
+			$msg = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
 			$res
 				->setStatusCode(500)
-				->withHtml("<h1>500 Internal Server Error</h1><p>Error: {$e->getMessage()}</p>")
+				->withHtml("<h1>500 Internal Server Error</h1><p>Error: {$msg}</p>")
 				->send();
 
 			$this->logger->logException($e, $req);
@@ -86,7 +87,6 @@ class App
 
 		$this->routes['404'] = $this->_404;
 		$this->routes['fallback'] = function (?Request $req = null, ?Response $res = null, ?stdClass $params = null) {
-			$this->logger->log(LogLevel::WARNING, 'No route matched, executing 404 handler for URI: ' . $req->getUri());
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
 
 			if (is_null($req)) $req = new Request();
@@ -402,7 +402,8 @@ class App
 						'debug' => $error['message']
 					]);
 				} else {
-					echo "<h1>Fatal Error</h1><p>{$error['message']}</p>";
+					$safeErrorDebug = htmlspecialchars($error['message'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+					echo "<h1>Fatal Error</h1><p>{$safeErrorDebug}</p>";
 				}
 			}
 		});
@@ -448,9 +449,11 @@ class App
 			$uri = $req->getUri();
 			$params = [];
 
+			$normalizedUri = strlen($uri) > 1 ? rtrim($uri, '/') : $uri;
+
 			if (isset($this->routes['redirects'])) {
 				foreach ($this->routes['redirects'] as $redirect) {
-					if ($uri === $redirect['from']) {
+					if ($normalizedUri === $redirect['from']) {
 						$statusCode = $redirect['permanent'] ? 301 : 302;
 						return $res->redirect($redirect['to'], $statusCode);
 					}
@@ -464,7 +467,7 @@ class App
 			}
 
 			foreach ($this->routes[$method] as $route => $routeData) {
-				if (preg_match($route, $uri, $params)) {
+				if (preg_match($route, $normalizedUri, $params)) {
 					array_shift($params);
 					$paramObj = new stdClass();
 					foreach ($routeData['paramNames'] as $i => $name) {
