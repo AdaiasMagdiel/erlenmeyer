@@ -10,8 +10,8 @@ use AdaiasMagdiel\Erlenmeyer\Response;
  * A lightweight testing client for simulating HTTP requests within the Erlenmeyer framework.
  *
  * This client allows integration testing by emulating HTTP requests to the App
- * without requiring a real web server. It provides methods for all common HTTP verbs
- * (GET, POST, PUT, PATCH, DELETE, etc.) and supports headers, JSON, form, and file payloads.
+ * without requiring a real web server. It ensures headers do not interfere with
+ * CLI output and properly handles global state isolation.
  */
 class ErlenClient
 {
@@ -34,11 +34,16 @@ class ErlenClient
      * Creates a new ErlenClient instance.
      *
      * @param App $app The application instance to handle requests.
+     * @param bool $showOutput Whether to echo the response body to the terminal.
      */
     public function __construct(App $app, bool $showOutput = false)
     {
         $this->app = $app;
         $this->showOutput = $showOutput;
+
+        Response::updateFunctions([
+            'header' => function (string $header, bool $replace = true, int $response_code = 0) {}
+        ]);
     }
 
     /**
@@ -122,17 +127,9 @@ class ErlenClient
     /**
      * Executes an HTTP request against the application.
      *
-     * Supports headers, query strings, JSON, form data, and file uploads.
-     *
      * @param string $method The HTTP method (GET, POST, etc.).
      * @param string $uri The request URI.
-     * @param array $options Additional request options:
-     *   - headers: associative array of HTTP headers
-     *   - query: query parameters
-     *   - json: data to be JSON-encoded
-     *   - form_params: form data
-     *   - files: uploaded file data
-     *   - body: raw request body
+     * @param array $options Additional request options.
      * @return Response The application response.
      */
     public function request(string $method, string $uri, array $options = []): Response
@@ -151,12 +148,13 @@ class ErlenClient
             'REQUEST_URI' => $uri,
             'PATH_INFO' => $path,
             'QUERY_STRING' => $query,
-            'SCRIPT_NAME' => '',
-            'PHP_SELF' => $path,
+            'SCRIPT_NAME' => 'index.php', // Standardize script name
+            'PHP_SELF' => '/index.php' . $path,
             'SERVER_NAME' => 'localhost',
             'SERVER_PORT' => '80',
             'HTTP_HOST' => 'localhost',
             'SERVER_PROTOCOL' => 'HTTP/1.1',
+            'REMOTE_ADDR' => '127.0.0.1', // Ensure IP is present
         ];
 
         // Merge headers with defaults and convert to $_SERVER format
@@ -181,7 +179,7 @@ class ErlenClient
         }
 
         if ($json !== null) {
-            $body = json_encode($json, JSON_UNESCAPED_UNICODE);
+            $body = json_encode($json, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         } elseif (!empty($form)) {
             $body = http_build_query($form);
         }
@@ -190,12 +188,19 @@ class ErlenClient
         $queryParams = $options['query'] ?? [];
         if (!empty($queryParams)) {
             $queryString = http_build_query($queryParams);
-            $uri .= (str_contains($uri, '?') ? '&' : '?') . $queryString;
+            // Append properly handling existing query params
+            $separator = (str_contains($uri, '?')) ? '&' : '?';
+            $uri .= $separator . $queryString;
+
+            // Update SERVER vars
             $server['REQUEST_URI'] = $uri;
-            $server['QUERY_STRING'] = $queryString;
+            // Append to existing query string if present
+            $server['QUERY_STRING'] = ($server['QUERY_STRING'] ? $server['QUERY_STRING'] . '&' : '') . $queryString;
         }
 
-        // Create Request and Response instances
+        // Create Request instance
+        // Note: We intentionally pass 'queryParams' even though Request might parse 
+        // QUERY_STRING, to ensure maximum compatibility.
         $request = new Request(
             $server,
             $queryParams,
@@ -207,24 +212,25 @@ class ErlenClient
 
         $response = new Response();
 
-        // If output should NOT be displayed, start output buffering
+        // Capture output buffer to simulate network transmission and suppress noise
         if (!$this->showOutput) {
             ob_start();
         }
 
-        // Delegate to the application
         try {
-            // Process the request
+            // Process the request through the App
             $result = $this->app->handle($request, $response);
 
-            // If response hasn't been sent yet, send it now
+            // Trigger the "send" logic to ensure body is rendered and headers are processed
+            // (Even though our mocked header function prevents actual CLI output)
             if (!$result->isSent()) {
                 $result->send();
             }
 
             return $result;
         } finally {
-            // If output was being captured, clean the buffer
+            // Clean the buffer. We discard the output unless showOutput is true,
+            // because the test should assert against the $result object, not stdout.
             if (!$this->showOutput) {
                 ob_end_clean();
             }
@@ -234,9 +240,6 @@ class ErlenClient
     /**
      * Normalizes a URI in the same way as the App class.
      *
-     * Removes trailing slashes except for the root route, preserving
-     * query strings and fragments.
-     *
      * @param string $uri The URI to normalize.
      * @return string Normalized URI.
      */
@@ -245,7 +248,7 @@ class ErlenClient
         $parsed = parse_url($uri);
         $path = $parsed['path'] ?? '/';
 
-        if ($path !== '/') {
+        if ($path !== '/' && str_ends_with($path, '/')) {
             $path = rtrim($path, '/');
         }
 
