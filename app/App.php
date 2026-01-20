@@ -2,7 +2,6 @@
 
 namespace AdaiasMagdiel\Erlenmeyer;
 
-use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use AdaiasMagdiel\Erlenmeyer\Logging\NullLogger;
@@ -11,7 +10,6 @@ use ErrorException;
 use InvalidArgumentException;
 use RuntimeException;
 use stdClass;
-use Exception;
 use Throwable;
 
 /**
@@ -23,9 +21,6 @@ use Throwable;
  */
 class App
 {
-	/** @var Assets Asset manager instance for serving static files. */
-	private ?Assets $assets;
-
 	/**
 	 * @var LoggerInterface $logger
 	 * Logger interface for handling system logging.
@@ -57,39 +52,19 @@ class App
 	 * Initializes the asset manager, default 404 handler, default exception handler,
 	 * and fallback route for handling asset requests or 404 errors.
 	 *
-	 * @param ?Assets $assets An optional Assets instance for managing static assets. Set to null to disable assets.
 	 * @param ?LoggerInterface $logger Logger instance for application logging.
-	 * @throws InvalidArgumentException If the assets configuration is invalid.
 	 */
 	public function __construct(
-		?Assets $assets = null,
 		?LoggerInterface $logger = null
 	) {
 		if (session_status() === PHP_SESSION_NONE) {
 			session_start();
 		}
 
-		$this->assets = $assets;
-
 		if (is_null($logger)) {
-			$defaultLogger = new NullLogger();
-			$this->logger = $defaultLogger;
+			$this->logger = new NullLogger();
 		} else {
 			$this->logger = $logger;
-		}
-
-		if ($this->assets) {
-			$assetsDir = realpath($this->assets->getAssetsDirectory());
-			if ($assetsDir === false || !is_dir($assetsDir) || !is_readable($assetsDir)) {
-				$this->logger->log(LogLevel::ERROR, "Invalid or inaccessible assets directory: $assetsDir");
-				throw new InvalidArgumentException("Invalid or inaccessible assets directory: $assetsDir");
-			}
-			$assetsRoute = $this->assets->getAssetsRoute();
-			if (!preg_match('/^\/[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/', $assetsRoute)) {
-				$this->logger->log(LogLevel::ERROR, "Invalid assets route: $assetsRoute");
-				throw new InvalidArgumentException("Invalid assets route: $assetsRoute");
-			}
-			$this->logger->log(LogLevel::INFO, 'Asset manager initialized for route: ' . $assetsRoute);
 		}
 
 		$this->set404Handler(function (Request $req, Response $res, $params): void {
@@ -111,12 +86,6 @@ class App
 
 		$this->routes['404'] = $this->_404;
 		$this->routes['fallback'] = function (?Request $req = null, ?Response $res = null, ?stdClass $params = null) {
-			if ($this->assets && $this->assets->isAssetRequest($req)) {
-				$this->logger->log(LogLevel::INFO, 'Serving asset: ' . $req->getUri());
-				$this->assets->serveAsset($req);
-				return;
-			}
-
 			$this->logger->log(LogLevel::WARNING, 'No route matched, executing 404 handler for URI: ' . $req->getUri());
 			$handler = $this->applyMiddlewares($this->_404, $this->globalMiddlewares);
 
@@ -474,7 +443,7 @@ class App
 			foreach ($this->routes[$method] as $route => $routeData) {
 				if (preg_match($route, $uri, $params)) {
 					array_shift($params);
-					$paramObj = new \stdClass();
+					$paramObj = new stdClass();
 					foreach ($routeData['paramNames'] as $i => $name) {
 						$paramObj->$name = $params[$i] ?? null;
 					}
@@ -523,15 +492,6 @@ class App
 	 */
 	private function handleFallbackOrNotFound(Request $req, Response $res): void
 	{
-		if ($this->assets) {
-			$assetsRequest = $this->assets->isAssetRequest($req);
-			if ($assetsRequest) {
-				$this->logger->log(LogLevel::INFO, 'Serving asset: ' . $req->getUri());
-				$this->assets->serveAsset($req);
-				return;
-			}
-		}
-
 		if (isset($this->routes['fallback'])) {
 			$this->logger->log(LogLevel::INFO, 'Executing fallback handler');
 			$this->routes['fallback']($req, $res, new stdClass());
