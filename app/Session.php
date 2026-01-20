@@ -2,6 +2,8 @@
 
 namespace AdaiasMagdiel\Erlenmeyer;
 
+use InvalidArgumentException;
+
 /**
  * Provides static methods for managing PHP session data and flash messages.
  *
@@ -45,12 +47,12 @@ class Session
      * @param string $key The session key to store the value under.
      * @param mixed $value The value to store.
      * @return void
-     * @throws \InvalidArgumentException If the key is empty.
+     * @throws InvalidArgumentException If the key is empty.
      */
     public static function set(string $key, $value): void
     {
         if (empty($key)) {
-            throw new \InvalidArgumentException("Session key cannot be empty.");
+            throw new InvalidArgumentException("Session key cannot be empty.");
         }
 
         self::ensureSessionStarted();
@@ -82,6 +84,22 @@ class Session
     }
 
     /**
+     * Writes session data and ends the session.
+     *
+     * This releases the session file lock, allowing other requests (e.g., AJAX)
+     * to proceed without waiting for the current script to terminate.
+     * Use this method as soon as you are done writing to the session.
+     *
+     * @return void
+     */
+    public static function close(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+    }
+
+    /**
      * Sets a flash message available for the next request only.
      *
      * Flash messages are automatically removed after being retrieved.
@@ -89,12 +107,12 @@ class Session
      * @param string $key The flash message key.
      * @param mixed $value The flash message value.
      * @return void
-     * @throws \InvalidArgumentException If the key is empty.
+     * @throws InvalidArgumentException If the key is empty.
      */
     public static function flash(string $key, $value): void
     {
         if (empty($key)) {
-            throw new \InvalidArgumentException("Flash message key cannot be empty.");
+            throw new InvalidArgumentException("Flash message key cannot be empty.");
         }
 
         self::ensureSessionStarted();
