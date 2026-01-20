@@ -7,18 +7,23 @@ use InvalidArgumentException;
 use Throwable;
 
 /**
- * Logger que escreve no console/error_log com suporte a níveis e exclusões.
+ * Logger that writes to the console/error_log with support for log levels and exclusions.
  */
 class ConsoleLogger implements LoggerInterface
 {
-	/** Timestamp format. */
+	/** The format used for log timestamps. */
 	private const TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
 
-	/** @var LogLevel[] Lista de níveis excluídos. */
+	/** 
+	 * @var LogLevel[] List of excluded log levels. 
+	 */
 	private array $excludedLogLevels = [];
 
 	/**
-	 * @param LogLevel[] $excludedLogLevels Lista de níveis a ignorar.
+	 * Initializes the console logger.
+	 *
+	 * @param LogLevel[] $excludedLogLevels List of log levels to ignore.
+	 * @throws InvalidArgumentException If any item in the array is not a valid LogLevel instance.
 	 */
 	public function __construct(array $excludedLogLevels = [])
 	{
@@ -27,7 +32,10 @@ class ConsoleLogger implements LoggerInterface
 	}
 
 	/**
-	 * Registra exceções com contexto opcional da request.
+	 * Logs an exception with optional request context.
+	 *
+	 * @param Throwable    $exception The exception to log.
+	 * @param Request|null $request   The request context (optional).
 	 */
 	public function logException(Throwable $exception, ?Request $request = null): void
 	{
@@ -36,9 +44,12 @@ class ConsoleLogger implements LoggerInterface
 	}
 
 	/**
-	 * Registra uma mensagem de log.
+	 * Logs a message at a specific level.
 	 *
-	 * @throws InvalidArgumentException
+	 * @param LogLevel $level   The severity level of the log.
+	 * @param string   $message The message to log.
+	 * 
+	 * @throws InvalidArgumentException If the log message is empty.
 	 */
 	public function log(LogLevel $level = LogLevel::INFO, string $message = ''): void
 	{
@@ -59,13 +70,16 @@ class ConsoleLogger implements LoggerInterface
 		);
 
 		if (!@error_log($logEntry)) {
-			// Fallback robusto
+			// Robust fallback
 			@fwrite(STDERR, "Failed to write log entry:\n" . $logEntry);
 		}
 	}
 
 	/**
-	 * Verifica se o nível deve ser ignorado.
+	 * Checks if the specified log level should be skipped.
+	 *
+	 * @param LogLevel $level The level to check.
+	 * @return bool True if the level is excluded, false otherwise.
 	 */
 	private function shouldSkipLevel(LogLevel $level): bool
 	{
@@ -73,9 +87,10 @@ class ConsoleLogger implements LoggerInterface
 	}
 
 	/**
-	 * Valida o array de níveis excluídos.
+	 * Validates the array of excluded log levels.
 	 *
-	 * @throws InvalidArgumentException
+	 * @param array $levels The array of levels to validate.
+	 * @throws InvalidArgumentException If an invalid level instance is found.
 	 */
 	private function validateExcludedLogLevels(array $levels): void
 	{
@@ -89,7 +104,11 @@ class ConsoleLogger implements LoggerInterface
 	}
 
 	/**
-	 * Monta mensagem formatada para exceção.
+	 * Formats the exception message, including request info and stack trace.
+	 *
+	 * @param Throwable    $e   The exception.
+	 * @param Request|null $req The request context.
+	 * @return string The formatted log string.
 	 */
 	private function formatExceptionMessage(Throwable $e, ?Request $req): string
 	{
@@ -108,7 +127,10 @@ class ConsoleLogger implements LoggerInterface
 	}
 
 	/**
-	 * Formata stack trace para melhor leitura.
+	 * Formats the stack trace for better readability.
+	 *
+	 * @param string $trace The raw stack trace string.
+	 * @return string The formatted stack trace.
 	 */
 	private function formatStackTrace(string $trace): string
 	{
