@@ -379,8 +379,31 @@ class App
 				E_CORE_ERROR,
 				E_COMPILE_ERROR
 			], true)) {
+				// Clear any previous output (partial HTML, etc)
+				if (ob_get_length()) {
+					ob_clean();
+				}
+
 				http_response_code(500);
-				echo "<h1>Fatal Error</h1><p>{$error['message']}</p>";
+
+				// Check for JSON expectation
+				$isJson = false;
+				if (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json')) {
+					$isJson = true;
+				} elseif (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+					$isJson = true;
+				}
+
+				if ($isJson) {
+					header('Content-Type: application/json; charset=UTF-8');
+					echo json_encode([
+						'error' => true,
+						'message' => 'Fatal Error',
+						'debug' => $error['message']
+					]);
+				} else {
+					echo "<h1>Fatal Error</h1><p>{$error['message']}</p>";
+				}
 			}
 		});
 
