@@ -2,6 +2,7 @@ vendor/
 .phpunit.cache/
 .coverage/
 .venv/
+site/
 *.bat
 index.php
 repomix*
