@@ -11,7 +11,7 @@ Logging in Erlenmeyer is powered by the `LoggerInterface`, which defines two mai
 
 ```php
 public function log(LogLevel $level, string $message): void;
-public function logException(Exception $e, ?Request $request = null): void;
+public function logException(Throwable $e, ?Request $request = null): void;
 ```
 
 Two implementations are included by default:
@@ -54,7 +54,7 @@ use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 use AdaiasMagdiel\Erlenmeyer\App;
 
 $logger = new FileLogger(__DIR__ . '/logs');
-$app = new App(null, $logger);
+$app = new App($logger);
 ```
 
 - Logs are stored in `info.log` inside the specified directory.
@@ -87,7 +87,7 @@ This is ideal for development, testing, or containerized deployments.
 use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;
 
 $logger = new ConsoleLogger();
-$app = new App(null, $logger);
+$app = new App($logger);
 ```
 
 You can also exclude specific levels to reduce verbosity:
@@ -111,7 +111,7 @@ use AdaiasMagdiel\Erlenmeyer\App;
 use MyApp\CustomLogger;
 
 $logger = new CustomLogger();
-$app = new App(null, $logger);
+$app = new App($logger);
 ```
 
 The logger is used internally by the `App` to record:
