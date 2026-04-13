@@ -68,13 +68,13 @@ Writes a formatted log entry to the active file.
 
 ---
 
-### `logException(Exception $exception, ?Request $request = null): void`
+### `logException(Throwable $exception, ?Request $request = null): void`
 
 Logs detailed exception information.
 
 | Parameter    | Type        | Description                    |
 | ------------ | ----------- | ------------------------------ |
-| `$exception` | `Exception` | Exception to log.              |
+| `$exception` | `Throwable` | Exception to log.              |
 | `$request`   | `?Request`  | Optional HTTP request context. |
 
 **Returns:** `void`

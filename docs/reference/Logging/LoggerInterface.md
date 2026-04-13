@@ -30,13 +30,13 @@ Writes a log entry with the specified severity level.
 
 ---
 
-### `logException(Exception $e, ?Request $request = null): void`
+### `logException(Throwable $e, ?Request $request = null): void`
 
 Logs an exception, optionally including HTTP request context.
 
 | Parameter  | Type        | Description                                             |
 | ---------- | ----------- | ------------------------------------------------------- |
-| `$e`       | `Exception` | Exception instance to log.                              |
+| `$e`       | `Throwable` | Exception instance to log.                              |
 | `$request` | `?Request`  | Optional request providing context (method, URI, etc.). |
 
 **Returns:** `void`
