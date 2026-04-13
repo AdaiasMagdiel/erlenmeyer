@@ -18,7 +18,7 @@ All loggers in Erlenmeyer implement the [`LoggerInterface`](../reference/Logging
 interface LoggerInterface
 {
     public function log(LogLevel $level, string $message): void;
-    public function logException(Exception $e, ?Request $request = null): void;
+    public function logException(Throwable $e, ?Request $request = null): void;
 }
 ```
 
@@ -30,7 +30,7 @@ To create your own logger, simply implement this interface.
 use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use AdaiasMagdiel\Erlenmeyer\Request;
-use Exception;
+use Throwable;
 
 class JsonLogger implements LoggerInterface
 {
@@ -52,7 +52,7 @@ class JsonLogger implements LoggerInterface
         file_put_contents($this->file, json_encode($entry) . PHP_EOL, FILE_APPEND);
     }
 
-    public function logException(Exception $e, ?Request $request = null): void
+    public function logException(Throwable $e, ?Request $request = null): void
     {
         $entry = [
             'timestamp' => date('c'),
@@ -77,7 +77,7 @@ Then inject it into your app:
 ```php
 use AdaiasMagdiel\Erlenmeyer\App;
 
-$app = new App(null, new JsonLogger(__DIR__ . '/logs/app.jsonl'));
+$app = new App(new JsonLogger(__DIR__ . '/logs/app.jsonl'));
 ```
 
 Each log entry is stored as a separate JSON line — ideal for structured logging and observability tools.
@@ -172,7 +172,7 @@ use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 require 'vendor/autoload.php';
 
 $logger = new FileLogger(__DIR__ . '/logs');
-$app = new App(null, $logger);
+$app = new App($logger);
 
 // Handler for validation exceptions
 $app->setExceptionHandler(ValidationException::class, function ($req, $res, $e) use ($logger) {
