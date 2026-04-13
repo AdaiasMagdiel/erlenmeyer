@@ -107,15 +107,17 @@ echo Session::getFlash('notice'); // null
 
 ## 🧩 Complete API Reference
 
-| Method                                     | Description                           |
-| ------------------------------------------ | ------------------------------------- |
-| `Session::set($key, $value)`               | Stores a value in the session         |
-| `Session::get($key, $default = null)`      | Retrieves a value or default          |
-| `Session::has($key)`                       | Checks if a key exists                |
-| `Session::remove($key)`                    | Removes a key from the session        |
-| `Session::flash($key, $value)`             | Sets a temporary one-request message  |
-| `Session::getFlash($key, $default = null)` | Retrieves and removes a flash message |
-| `Session::hasFlash($key)`                  | Checks if a flash message exists      |
+| Method                                              | Description                                   |
+| --------------------------------------------------- | --------------------------------------------- |
+| `Session::set($key, $value)`                        | Stores a value in the session                 |
+| `Session::get($key, $default = null)`               | Retrieves a value or default                  |
+| `Session::has($key)`                                | Checks if a key exists                        |
+| `Session::remove($key)`                             | Removes a key from the session                |
+| `Session::regenerate($deleteOldSession = true)`     | Regenerates the session ID                    |
+| `Session::close()`                                  | Releases the session lock                     |
+| `Session::flash($key, $value)`                      | Sets a temporary one-request message          |
+| `Session::getFlash($key, $default = null)`          | Retrieves and removes a flash message         |
+| `Session::hasFlash($key)`                           | Checks if a flash message exists              |
 
 ---
 
@@ -148,24 +150,72 @@ to manage authentication in just a few lines.
 
 ---
 
+## 🔒 Security
+
+### Preventing Session Fixation
+
+After any login or privilege change, call `Session::regenerate()` to replace the
+session ID with a new one. This prevents session fixation attacks where an attacker
+pre-sets a known session ID before the user authenticates.
+
+```php
+$app->post(‘/login’, function ($req, $res) {
+    $user = authenticate(
+        $req->getFormDataParam(‘email’),
+        $req->getFormDataParam(‘password’)
+    );
+
+    if ($user) {
+        Session::regenerate(); // Replace the session ID on privilege change
+        Session::set(‘user_id’, $user[‘id’]);
+        return $res->redirect(‘/dashboard’);
+    }
+
+    Session::flash(‘error’, ‘Invalid credentials’);
+    return $res->redirect(‘/login’);
+});
+```
+
+### Releasing the Session Lock
+
+PHP holds a file-based session lock for the entire request. On apps with many concurrent
+AJAX calls or long-running operations, this causes requests from the same user to queue.
+Call `Session::close()` as soon as you are done writing to the session:
+
+```php
+$app->post(‘/track’, function ($req, $res) {
+    Session::set(‘last_seen’, time());
+    Session::close(); // Other tabs can now access the session immediately
+
+    $data = doSlowWork();
+    $res->withJson($data)->send();
+});
+```
+
+---
+
 ## ⚖️ Notes & Best Practices
 
 ✅ **Sessions are automatically started** when needed.
 ❌ **Do not call `session_start()` manually** — Erlenmeyer handles it.
 🧩 **Flash data is temporary** — once read, it’s gone.
 🔒 **Always validate user input** before storing it in the session.
+🛡️ **Call `Session::regenerate()`** after login to prevent session fixation.
+⚡ **Call `Session::close()`** before slow operations to unblock concurrent requests.
 
 ---
 
 ## 🚀 Summary
 
-| Concept               | Description                                                |
-| --------------------- | ---------------------------------------------------------- |
-| **Persistent data**   | Store and retrieve session values easily                   |
-| **Flash messages**    | Temporary data for redirects and notices                   |
-| **Auto-start**        | Sessions start automatically on first use                  |
-| **Clean API**         | No direct access to `$_SESSION`                            |
-| **Stateless testing** | Works seamlessly with `ErlenClient` for request simulation |
+| Concept                  | Description                                                   |
+| ------------------------ | ------------------------------------------------------------- |
+| **Persistent data**      | Store and retrieve session values easily                      |
+| **Flash messages**       | Temporary data for redirects and notices                      |
+| **Auto-start**           | Sessions start automatically on first use                     |
+| **Session fixation**     | `regenerate()` protects against fixation on privilege change  |
+| **Lock release**         | `close()` unblocks concurrent AJAX requests                   |
+| **Clean API**            | No direct access to `$_SESSION`                               |
+| **Stateless testing**    | Works seamlessly with `ErlenClient` for request simulation    |
 
 ---
 

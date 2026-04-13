@@ -168,22 +168,17 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
-## 🧩 Serving Static Files (Optional)
+## 🧩 Serving Static Files
 
-If you use the `Assets` class, Erlenmeyer can automatically handle static files.
+Erlenmeyer does not serve static files through PHP. Configure your web server to deliver
+them directly from a public directory — this is faster and more efficient.
 
-Example:
+With Apache, add a `.htaccess` file (see the section below). With Nginx, add a `location`
+block for your assets directory. The web server handles CSS, JavaScript, and images at
+full speed without involving PHP.
 
-```php
-use AdaiasMagdiel\Erlenmeyer\App;
-use AdaiasMagdiel\Erlenmeyer\Assets;
-
-$assets = new Assets(__DIR__ . '/assets', '/assets');
-$app = new App($assets);
-```
-
-This setup serves files from `/assets/` (or `/public/assets/`),
-with MIME type detection, caching, and 304 responses built-in.
+For controlled file downloads through PHP (access-gated files, user uploads stored outside
+the web root), use [`Response::withFile()`](reference/Response.md).
 
 ---
 
@@ -219,7 +214,6 @@ RewriteRule ^ index.php [L]
 
 - :map: **[Concepts → Routing](concepts/routing.md)** — how routes, parameters, and middleware work
 - :gear: **[Reference → App](reference/App.md)** — deep dive into the `App` class
-- :file_folder: **[Assets](concepts/assets.md)** — serving static files and media
 
 ---
 
