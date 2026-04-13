@@ -62,13 +62,13 @@ Logs a message to the PHP error log.
 
 ---
 
-### `logException(Exception $exception, ?Request $request = null): void`
+### `logException(Throwable $exception, ?Request $request = null): void`
 
 Logs an exception with contextual information.
 
 | Parameter    | Type        | Description                              |
 | ------------ | ----------- | ---------------------------------------- |
-| `$exception` | `Exception` | Exception to log.                        |
+| `$exception` | `Throwable` | Exception to log.                        |
 | `$request`   | `?Request`  | Optional request for additional context. |
 
 **Returns:** `void`

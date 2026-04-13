@@ -8,41 +8,47 @@
 ## Overview
 
 The `App` class is the core of the Erlenmeyer framework.  
-It provides routing, middleware, static asset handling, error management, and logging.
+It provides routing, middleware, error management, and logging.
 
 ---
 
 ## Properties
 
-| Name                 | Visibility | Type              | Description                                              |
-| -------------------- | ---------- | ----------------- | -------------------------------------------------------- |
-| `$assets`            | private    | `?Assets`         | Manages static file serving.                             |
-| `$logger`            | private    | `LoggerInterface` | Logger instance for application events and errors.       |
-| `$_404`              | private    | `Closure`         | Custom 404 handler.                                      |
-| `$globalMiddlewares` | private    | `array`           | Global middlewares executed on every request.            |
-| `$exceptionHandlers` | private    | `array`           | Map of exception classes to their handlers.              |
-| `$routes`            | private    | `array`           | Collection of registered routes, grouped by HTTP method. |
-| `$routePattern`      | private    | `string`          | Regex for identifying dynamic parameters in routes.      |
-| `$paramPattern`      | private    | `string`          | Regex pattern used to replace route parameters.          |
+| Name                 | Visibility | Type               | Description                                              |
+| -------------------- | ---------- | ------------------ | -------------------------------------------------------- |
+| `$logger`            | private    | `LoggerInterface`  | Logger instance for application events and errors.       |
+| `$router`            | private    | `Router`           | Handles route registration and matching.                 |
+| `$exceptionHandler`  | private    | `ExceptionHandler` | Manages exception handler registration and dispatch.     |
+| `$globalMiddlewares` | private    | `array`            | Global middlewares executed on every request.            |
+| `$notFoundHandler`   | private    | `Closure`          | Default 404 handler.                                     |
+| `$fallbackHandler`   | private    | `?Closure`         | Optional fallback handler called before 404.             |
 
 ---
 
 ## Constructor
 
-### `__construct(?Assets $assets = null, ?LoggerInterface $logger = null)`
+### `__construct(?LoggerInterface $logger = null)`
 
-Initializes the application, logger, asset manager, and default error handlers.
+Initializes the application, starts the session, sets up the router, exception handler,
+and registers default 404 and 500 handlers.
 
 #### Parameters
 
-| Name      | Type               | Description                                  |
-| --------- | ------------------ | -------------------------------------------- |
-| `$assets` | `?Assets`          | Optional `Assets` instance for static files. |
-| `$logger` | `?LoggerInterface` | Optional logger. Defaults to `FileLogger`.   |
+| Name      | Type               | Description                                                                  |
+| --------- | ------------------ | ---------------------------------------------------------------------------- |
+| `$logger` | `?LoggerInterface` | Optional logger. Defaults to `NullLogger` (all log calls are discarded).     |
 
-#### Throws
+#### Default Behavior
 
-- `InvalidArgumentException` – If the assets directory or route is invalid.
+When no logger is provided, a `NullLogger` is used — a no-op implementation that discards
+all log messages silently. To enable logging, pass a `FileLogger` or `ConsoleLogger`:
+
+```php
+use AdaiasMagdiel\Erlenmeyer\App;
+use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
+
+$app = new App(new FileLogger(__DIR__ . '/logs'));
+```
 
 ---
 
@@ -62,22 +68,6 @@ Registers a handler for a specific exception type.
 #### Throws
 
 - `InvalidArgumentException` – If `$throwableClass` is not a subclass of `Throwable`.
-
----
-
-### `getExceptionHandler(Throwable $e): ?Closure`
-
-Retrieves the most specific registered handler for a thrown exception.
-
-#### Parameters
-
-| Name | Type        | Description         |
-| ---- | ----------- | ------------------- |
-| `$e` | `Throwable` | Exception instance. |
-
-#### Returns
-
-`?Closure` – Matching handler closure or `null` if none found.
 
 ---
 
@@ -148,6 +138,58 @@ function (Request $req, Response $res, stdClass $params): void
 
 ---
 
+### `setFallbackHandler(callable $action): void`
+
+Registers a **fallback handler** invoked when no route matches, before the 404 handler.
+
+The fallback handler receives the same signature as route handlers:
+
+```php
+function (Request $req, Response $res, stdClass $params): void
+```
+
+#### Parameters
+
+| Name      | Type       | Description                                                                       |
+| --------- | ---------- | --------------------------------------------------------------------------------- |
+| `$action` | `callable` | Callable invoked when no route matches. Receives `(Request, Response, stdClass)`. |
+
+#### Behavior
+
+- If a fallback handler is registered, it is called instead of the 404 handler.
+- Global middlewares are **not** applied to the fallback handler.
+- If the fallback handler does not send a response, execution stops there — no automatic 404 is triggered.
+
+#### Use Cases
+
+- Single-page applications (SPA) that need to serve `index.html` for all unmatched routes
+- Catch-all proxy patterns
+- Custom "not found" logic that attempts something before returning 404
+
+#### Example — SPA catch-all
+
+```php
+$app->setFallbackHandler(function (Request $req, Response $res, $params) {
+    $res->withTemplate(__DIR__ . '/views/app.html')->send();
+});
+```
+
+#### Example — Try a CMS before 404
+
+```php
+$app->setFallbackHandler(function (Request $req, Response $res, $params) {
+    $page = CMS::findPage($req->getUri());
+
+    if ($page) {
+        $res->withHtml($page->render())->send();
+    } else {
+        $res->setStatusCode(404)->withHtml('<h1>Page Not Found</h1>')->send();
+    }
+});
+```
+
+---
+
 ### `addMiddleware(callable $middleware): void`
 
 Adds a global middleware applied to all requests.
@@ -207,27 +249,10 @@ Processes a manually supplied request and returns a `Response`.
 
 ## Private Methods
 
-### `parseRoute(string $route): string`
-
-Converts a route string into a regex pattern.
-
-#### Parameters
-
-| Name     | Type     | Description                         |
-| -------- | -------- | ----------------------------------- |
-| `$route` | `string` | Route string (e.g., `/users/[id]`). |
-
-#### Returns
-
-`string` – Regex expression for matching the route.
-
----
-
 ### `handleFallbackOrNotFound(Request $req, Response $res): void`
 
-Handles unmatched requests by serving assets or invoking the 404 handler.
-
-#### Parameters
+Called when no route matches. Executes the fallback handler if registered,
+otherwise applies global middlewares and invokes the 404 handler.
 
 | Name   | Type       | Description          |
 | ------ | ---------- | -------------------- |
@@ -236,53 +261,41 @@ Handles unmatched requests by serving assets or invoking the 404 handler.
 
 ---
 
-### `getMethod(): string`
+### `handleException(Throwable $e, Request $req, Response $res): void`
 
-Retrieves the HTTP method from the environment.
+Delegates to the `ExceptionHandler` to find and invoke the most specific registered
+handler for the thrown exception. Falls back to a plain 500 response if none matches.
 
-#### Returns
-
-`string` – Uppercase HTTP method name.
-
----
-
-### `getUri(): string`
-
-Retrieves and normalizes the request URI.
-
-#### Returns
-
-`string` – Normalized path (trailing slash removed except for `/`).
+| Name   | Type        | Description                |
+| ------ | ----------- | -------------------------- |
+| `$e`   | `Throwable` | The exception.             |
+| `$req` | `Request`   | The current request.       |
+| `$res` | `Response`  | The current response.      |
 
 ---
 
 ### `applyMiddlewares(callable $handler, array $middlewares): callable`
 
-Wraps a handler with a stack of middleware closures.
-
-#### Parameters
+Wraps a handler with a stack of middleware closures using reverse iteration.
 
 | Name           | Type       | Description                   |
 | -------------- | ---------- | ----------------------------- |
 | `$handler`     | `callable` | The final route handler.      |
 | `$middlewares` | `array`    | List of middlewares to apply. |
 
-#### Returns
-
-`callable` – Composed callable chain with middleware wrapping.
+**Returns:** `callable` — Composed callable chain with all middlewares applied.
 
 ---
 
 ## Behavior Summary
 
-| Feature            | Description                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| Routing            | Regex-based pattern matching with dynamic parameters `[param]`. |
-| Middlewares        | Global and route-specific, with `$next` chaining.               |
-| Exception Handling | Per-class exception mapping and fallback.                       |
-| Asset Handling     | Delegated to `Assets` manager when provided.                    |
-| Logging            | Delegated to `LoggerInterface` (default `FileLogger`).          |
-| Fallbacks          | Assets → Fallback → 404 chain.                                  |
+| Feature            | Description                                                            |
+| ------------------ | ---------------------------------------------------------------------- |
+| Routing            | Regex-based pattern matching with dynamic parameters `[param]`.        |
+| Middlewares        | Global and route-specific, with `$next` chaining.                      |
+| Exception Handling | Per-class exception mapping with class hierarchy traversal.            |
+| Fallback Handler   | Optional catch-all called before 404, bypasses global middlewares.     |
+| Logging            | Delegated to `LoggerInterface`. Defaults to `NullLogger` (no output).  |
 
 ---
 
@@ -290,6 +303,5 @@ Wraps a handler with a stack of middleware closures.
 
 - [`Request`](./Request.md)
 - [`Response`](./Response.md)
-- [`Assets`](./Assets.md)
 - [`Session`](./Session.md)
 - [`Logging\LoggerInterface`](./Logging/LoggerInterface.md)
