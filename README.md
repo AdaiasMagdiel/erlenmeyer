@@ -16,7 +16,6 @@
 - [Routing](#routing)
 - [Middlewares](#middlewares)
 - [Error Handling](#error-handling)
-- [Asset Management](#asset-management)
 - [Session Management](#session-management)
 - [Request and Response Objects](#request-and-response-objects)
 - [Logging](#logging)
@@ -42,7 +41,6 @@ Erlenmeyer is a lightweight PHP framework designed for simplicity and efficiency
 - Support for global and route-specific middlewares.
 - Custom error handling for 404 errors and exceptions.
 - Integrated session management with flash messages.
-- Static asset server for CSS, JavaScript, images, and more.
 - Comprehensive `Request` and `Response` objects for handling HTTP requests and responses.
 - Logging with file rotation for application event monitoring.
 
@@ -168,23 +166,6 @@ $app->setExceptionHandler(\Exception::class, function (Request $req, Response $r
 });
 ```
 
-## Asset Management
-
-Serve static assets by creating an instance of `Assets`:
-
-```php
-use AdaiasMagdiel\Erlenmeyer\Assets;
-
-$assets = new Assets(assetsDirectory: __DIR__ . '/public', assetsRoute: '/assets');
-$app = new App(assets: $assets);
-```
-
-Access assets via `/assets/file.ext`. For example:
-
-```html
-<link rel="stylesheet" href="/assets/css/style.css" />
-```
-
 ## Session Management
 
 Use the `Session` class to manage sessions:
@@ -289,7 +270,7 @@ If you need advanced logging features, such as logging to a database, sending lo
 ```php
 use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
 use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
-use Exception;
+use Throwable;
 use AdaiasMagdiel\Erlenmeyer\Request;
 
 class CustomLogger implements LoggerInterface
@@ -308,7 +289,7 @@ class CustomLogger implements LoggerInterface
         file_put_contents($this->logFile, $logEntry, FILE_APPEND);
     }
 
-    public function logException(Exception $e, ?Request $request = null): void
+    public function logException(Throwable $e, ?Request $request = null): void
     {
         $timestamp = date('Y-m-d H:i:s');
         $message = "[$timestamp] [ERROR] Exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "\n";
@@ -328,7 +309,7 @@ $customLogger = new CustomLogger('/path/to/custom.log');
 $app = new App(logger: $customLogger);
 ```
 
-**Important Note:** If no logger is explicitly provided, the `App` will create a `FileLogger` without a log directory, which means no logging will occur. You must configure a logger explicitly to enable logging.
+**Important Note:** If no logger is explicitly provided, the `App` uses a `NullLogger` — a no-op implementation that silently discards all log messages. To enable logging, pass a `FileLogger` or `ConsoleLogger` explicitly.
 
 ## Tests
 
@@ -346,7 +327,7 @@ Erlenmeyer is suitable for a wide range of web applications. Here are some examp
 | ------------------------- | -------------------------------------------------------------------------------------- |
 | **Simple REST API**       | Create an API with endpoints for GET, POST, PUT, and DELETE, returning JSON responses. |
 | **Basic Web Application** | Develop an application with routes for HTML pages and session management.              |
-| **Static Page Generator** | Serve static assets like CSS and JavaScript for landing pages.                         |
+| **Static Page Generator** | Build apps with routes for HTML pages; static assets are served by Apache or Nginx.    |
 | **Forms and Uploads**     | Handle POST forms and file uploads with validation.                                    |
 
 **Example REST API:**
@@ -388,7 +369,7 @@ Erlenmeyer is licensed under the GPLv3. See the [LICENSE](LICENSE) and the [COPY
 
 | Method                                                                            | Description                              |
 | --------------------------------------------------------------------------------- | ---------------------------------------- |
-| `__construct(?Assets $assets = null, ?string $logDir = null)`                     | Initializes the application.             |
+| `__construct(?LoggerInterface $logger = null)`                                    | Initializes the application.             |
 | `route(string $method, string $route, callable $action, array $middlewares = [])` | Registers a route for an HTTP method.    |
 | `get(string $route, callable $action, array $middlewares = [])`                   | Registers a GET route.                   |
 | `post(string $route, callable $action, array $middlewares = [])`                  | Registers a POST route.                  |
@@ -396,31 +377,24 @@ Erlenmeyer is licensed under the GPLv3. See the [LICENSE](LICENSE) and the [COPY
 | `match(array $methods, string $route, callable $action, array $middlewares = [])` | Registers a route for specified methods. |
 | `redirect(string $from, string $to, bool $permanent = false)`                     | Registers a redirect.                    |
 | `set404Handler(callable $action)`                                                 | Sets the 404 error handler.              |
+| `setFallbackHandler(callable $action)`                                            | Sets a fallback handler called before 404. |
 | `addMiddleware(callable $middleware)`                                             | Adds a global middleware.                |
 | `setExceptionHandler(string $exceptionClass, callable $handler)`                  | Sets an exception handler.               |
 | `run()`                                                                           | Runs the application.                    |
-
-### Assets
-
-| Method                                                                              | Description                            |
-| ----------------------------------------------------------------------------------- | -------------------------------------- |
-| `__construct(string $assetsDirectory = "/public", string $assetsRoute = "/assets")` | Initializes the asset manager.         |
-| `getAssetsDirectory(): string`                                                      | Returns the assets directory.          |
-| `getAssetsRoute(): string`                                                          | Returns the assets route.              |
-| `isAssetRequest(): bool`                                                            | Checks if the request is for an asset. |
-| `serveAsset(): bool`                                                                | Serves the requested asset.            |
 
 ### Session
 
 | Method                                          | Description                       |
 | ----------------------------------------------- | --------------------------------- |
-| `static get(string $key, $default = null)`      | Gets a session value.             |
-| `static set(string $key, $value)`               | Sets a session value.             |
-| `static has(string $key): bool`                 | Checks if a session key exists.   |
-| `static remove(string $key)`                    | Removes a session key.            |
-| `static flash(string $key, $value)`             | Sets a flash message.             |
-| `static getFlash(string $key, $default = null)` | Gets and removes a flash message. |
-| `static hasFlash(string $key): bool`            | Checks if a flash message exists. |
+| `static get(string $key, $default = null)`                    | Gets a session value.                          |
+| `static set(string $key, $value)`                             | Sets a session value.                          |
+| `static has(string $key): bool`                               | Checks if a session key exists.                |
+| `static remove(string $key)`                                  | Removes a session key.                         |
+| `static regenerate(bool $deleteOldSession = true)`            | Regenerates session ID (prevents fixation).    |
+| `static close()`                                              | Releases the session lock.                     |
+| `static flash(string $key, $value)`                           | Sets a flash message.                          |
+| `static getFlash(string $key, $default = null)`               | Gets and removes a flash message.              |
+| `static hasFlash(string $key): bool`                          | Checks if a flash message exists.              |
 
 ### Request
 
