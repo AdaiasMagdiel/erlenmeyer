@@ -83,7 +83,7 @@ The second parameter defines the destination, and the optional `permanent` flag 
 
 If no route matches, Erlenmeyer will:
 
-1. Try to serve a static file through the `Assets` manager (if configured);
+1. Call the fallback handler (if registered via `setFallbackHandler()`);
 2. Otherwise, call the 404 handler.
 
 You can customize the 404 handler at any time:

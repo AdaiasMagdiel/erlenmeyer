@@ -108,7 +108,7 @@ by passing it to the `App` constructor:
 
 ```php
 $logger = new MyCustomLogger();
-$app = new App(null, $logger);
+$app = new App($logger);
 ```
 
 ---
