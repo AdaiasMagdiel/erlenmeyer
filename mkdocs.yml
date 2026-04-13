@@ -45,7 +45,6 @@ nav:
       - Requests: concepts/requests.md
       - Responses: concepts/responses.md
       - Error Handling: concepts/errors.md
-      - Assets: concepts/assets.md
       - Sessions: concepts/sessions.md
   - Guides:
       - Building an API: guides/building-an-api.md
@@ -54,7 +53,6 @@ nav:
   - Reference:
       - Core:
           - App: reference/App.md
-          - Assets: reference/Assets.md
           - Request: reference/Request.md
           - Response: reference/Response.md
           - Session: reference/Session.md

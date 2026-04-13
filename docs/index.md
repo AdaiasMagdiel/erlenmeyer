@@ -33,7 +33,6 @@ Erlenmeyer is about **clarity without constraints**.
 | **Requests & Responses** | Typed API with helpers for HTML, JSON, text, and files              |
 | **Logging**              | Console or rotating file-based logs with structured levels          |
 | **Error Handling**       | Custom exception mapping and fallback handlers                      |
-| **Assets**               | Static file delivery with MIME detection and caching                |
 | **Sessions**             | Flash messages and persistent data management                       |
 | **Testing**              | `ErlenClient` to simulate full HTTP requests for testing            |
 
