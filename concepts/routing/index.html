@@ -709,29 +709,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../sessions/" class="md-nav__link">
         
   
@@ -973,29 +950,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1485,7 +1439,7 @@ Each route maps an HTTP method and a URI pattern to a callable handler:</p>
 <h2 id="fallbacks-and-404s">Fallbacks and 404s<a class="headerlink" href="#fallbacks-and-404s" title="Permanent link">&para;</a></h2>
 <p>If no route matches, Erlenmeyer will:</p>
 <ol>
-<li>Try to serve a static file through the <code>Assets</code> manager (if configured);</li>
+<li>Call the fallback handler (if registered via <code>setFallbackHandler()</code>);</li>
 <li>Otherwise, call the 404 handler.</li>
 </ol>
 <p>You can customize the 404 handler at any time:</p>

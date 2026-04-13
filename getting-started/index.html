@@ -532,9 +532,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#serving-static-files-optional" class="md-nav__link">
+  <a href="#serving-static-files" class="md-nav__link">
     <span class="md-ellipsis">
-      🧩 Serving Static Files (Optional)
+      🧩 Serving Static Files
     </span>
   </a>
   
@@ -723,29 +723,6 @@
   
   <span class="md-ellipsis">
     Error Handling
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../concepts/assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1004,29 +981,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1599,17 +1553,14 @@ Here’s a simple example:</p>
 </code></pre></div>
 <p>Then open <a href="http://localhost:8000">http://localhost:8000</a> in your browser.</p>
 <hr />
-<h2 id="serving-static-files-optional">🧩 Serving Static Files (Optional)<a class="headerlink" href="#serving-static-files-optional" title="Permanent link">&para;</a></h2>
-<p>If you use the <code>Assets</code> class, Erlenmeyer can automatically handle static files.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\App;</span>
-<span class="x">use AdaiasMagdiel\Erlenmeyer\Assets;</span>
-
-<span class="x">$assets = new Assets(__DIR__ . &#39;/assets&#39;, &#39;/assets&#39;);</span>
-<span class="x">$app = new App($assets);</span>
-</code></pre></div>
-<p>This setup serves files from <code>/assets/</code> (or <code>/public/assets/</code>),
-with MIME type detection, caching, and 304 responses built-in.</p>
+<h2 id="serving-static-files">🧩 Serving Static Files<a class="headerlink" href="#serving-static-files" title="Permanent link">&para;</a></h2>
+<p>Erlenmeyer does not serve static files through PHP. Configure your web server to deliver
+them directly from a public directory — this is faster and more efficient.</p>
+<p>With Apache, add a <code>.htaccess</code> file (see the section below). With Nginx, add a <code>location</code>
+block for your assets directory. The web server handles CSS, JavaScript, and images at
+full speed without involving PHP.</p>
+<p>For controlled file downloads through PHP (access-gated files, user uploads stored outside
+the web root), use <a href="../reference/Response/"><code>Response::withFile()</code></a>.</p>
 <hr />
 <h2 id="recommended-htaccess">🔧 Recommended <code>.htaccess</code><a class="headerlink" href="#recommended-htaccess" title="Permanent link">&para;</a></h2>
 <p>If you’re hosting on Apache, use this file to route all requests to <code>index.php</code>:</p>
@@ -1638,7 +1589,6 @@ with MIME type detection, caching, and 304 responses built-in.</p>
 <ul>
 <li><img alt="🗺️" class="emojione" src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/png/1f5fa.png" title=":map:" /> <strong><a href="../concepts/routing/">Concepts → Routing</a></strong> — how routes, parameters, and middleware work</li>
 <li><img alt="⚙️" class="emojione" src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/png/2699.png" title=":gear:" /> <strong><a href="../reference/App/">Reference → App</a></strong> — deep dive into the <code>App</code> class</li>
-<li><img alt="📁" class="emojione" src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/png/1f4c1.png" title=":file_folder:" /> <strong><a href="../concepts/assets/">Assets</a></strong> — serving static files and media</li>
 </ul>
 <hr />
 <h2 id="license">⚖️ License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>

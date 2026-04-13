@@ -13,7 +13,7 @@
       
       
       
-        <link rel="prev" href="../assets/">
+        <link rel="prev" href="../errors/">
       
       
         <link rel="next" href="../../guides/building-an-api/">
@@ -599,29 +599,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -760,6 +737,39 @@
       🧩 Example: Login System
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔒 Security
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔒 Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preventing-session-fixation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preventing Session Fixation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#releasing-the-session-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      Releasing the Session Lock
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1015,29 +1025,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1574,6 +1561,14 @@ Erlenmeyer does this automatically whenever you interact with <code>Session</cod
 <td>Removes a key from the session</td>
 </tr>
 <tr>
+<td><code>Session::regenerate($deleteOldSession = true)</code></td>
+<td>Regenerates the session ID</td>
+</tr>
+<tr>
+<td><code>Session::close()</code></td>
+<td>Releases the session lock</td>
+</tr>
+<tr>
 <td><code>Session::flash($key, $value)</code></td>
 <td>Sets a temporary one-request message</td>
 </tr>
@@ -1612,11 +1607,47 @@ Erlenmeyer does this automatically whenever you interact with <code>Session</cod
 <p>This demonstrates how you can combine sessions and flash messages
 to manage authentication in just a few lines.</p>
 <hr />
+<h2 id="security">🔒 Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
+<h3 id="preventing-session-fixation">Preventing Session Fixation<a class="headerlink" href="#preventing-session-fixation" title="Permanent link">&para;</a></h3>
+<p>After any login or privilege change, call <code>Session::regenerate()</code> to replace the
+session ID with a new one. This prevents session fixation attacks where an attacker
+pre-sets a known session ID before the user authenticates.</p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post(‘/login’, function ($req, $res) {</span>
+<span class="x">    $user = authenticate(</span>
+<span class="x">        $req-&gt;getFormDataParam(‘email’),</span>
+<span class="x">        $req-&gt;getFormDataParam(‘password’)</span>
+<span class="x">    );</span>
+
+<span class="x">    if ($user) {</span>
+<span class="x">        Session::regenerate(); // Replace the session ID on privilege change</span>
+<span class="x">        Session::set(‘user_id’, $user[‘id’]);</span>
+<span class="x">        return $res-&gt;redirect(‘/dashboard’);</span>
+<span class="x">    }</span>
+
+<span class="x">    Session::flash(‘error’, ‘Invalid credentials’);</span>
+<span class="x">    return $res-&gt;redirect(‘/login’);</span>
+<span class="x">});</span>
+</code></pre></div>
+<h3 id="releasing-the-session-lock">Releasing the Session Lock<a class="headerlink" href="#releasing-the-session-lock" title="Permanent link">&para;</a></h3>
+<p>PHP holds a file-based session lock for the entire request. On apps with many concurrent
+AJAX calls or long-running operations, this causes requests from the same user to queue.
+Call <code>Session::close()</code> as soon as you are done writing to the session:</p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post(‘/track’, function ($req, $res) {</span>
+<span class="x">    Session::set(‘last_seen’, time());</span>
+<span class="x">    Session::close(); // Other tabs can now access the session immediately</span>
+
+<span class="x">    $data = doSlowWork();</span>
+<span class="x">    $res-&gt;withJson($data)-&gt;send();</span>
+<span class="x">});</span>
+</code></pre></div>
+<hr />
 <h2 id="notes-best-practices">⚖️ Notes &amp; Best Practices<a class="headerlink" href="#notes-best-practices" title="Permanent link">&para;</a></h2>
 <p>✅ <strong>Sessions are automatically started</strong> when needed.
 ❌ <strong>Do not call <code>session_start()</code> manually</strong> — Erlenmeyer handles it.
 🧩 <strong>Flash data is temporary</strong> — once read, it’s gone.
-🔒 <strong>Always validate user input</strong> before storing it in the session.</p>
+🔒 <strong>Always validate user input</strong> before storing it in the session.
+🛡️ <strong>Call <code>Session::regenerate()</code></strong> after login to prevent session fixation.
+⚡ <strong>Call <code>Session::close()</code></strong> before slow operations to unblock concurrent requests.</p>
 <hr />
 <h2 id="summary">🚀 Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <table>
@@ -1638,6 +1669,14 @@ to manage authentication in just a few lines.</p>
 <tr>
 <td><strong>Auto-start</strong></td>
 <td>Sessions start automatically on first use</td>
+</tr>
+<tr>
+<td><strong>Session fixation</strong></td>
+<td><code>regenerate()</code> protects against fixation on privilege change</td>
+</tr>
+<tr>
+<td><strong>Lock release</strong></td>
+<td><code>close()</code> unblocks concurrent AJAX requests</td>
 </tr>
 <tr>
 <td><strong>Clean API</strong></td>

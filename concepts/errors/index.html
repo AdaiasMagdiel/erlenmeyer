@@ -16,7 +16,7 @@
         <link rel="prev" href="../responses/">
       
       
-        <link rel="next" href="../assets/">
+        <link rel="next" href="../sessions/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -718,29 +718,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../sessions/" class="md-nav__link">
         
   
@@ -982,29 +959,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1519,7 +1473,7 @@ Stack trace:
 <p>You can plug in your own logger (e.g., Monolog or a custom PSR-3 implementation)
 by passing it to the <code>App</code> constructor:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$logger = new MyCustomLogger();</span>
-<span class="x">$app = new App(null, $logger);</span>
+<span class="x">$app = new App($logger);</span>
 </code></pre></div>
 <hr />
 <h2 id="handling-php-errors">🧰 Handling PHP Errors<a class="headerlink" href="#handling-php-errors" title="Permanent link">&para;</a></h2>

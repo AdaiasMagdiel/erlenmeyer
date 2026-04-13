@@ -599,29 +599,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../concepts/assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../concepts/sessions/" class="md-nav__link">
         
   
@@ -871,29 +848,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1181,9 +1135,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#logexceptionexception-exception-request-request-null-void" class="md-nav__link">
+  <a href="#logexceptionthrowable-exception-request-request-null-void" class="md-nav__link">
     <span class="md-ellipsis">
-      logException(Exception $exception, ?Request $request = null): void
+      logException(Throwable $exception, ?Request $request = null): void
     </span>
   </a>
   
@@ -1611,7 +1565,7 @@ Each log entry includes a timestamp, level, and message.</p>
 <li>Skips logging if <code>$logDir</code> is <code>null</code>.</li>
 </ul>
 <hr />
-<h3 id="logexceptionexception-exception-request-request-null-void"><code>logException(Exception $exception, ?Request $request = null): void</code><a class="headerlink" href="#logexceptionexception-exception-request-request-null-void" title="Permanent link">&para;</a></h3>
+<h3 id="logexceptionthrowable-exception-request-request-null-void"><code>logException(Throwable $exception, ?Request $request = null): void</code><a class="headerlink" href="#logexceptionthrowable-exception-request-request-null-void" title="Permanent link">&para;</a></h3>
 <p>Logs detailed exception information.</p>
 <table>
 <thead>
@@ -1624,7 +1578,7 @@ Each log entry includes a timestamp, level, and message.</p>
 <tbody>
 <tr>
 <td><code>$exception</code></td>
-<td><code>Exception</code></td>
+<td><code>Throwable</code></td>
 <td>Exception to log.</td>
 </tr>
 <tr>

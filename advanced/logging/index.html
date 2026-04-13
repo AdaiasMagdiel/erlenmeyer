@@ -597,29 +597,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../concepts/sessions/" class="md-nav__link">
         
   
@@ -861,29 +838,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1484,7 +1438,7 @@ It provides standardized severity levels and supports context-aware exception lo
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Logging in Erlenmeyer is powered by the <code>LoggerInterface</code>, which defines two main methods:</p>
 <div class="highlight"><pre><span></span><code><span class="x">public function log(LogLevel $level, string $message): void;</span>
-<span class="x">public function logException(Exception $e, ?Request $request = null): void;</span>
+<span class="x">public function logException(Throwable $e, ?Request $request = null): void;</span>
 </code></pre></div>
 <p>Two implementations are included by default:</p>
 <table>
@@ -1526,7 +1480,7 @@ It provides standardized severity levels and supports context-aware exception lo
 <span class="x">use AdaiasMagdiel\Erlenmeyer\App;</span>
 
 <span class="x">$logger = new FileLogger(__DIR__ . &#39;/logs&#39;);</span>
-<span class="x">$app = new App(null, $logger);</span>
+<span class="x">$app = new App($logger);</span>
 </code></pre></div>
 <ul>
 <li>Logs are stored in <code>info.log</code> inside the specified directory.</li>
@@ -1548,7 +1502,7 @@ This is ideal for development, testing, or containerized deployments.</p>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;</span>
 
 <span class="x">$logger = new ConsoleLogger();</span>
-<span class="x">$app = new App(null, $logger);</span>
+<span class="x">$app = new App($logger);</span>
 </code></pre></div>
 <p>You can also exclude specific levels to reduce verbosity:</p>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;</span>
@@ -1563,7 +1517,7 @@ This is ideal for development, testing, or containerized deployments.</p>
 <span class="x">use MyApp\CustomLogger;</span>
 
 <span class="x">$logger = new CustomLogger();</span>
-<span class="x">$app = new App(null, $logger);</span>
+<span class="x">$app = new App($logger);</span>
 </code></pre></div>
 <p>The logger is used internally by the <code>App</code> to record:</p>
 <ul>

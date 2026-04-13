@@ -595,29 +595,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../concepts/sessions/" class="md-nav__link">
         
   
@@ -859,29 +836,6 @@
   
   <span class="md-ellipsis">
     App
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
     
   </span>
   
@@ -1462,7 +1416,7 @@ This includes:</p>
 <div class="highlight"><pre><span></span><code><span class="x">interface LoggerInterface</span>
 <span class="x">{</span>
 <span class="x">    public function log(LogLevel $level, string $message): void;</span>
-<span class="x">    public function logException(Exception $e, ?Request $request = null): void;</span>
+<span class="x">    public function logException(Throwable $e, ?Request $request = null): void;</span>
 <span class="x">}</span>
 </code></pre></div>
 <p>To create your own logger, simply implement this interface.</p>
@@ -1470,7 +1424,7 @@ This includes:</p>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;</span>
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;</span>
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Request;</span>
-<span class="x">use Exception;</span>
+<span class="x">use Throwable;</span>
 
 <span class="x">class JsonLogger implements LoggerInterface</span>
 <span class="x">{</span>
@@ -1492,7 +1446,7 @@ This includes:</p>
 <span class="x">        file_put_contents($this-&gt;file, json_encode($entry) . PHP_EOL, FILE_APPEND);</span>
 <span class="x">    }</span>
 
-<span class="x">    public function logException(Exception $e, ?Request $request = null): void</span>
+<span class="x">    public function logException(Throwable $e, ?Request $request = null): void</span>
 <span class="x">    {</span>
 <span class="x">        $entry = [</span>
 <span class="x">            &#39;timestamp&#39; =&gt; date(&#39;c&#39;),</span>
@@ -1514,7 +1468,7 @@ This includes:</p>
 <p>Then inject it into your app:</p>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\App;</span>
 
-<span class="x">$app = new App(null, new JsonLogger(__DIR__ . &#39;/logs/app.jsonl&#39;));</span>
+<span class="x">$app = new App(new JsonLogger(__DIR__ . &#39;/logs/app.jsonl&#39;));</span>
 </code></pre></div>
 <p>Each log entry is stored as a separate JSON line — ideal for structured logging and observability tools.</p>
 <hr />
@@ -1582,7 +1536,7 @@ This includes:</p>
 <span class="x">require &#39;vendor/autoload.php&#39;;</span>
 
 <span class="x">$logger = new FileLogger(__DIR__ . &#39;/logs&#39;);</span>
-<span class="x">$app = new App(null, $logger);</span>
+<span class="x">$app = new App($logger);</span>
 
 <span class="x">// Handler for validation exceptions</span>
 <span class="x">$app-&gt;setExceptionHandler(ValidationException::class, function ($req, $res, $e) use ($logger) {</span>

@@ -599,29 +599,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../concepts/sessions/" class="md-nav__link">
         
   
@@ -890,29 +867,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../Assets/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Assets
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../Request/" class="md-nav__link">
         
   
@@ -1093,6 +1047,24 @@
   <a href="#removestring-key-void" class="md-nav__link">
     <span class="md-ellipsis">
       remove(string $key): void
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regeneratebool-deleteoldsession-true-void" class="md-nav__link">
+    <span class="md-ellipsis">
+      regenerate(bool $deleteOldSession = true): void
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#close-void" class="md-nav__link">
+    <span class="md-ellipsis">
+      close(): void
     </span>
   </a>
   
@@ -1556,6 +1528,14 @@ that persist for a single request.</p>
 <td>Supports temporary values that are cleared after retrieval.</td>
 </tr>
 <tr>
+<td><strong>Session Fixation Guard</strong></td>
+<td><code>regenerate()</code> replaces the session ID after privilege changes.</td>
+</tr>
+<tr>
+<td><strong>Lock Release</strong></td>
+<td><code>close()</code> calls <code>session_write_close()</code> to unblock concurrent requests.</td>
+</tr>
+<tr>
 <td><strong>Validation</strong></td>
 <td>Prevents usage of empty session keys.</td>
 </tr>
@@ -1664,6 +1644,79 @@ If no session is started, it calls <code>session_start()</code>.</p>
 </table>
 <p><strong>Returns:</strong> <code>void</code></p>
 <hr />
+<h3 id="regeneratebool-deleteoldsession-true-void"><code>regenerate(bool $deleteOldSession = true): void</code><a class="headerlink" href="#regeneratebool-deleteoldsession-true-void" title="Permanent link">&para;</a></h3>
+<p>Regenerates the session ID to prevent <strong>session fixation</strong> attacks.</p>
+<p>Call this immediately after any change in privilege level — for example, when a user
+logs in or logs out.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$deleteOldSession</code></td>
+<td><code>bool</code></td>
+<td>Whether to delete the old session file. Defaults to <code>true</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>void</code></p>
+<p><strong>Security Note:</strong> Always call <code>Session::regenerate()</code> after successful authentication.
+If the session ID is not regenerated on login, an attacker who obtained the pre-login
+session ID can hijack the authenticated session (session fixation).</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post(&#39;/login&#39;, function (Request $req, Response $res, $params) {</span>
+<span class="x">    $user = authenticateUser(</span>
+<span class="x">        $req-&gt;getFormDataParam(&#39;email&#39;),</span>
+<span class="x">        $req-&gt;getFormDataParam(&#39;password&#39;)</span>
+<span class="x">    );</span>
+
+<span class="x">    if ($user) {</span>
+<span class="x">        Session::regenerate(); // Invalidate the pre-login session ID</span>
+<span class="x">        Session::set(&#39;user_id&#39;, $user[&#39;id&#39;]);</span>
+<span class="x">        $res-&gt;redirect(&#39;/dashboard&#39;)-&gt;send();</span>
+<span class="x">    } else {</span>
+<span class="x">        Session::flash(&#39;error&#39;, &#39;Invalid credentials&#39;);</span>
+<span class="x">        $res-&gt;redirect(&#39;/login&#39;)-&gt;send();</span>
+<span class="x">    }</span>
+<span class="x">});</span>
+</code></pre></div>
+<hr />
+<h3 id="close-void"><code>close(): void</code><a class="headerlink" href="#close-void" title="Permanent link">&para;</a></h3>
+<p>Writes session data and releases the session lock via <code>session_write_close()</code>.</p>
+<p>Call this as soon as you are done writing to the session — particularly before
+long-running operations or parallel AJAX requests. PHP holds a session file lock
+for the entire request duration by default, which causes concurrent requests from
+the same user to queue up.</p>
+<p><strong>Returns:</strong> <code>void</code></p>
+<p><strong>Note:</strong> Only acts if the session is currently active. Safe to call even if the
+session was already closed.</p>
+<p><strong>Example — Release lock before a slow operation:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/report&#39;, function (Request $req, Response $res, $params) {</span>
+<span class="x">    $userId = Session::get(&#39;user_id&#39;);</span>
+
+<span class="x">    // Done reading/writing session — release the lock</span>
+<span class="x">    Session::close();</span>
+
+<span class="x">    // This long operation no longer blocks concurrent tabs</span>
+<span class="x">    $report = generateLargeReport($userId);</span>
+
+<span class="x">    $res-&gt;withJson($report)-&gt;send();</span>
+<span class="x">});</span>
+</code></pre></div>
+<p><strong>Example — AJAX-friendly session handling:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post(&#39;/track&#39;, function (Request $req, Response $res, $params) {</span>
+<span class="x">    Session::set(&#39;last_action&#39;, time());</span>
+<span class="x">    Session::close(); // Allow concurrent AJAX calls to proceed immediately</span>
+
+<span class="x">    $res-&gt;withJson([&#39;ok&#39; =&gt; true])-&gt;send();</span>
+<span class="x">});</span>
+</code></pre></div>
+<hr />
 <h3 id="flashstring-key-mixed-value-void"><code>flash(string $key, mixed $value): void</code><a class="headerlink" href="#flashstring-key-mixed-value-void" title="Permanent link">&para;</a></h3>
 <p>Sets a <strong>flash message</strong> available for the <strong>next request only</strong>.<br />
 Flash data is automatically deleted after retrieval.</p>
@@ -1742,6 +1795,8 @@ Once retrieved, the flash value is deleted immediately.</p>
 <li>Sessions are started lazily — the first call to any method triggers <code>session_start()</code> if necessary.</li>
 <li>Flash messages are stored in the <code>$_SESSION['flash']</code> array internally.</li>
 <li>After retrieving a flash message, it is immediately removed from the session.</li>
+<li>Call <code>Session::regenerate()</code> immediately after any login or privilege escalation to prevent session fixation attacks.</li>
+<li>Call <code>Session::close()</code> before long operations or parallel AJAX calls to release the session file lock and avoid request queuing.</li>
 </ul>
 <hr />
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
