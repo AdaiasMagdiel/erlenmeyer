@@ -255,4 +255,3 @@ Checks whether the request was made via HTTPS.
 
 - [`Response`](./Response.md)
 - [`App`](./App.md)
-- [`Assets`](./Assets.md)

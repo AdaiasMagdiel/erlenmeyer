@@ -363,4 +363,3 @@ Configures **Cross-Origin Resource Sharing (CORS)** headers.
 
 - [`Request`](./Request.md)
 - [`App`](./App.md)
-- [`Assets`](./Assets.md)
