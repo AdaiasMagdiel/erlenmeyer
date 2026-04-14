@@ -301,6 +301,8 @@ Wraps a handler with a stack of middleware closures using reverse iteration.
 
 ## See Also
 
+- [`Router`](./Router.md)
+- [`ExceptionHandler`](./ExceptionHandler.md)
 - [`Request`](./Request.md)
 - [`Response`](./Response.md)
 - [`Session`](./Session.md)

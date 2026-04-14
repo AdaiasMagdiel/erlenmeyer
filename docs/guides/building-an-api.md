@@ -193,7 +193,7 @@ $app->setExceptionHandler(Throwable::class, function (Request $req, Response $re
 You can use **ErlenClient** to test your API routes programmatically.
 
 ```php
-use AdaiasMagdiel\Erlenmeyer\ErlenClient;
+use AdaiasMagdiel\Erlenmeyer\Testing\ErlenClient;
 
 $client = new ErlenClient($app);
 

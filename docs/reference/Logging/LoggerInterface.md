@@ -45,5 +45,6 @@ Logs an exception, optionally including HTTP request context.
 
 ## Implementations
 
+- [`NullLogger`](./NullLogger.md) — default, discards all messages
 - [`ConsoleLogger`](./ConsoleLogger.md)
 - [`FileLogger`](./FileLogger.md)
