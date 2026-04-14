@@ -53,10 +53,13 @@ nav:
   - Reference:
       - Core:
           - App: reference/App.md
+          - Router: reference/Router.md
+          - ExceptionHandler: reference/ExceptionHandler.md
           - Request: reference/Request.md
           - Response: reference/Response.md
           - Session: reference/Session.md
       - Logging:
+          - NullLogger: reference/Logging/NullLogger.md
           - ConsoleLogger: reference/Logging/ConsoleLogger.md
           - FileLogger: reference/Logging/FileLogger.md
           - LoggerInterface: reference/Logging/LoggerInterface.md
