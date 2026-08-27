@@ -57,6 +57,17 @@ Creates a new `Request` instance, optionally using custom superglobals
 
 ## Public Methods
 
+### `setTrustedProxies(array $ips): void`
+
+**Static.** Sets the list of proxy IPs allowed to set `X-Forwarded-For`. Also available as
+`App::setTrustedProxies()`, which delegates here. See [`getIp()`](#getip-string) below.
+
+| Parameter | Type    | Description                          |
+| --------- | ------- | ------------------------------------- |
+| `$ips`    | `array` | Trusted proxy IP addresses. Empty (the default) means `X-Forwarded-For` is never trusted. |
+
+---
+
 ### `getHeader(string $name): ?string`
 
 Retrieves a header value by name (case-insensitive).
@@ -207,7 +218,11 @@ Returns an uploaded file’s metadata by key (and index for multiple uploads).
 
 ### `getIp(): ?string`
 
-Returns the detected client IP address.
+Returns the detected client IP address. Defaults to `REMOTE_ADDR`. If `REMOTE_ADDR` is in
+the list configured via [`setTrustedProxies()`](#settrustedproxiesarray-ips-void), the IP
+is instead read from the leftmost address in `X-Forwarded-For`. With no trusted proxies
+configured, `X-Forwarded-For` is never consulted — this prevents a client from spoofing its
+IP simply by sending that header.
 
 **Returns:** `?string` – IP address or `null`.
 

@@ -212,7 +212,8 @@ RewriteRule ^ index.php [L]
 
 ## 🚀 What’s Next
 
-- :map: **[Concepts → Routing](concepts/routing.md)** — how routes, parameters, and middleware work
+- :map: **[Concepts → Routing](concepts/routing.md)** — how routes, parameters, middleware, and route groups work
+- :satellite: **[Concepts → Requests](concepts/requests.md)** — reading input, files, and resolving the real client IP behind a proxy
 - :gear: **[Reference → App](reference/App.md)** — deep dive into the `App` class
 
 ---

@@ -115,8 +115,22 @@ $ip = $req->getIp();
 $ua = $req->getUserAgent();
 ```
 
-The IP detection respects proxy headers like `X-Forwarded-For`,
-but always falls back to `REMOTE_ADDR`.
+By default, `getIp()` returns `REMOTE_ADDR` — the address of whoever opened the TCP
+connection. It does **not** trust the `X-Forwarded-For` header, because any client can send
+that header with an arbitrary value; trusting it blindly lets a client spoof its IP for
+rate limiting, audit logs, or IP-based access rules.
+
+If your app sits behind a reverse proxy or load balancer, tell Erlenmeyer which peer is
+allowed to set that header:
+
+```php
+$app->setTrustedProxies(['10.0.0.1']); // your proxy's IP
+```
+
+Once `REMOTE_ADDR` matches an entry in that list, `getIp()` reads the client IP from the
+leftmost address in `X-Forwarded-For` (the originating client, per the standard proxy chain
+convention) instead of `REMOTE_ADDR`. With no trusted proxies configured (the default),
+`X-Forwarded-For` is ignored entirely.
 
 ---
 

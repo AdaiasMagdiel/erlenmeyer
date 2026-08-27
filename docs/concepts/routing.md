@@ -96,6 +96,42 @@ $app->set404Handler(function ($req, $res) {
 
 ---
 
+## Route Groups
+
+Group related routes under a shared path prefix and middleware set with `group()`:
+
+```php
+$app->group('/admin', function () use ($app) {
+    $app->get('/users', function ($req, $res) {
+        $res->withJson(['users' => []])->send();
+    });
+
+    $app->get('/users/[id]', function ($req, $res, $params) {
+        $res->withJson(['id' => $params->id])->send();
+    });
+}, [$authMiddleware]);
+```
+
+This registers `GET /admin/users` and `GET /admin/users/[id]`, both running `$authMiddleware`
+before the route handler. The prefix and middlewares only apply to routes registered inside
+the callback — nothing outside the group is affected.
+
+Groups can be nested; prefixes concatenate and middlewares accumulate from the outermost
+group inward:
+
+```php
+$app->group('/admin', function () use ($app) {
+    $app->group('/reports', function () use ($app) {
+        $app->get('/sales', $handler); // -> GET /admin/reports/sales
+    }, [$reportsMiddleware]);
+}, [$authMiddleware]);
+// /admin/reports/sales runs $authMiddleware then $reportsMiddleware, then $handler
+```
+
+`redirect()` called inside a group is prefixed the same way as routes.
+
+---
+
 ## Middlewares
 
 Each route can have its own middleware chain.
@@ -125,10 +161,20 @@ They will be applied to **every** route automatically.
 
 ## Under the hood
 
-- The `App` class keeps an internal map of routes by method.
-- Each route is stored as a regex pattern and a handler.
-- When a request arrives, `handle()` loops through the registered routes, testing each pattern with `preg_match`.
-- If a match is found, parameters are mapped into an object and passed to the handler.
-- If none match, the fallback or 404 handler is invoked.
+Route matching is handled by the `Router` class and is optimized to avoid scanning every
+registered route on each request:
 
-This simple mechanism allows Erlenmeyer to remain lightweight, predictable, and easy to debug.
+- **Redirects** and **static routes** (no `[param]` segments, e.g. `/users`, `/about`) are
+  stored in hash maps keyed by the normalized URI. Matching them is a direct `O(1)` lookup —
+  no regex involved.
+- **Dynamic routes** (containing `[param]` segments) are compiled to a regex once, at
+  registration time, and grouped by their first static URI segment (e.g. everything under
+  `/users/...` is bucketed together). On each request, only the bucket matching the incoming
+  URI's first segment — plus routes whose first segment is itself dynamic — is scanned with
+  `preg_match`, instead of every dynamic route in the app.
+- The first candidate whose pattern matches wins; matched groups are mapped into the
+  `$params` object passed to your handler.
+- If nothing matches, the fallback handler runs if registered, otherwise the 404 handler.
+
+This keeps lookups fast without needing a general-purpose routing tree, which fits
+Erlenmeyer's goal of staying small and easy to reason about.
