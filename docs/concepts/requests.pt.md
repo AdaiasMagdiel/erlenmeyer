@@ -1,5 +1,9 @@
 # Handling Requests
 
+!!! note "Tradução em andamento"
+    Esta página ainda não foi traduzida para pt-BR e está exibindo o conteúdo original em inglês. [Ajude a traduzir](https://github.com/AdaiasMagdiel/Erlenmeyer).
+
+
 Erlenmeyer’s `Request` object gives you a clean, expressive way  
 to interact with incoming HTTP requests — from query strings and forms  
 to JSON payloads, uploaded files, and headers.

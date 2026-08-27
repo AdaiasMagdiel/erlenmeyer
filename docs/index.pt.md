@@ -1,5 +1,9 @@
 # Erlenmeyer Framework
 
+!!! note "Tradução em andamento"
+    Esta página ainda não foi traduzida para pt-BR e está exibindo o conteúdo original em inglês. [Ajude a traduzir](https://github.com/AdaiasMagdiel/Erlenmeyer).
+
+
 > ⚗️ A lightweight, modular, and elegant PHP microframework for building modern web applications and APIs.
 
 ---

@@ -1,5 +1,9 @@
 # Getting Started
 
+!!! note "Tradução em andamento"
+    Esta página ainda não foi traduzida para pt-BR e está exibindo o conteúdo original em inglês. [Ajude a traduzir](https://github.com/AdaiasMagdiel/Erlenmeyer).
+
+
 > ⚗️ Build modern PHP apps with simplicity — the Erlenmeyer way.
 
 ---
