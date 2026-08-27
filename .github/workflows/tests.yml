@@ -22,10 +22,10 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           extensions: json, mbstring
-          coverage: none
+          coverage: pcov
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
       - name: Run tests
-        run: ./vendor/bin/pest
+        run: ./vendor/bin/pest --coverage --min=85
