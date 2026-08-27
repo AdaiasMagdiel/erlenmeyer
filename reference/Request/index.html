@@ -1032,6 +1032,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#settrustedproxiesarray-ips-void" class="md-nav__link">
+    <span class="md-ellipsis">
+      setTrustedProxies(array $ips): void
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#getheaderstring-name-string" class="md-nav__link">
     <span class="md-ellipsis">
       getHeader(string $name): ?string
@@ -1628,6 +1637,26 @@ for manual request handling and testing.</p>
 </table>
 <hr />
 <h2 id="public-methods">Public Methods<a class="headerlink" href="#public-methods" title="Permanent link">&para;</a></h2>
+<h3 id="settrustedproxiesarray-ips-void"><code>setTrustedProxies(array $ips): void</code><a class="headerlink" href="#settrustedproxiesarray-ips-void" title="Permanent link">&para;</a></h3>
+<p><strong>Static.</strong> Sets the list of proxy IPs allowed to set <code>X-Forwarded-For</code>. Also available as
+<code>App::setTrustedProxies()</code>, which delegates here. See <a href="#getip-string"><code>getIp()</code></a> below.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$ips</code></td>
+<td><code>array</code></td>
+<td>Trusted proxy IP addresses. Empty (the default) means <code>X-Forwarded-For</code> is never trusted.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="getheaderstring-name-string"><code>getHeader(string $name): ?string</code><a class="headerlink" href="#getheaderstring-name-string" title="Permanent link">&para;</a></h3>
 <p>Retrieves a header value by name (case-insensitive).</p>
 <table>
@@ -1809,7 +1838,11 @@ Supports <code>_method</code> override via POST or <code>X-HTTP-Method-Override<
 <p><strong>Returns:</strong> <code>?array</code> – File info (<code>name</code>, <code>type</code>, <code>tmp_name</code>, <code>error</code>, <code>size</code>) or <code>null</code>.</p>
 <hr />
 <h3 id="getip-string"><code>getIp(): ?string</code><a class="headerlink" href="#getip-string" title="Permanent link">&para;</a></h3>
-<p>Returns the detected client IP address.</p>
+<p>Returns the detected client IP address. Defaults to <code>REMOTE_ADDR</code>. If <code>REMOTE_ADDR</code> is in
+the list configured via <a href="#settrustedproxiesarray-ips-void"><code>setTrustedProxies()</code></a>, the IP
+is instead read from the leftmost address in <code>X-Forwarded-For</code>. With no trusted proxies
+configured, <code>X-Forwarded-For</code> is never consulted — this prevents a client from spoofing its
+IP simply by sending that header.</p>
 <p><strong>Returns:</strong> <code>?string</code> – IP address or <code>null</code>.</p>
 <hr />
 <h3 id="getuseragent-string"><code>getUserAgent(): ?string</code><a class="headerlink" href="#getuseragent-string" title="Permanent link">&para;</a></h3>

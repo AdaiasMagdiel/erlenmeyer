@@ -584,6 +584,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#route-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      Route Groups
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#middlewares" class="md-nav__link">
     <span class="md-ellipsis">
       Middlewares
@@ -1328,6 +1337,32 @@ Each route maps an HTTP method and a URI pattern to a callable handler:</p>
 <span class="x">});</span>
 </code></pre></div>
 <hr />
+<h2 id="route-groups">Route Groups<a class="headerlink" href="#route-groups" title="Permanent link">&para;</a></h2>
+<p>Group related routes under a shared path prefix and middleware set with <code>group()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;group('/admin', function () use ($app) {</span>
+<span class="x">    $app-&gt;get('/users', function ($req, $res) {</span>
+<span class="x">        $res-&gt;withJson(['users' =&gt; []])-&gt;send();</span>
+<span class="x">    });</span>
+
+<span class="x">    $app-&gt;get('/users/[id]', function ($req, $res, $params) {</span>
+<span class="x">        $res-&gt;withJson(['id' =&gt; $params-&gt;id])-&gt;send();</span>
+<span class="x">    });</span>
+<span class="x">}, [$authMiddleware]);</span>
+</code></pre></div>
+<p>This registers <code>GET /admin/users</code> and <code>GET /admin/users/[id]</code>, both running <code>$authMiddleware</code>
+before the route handler. The prefix and middlewares only apply to routes registered inside
+the callback — nothing outside the group is affected.</p>
+<p>Groups can be nested; prefixes concatenate and middlewares accumulate from the outermost
+group inward:</p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;group('/admin', function () use ($app) {</span>
+<span class="x">    $app-&gt;group('/reports', function () use ($app) {</span>
+<span class="x">        $app-&gt;get('/sales', $handler); // -&gt; GET /admin/reports/sales</span>
+<span class="x">    }, [$reportsMiddleware]);</span>
+<span class="x">}, [$authMiddleware]);</span>
+<span class="x">// /admin/reports/sales runs $authMiddleware then $reportsMiddleware, then $handler</span>
+</code></pre></div>
+<p><code>redirect()</code> called inside a group is prefixed the same way as routes.</p>
+<hr />
 <h2 id="middlewares">Middlewares<a class="headerlink" href="#middlewares" title="Permanent link">&para;</a></h2>
 <p>Each route can have its own middleware chain.
 A middleware receives a <code>$next()</code> callback to continue the execution flow:</p>
@@ -1347,14 +1382,23 @@ A middleware receives a <code>$next()</code> callback to continue the execution 
 <p>They will be applied to <strong>every</strong> route automatically.</p>
 <hr />
 <h2 id="under-the-hood">Under the hood<a class="headerlink" href="#under-the-hood" title="Permanent link">&para;</a></h2>
+<p>Route matching is handled by the <code>Router</code> class and is optimized to avoid scanning every
+registered route on each request:</p>
 <ul>
-<li>The <code>App</code> class keeps an internal map of routes by method.</li>
-<li>Each route is stored as a regex pattern and a handler.</li>
-<li>When a request arrives, <code>handle()</code> loops through the registered routes, testing each pattern with <code>preg_match</code>.</li>
-<li>If a match is found, parameters are mapped into an object and passed to the handler.</li>
-<li>If none match, the fallback or 404 handler is invoked.</li>
+<li><strong>Redirects</strong> and <strong>static routes</strong> (no <code>[param]</code> segments, e.g. <code>/users</code>, <code>/about</code>) are
+  stored in hash maps keyed by the normalized URI. Matching them is a direct <code>O(1)</code> lookup —
+  no regex involved.</li>
+<li><strong>Dynamic routes</strong> (containing <code>[param]</code> segments) are compiled to a regex once, at
+  registration time, and grouped by their first static URI segment (e.g. everything under
+  <code>/users/...</code> is bucketed together). On each request, only the bucket matching the incoming
+  URI's first segment — plus routes whose first segment is itself dynamic — is scanned with
+  <code>preg_match</code>, instead of every dynamic route in the app.</li>
+<li>The first candidate whose pattern matches wins; matched groups are mapped into the
+  <code>$params</code> object passed to your handler.</li>
+<li>If nothing matches, the fallback handler runs if registered, otherwise the 404 handler.</li>
 </ul>
-<p>This simple mechanism allows Erlenmeyer to remain lightweight, predictable, and easy to debug.</p>
+<p>This keeps lookups fast without needing a general-purpose routing tree, which fits
+Erlenmeyer's goal of staying small and easy to reason about.</p>
 
 
 

@@ -1360,8 +1360,18 @@ header is <code>application/json</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="x">$ip = $req-&gt;getIp();</span>
 <span class="x">$ua = $req-&gt;getUserAgent();</span>
 </code></pre></div>
-<p>The IP detection respects proxy headers like <code>X-Forwarded-For</code>,
-but always falls back to <code>REMOTE_ADDR</code>.</p>
+<p>By default, <code>getIp()</code> returns <code>REMOTE_ADDR</code> — the address of whoever opened the TCP
+connection. It does <strong>not</strong> trust the <code>X-Forwarded-For</code> header, because any client can send
+that header with an arbitrary value; trusting it blindly lets a client spoof its IP for
+rate limiting, audit logs, or IP-based access rules.</p>
+<p>If your app sits behind a reverse proxy or load balancer, tell Erlenmeyer which peer is
+allowed to set that header:</p>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;setTrustedProxies(['10.0.0.1']); // your proxy's IP</span>
+</code></pre></div>
+<p>Once <code>REMOTE_ADDR</code> matches an entry in that list, <code>getIp()</code> reads the client IP from the
+leftmost address in <code>X-Forwarded-For</code> (the originating client, per the standard proxy chain
+convention) instead of <code>REMOTE_ADDR</code>. With no trusted proxies configured (the default),
+<code>X-Forwarded-For</code> is ignored entirely.</p>
 <hr />
 <h2 id="handling-tokens-or-auth-checks">Handling Tokens or Auth Checks<a class="headerlink" href="#handling-tokens-or-auth-checks" title="Permanent link">&para;</a></h2>
 <p>Because the <code>Request</code> gives you direct access to headers and params,
