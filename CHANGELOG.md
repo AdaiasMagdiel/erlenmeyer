@@ -2,6 +2,13 @@
 
 A record of all notable changes to **Erlenmeyer**.
 
+## [6.0.2] – 2026-08-27
+
+### 🧹 **Housekeeping**
+
+- Pinned `config.platform.php` to `8.2.0` in `composer.json` so `composer update` always resolves dev dependencies against the minimum supported PHP version, instead of whatever PHP happens to be installed on the machine running the update. The `6.0.1` lock file had been resolved on PHP 8.4 and pulled in `symfony/*` packages requiring PHP ≥8.4.1, breaking `composer install` on PHP 8.2/8.3 — fixed here.
+- Added test coverage to CI (`pest --coverage --min=85`) across the PHP 8.2/8.3/8.4 matrix.
+
 ## [6.0.1] – 2026-08-27
 
 ### ⚠️ **BREAKING CHANGES**
