@@ -3,9 +3,6 @@
 namespace AdaiasMagdiel\Erlenmeyer;
 
 use AdaiasMagdiel\Erlenmeyer\Exception\Handler as ExceptionHandler;
-use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
-use AdaiasMagdiel\Erlenmeyer\Logging\NullLogger;
 use Closure;
 use ErrorException;
 use stdClass;
@@ -19,12 +16,17 @@ use Throwable;
  */
 class App
 {
-	private LoggerInterface $logger;
 	private Router $router;
 	private ExceptionHandler $exceptionHandler;
 
 	/** @var array List of global middlewares applied to all routes. */
 	private array $globalMiddlewares = [];
+
+	/** @var array Stack of active route prefix segments. */
+	private array $prefixStack = [];
+
+	/** @var array Stack of middleware arrays per active group. */
+	private array $middlewareStack = [];
 
 	/** @var Closure Default 404 handler. */
 	private Closure $notFoundHandler;
@@ -32,15 +34,14 @@ class App
 	/** @var Closure|null Custom fallback handler. */
 	private ?Closure $fallbackHandler = null;
 
-	public function __construct(?LoggerInterface $logger = null)
+	public function __construct()
 	{
 		if (session_status() === PHP_SESSION_NONE) {
 			session_start();
 		}
 
-		$this->logger = $logger ?? new NullLogger();
-		$this->router = new Router($this->logger);
-		$this->exceptionHandler = new ExceptionHandler($this->logger);
+		$this->router = new Router();
+		$this->exceptionHandler = new ExceptionHandler();
 
 		// Default 404 Handler
 		$this->set404Handler(function (Request $req, Response $res) {
@@ -55,13 +56,17 @@ class App
 			$res->setStatusCode(500)
 				->withHtml("<h1>500 Internal Server Error</h1><p>Error: {$msg}</p>")
 				->send();
-			$this->logger->logException($e, $req);
 		});
 	}
 
 	// -------------------------------------------------------------------------
 	// Configuration & Registration Methods
 	// -------------------------------------------------------------------------
+
+	public function setTrustedProxies(array $ips): void
+	{
+		Request::setTrustedProxies($ips);
+	}
 
 	public function setExceptionHandler(string $throwableClass, callable $handler): void
 	{
@@ -87,63 +92,96 @@ class App
 	// Routing Proxy Methods
 	// -------------------------------------------------------------------------
 
+	public function group(string $prefix, callable $callback, array $middlewares = []): void
+	{
+		$this->prefixStack[] = rtrim($prefix, '/');
+		$this->middlewareStack[] = $middlewares;
+		try {
+			$callback();
+		} finally {
+			array_pop($this->prefixStack);
+			array_pop($this->middlewareStack);
+		}
+	}
+
+	private function buildRoute(string $route): string
+	{
+		$prefix = implode('', $this->prefixStack);
+		if ($prefix === '') return $route;
+		if ($route === '/') return $prefix;
+		return $prefix . $route;
+	}
+
+	private function buildMiddlewares(array $routeMiddlewares): array
+	{
+		$all = [];
+		foreach ($this->middlewareStack as $groupMiddlewares) {
+			$all = array_merge($all, $groupMiddlewares);
+		}
+		return array_merge($all, $routeMiddlewares);
+	}
+
 	public function route(string $method, string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add($method, $route, $action, $middlewares);
+		$this->router->add($method, $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function get(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('GET', $route, $action, $middlewares);
+		$this->router->add('GET', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function post(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('POST', $route, $action, $middlewares);
+		$this->router->add('POST', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function put(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('PUT', $route, $action, $middlewares);
+		$this->router->add('PUT', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function delete(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('DELETE', $route, $action, $middlewares);
+		$this->router->add('DELETE', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function patch(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('PATCH', $route, $action, $middlewares);
+		$this->router->add('PATCH', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function options(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('OPTIONS', $route, $action, $middlewares);
+		$this->router->add('OPTIONS', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function head(string $route, callable $action, array $middlewares = []): void
 	{
-		$this->router->add('HEAD', $route, $action, $middlewares);
+		$this->router->add('HEAD', $this->buildRoute($route), $action, $this->buildMiddlewares($middlewares));
 	}
 
 	public function any(string $route, callable $action, array $middlewares = []): void
 	{
+		$built = $this->buildRoute($route);
+		$builtMiddlewares = $this->buildMiddlewares($middlewares);
 		foreach (['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'] as $method) {
-			$this->router->add($method, $route, $action, $middlewares);
+			$this->router->add($method, $built, $action, $builtMiddlewares);
 		}
 	}
 
 	public function match(array $methods, string $route, callable $action, array $middlewares = []): void
 	{
+		$built = $this->buildRoute($route);
+		$builtMiddlewares = $this->buildMiddlewares($middlewares);
 		foreach ($methods as $method) {
-			$this->router->add(strtoupper($method), $route, $action, $middlewares);
+			$this->router->add(strtoupper($method), $built, $action, $builtMiddlewares);
 		}
 	}
 
 	public function redirect(string $from, string $to, bool $permanent = false): void
 	{
-		$this->router->redirect($from, $to, $permanent);
+		$this->router->redirect($this->buildRoute($from), $to, $permanent);
 	}
 
 	// -------------------------------------------------------------------------
@@ -153,7 +191,6 @@ class App
 	public function run(): void
 	{
 		set_error_handler(function ($severity, $message, $file, $line) {
-			$this->logger->log(LogLevel::ERROR, "PHP error: $message in $file:$line (severity: $severity)");
 			throw new ErrorException($message, 500, $severity, $file, $line);
 		});
 
@@ -193,8 +230,6 @@ class App
 
 	public function handle(Request $req, Response $res): Response
 	{
-		$this->logger->log(LogLevel::INFO, 'Handling request via App::handle()');
-
 		try {
 			$match = $this->router->match($req->getMethod(), $req->getUri());
 
@@ -213,7 +248,6 @@ class App
 			}
 
 			// No route found
-			$this->logger->log(LogLevel::WARNING, "No route matched for: " . $req->getMethod() . " " . $req->getUri());
 			$this->handleFallbackOrNotFound($req, $res);
 			return $res;
 		} catch (Throwable $e) {
@@ -232,17 +266,14 @@ class App
 			// Ultimate fallback if no handler is registered even for Throwable
 			http_response_code(500);
 			echo "Unexpected error.";
-			$this->logger->logException($e);
 		}
 	}
 
 	private function handleFallbackOrNotFound(Request $req, Response $res): void
 	{
 		if ($this->fallbackHandler) {
-			$this->logger->log(LogLevel::INFO, 'Executing fallback handler');
 			($this->fallbackHandler)($req, $res, new stdClass());
 		} else {
-			$this->logger->log(LogLevel::INFO, 'Executing 404 handler');
 			$handler = $this->applyMiddlewares($this->notFoundHandler, $this->globalMiddlewares);
 			$handler($req, $res, new stdClass());
 		}

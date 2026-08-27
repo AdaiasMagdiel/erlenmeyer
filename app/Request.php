@@ -72,6 +72,13 @@ class Request
 
     private const DOT_PLACEHOLDER = '_w_ERLEN_DOT_RPL_w_';
 
+    private static array $trustedProxies = [];
+
+    public static function setTrustedProxies(array $ips): void
+    {
+        self::$trustedProxies = $ips;
+    }
+
     /**
      * Creates a new Request instance.
      *
@@ -277,10 +284,21 @@ class Request
     {
         $this->ip = filter_var($this->server['REMOTE_ADDR'] ?? null, FILTER_VALIDATE_IP) ?: null;
 
-        if (isset($this->server['HTTP_X_FORWARDED_FOR'])) {
-            $forwarded = $this->server['HTTP_X_FORWARDED_FOR'];
-            $ips = explode(',', $forwarded);
-            $this->ip = filter_var(trim($ips[0]), FILTER_VALIDATE_IP) ?: $this->ip;
+        $remoteAddr = $this->server['REMOTE_ADDR'] ?? null;
+        if (
+            isset($this->server['HTTP_X_FORWARDED_FOR'])
+            && !empty(self::$trustedProxies)
+            && in_array($remoteAddr, self::$trustedProxies, true)
+        ) {
+            // The leftmost entry is the originating client; each proxy in the
+            // chain appends its own address to the right as it forwards the
+            // request. Only the immediate connecting peer (REMOTE_ADDR) is
+            // verified as trusted, so we take that leftmost entry as-is.
+            $ips = array_map('trim', explode(',', $this->server['HTTP_X_FORWARDED_FOR']));
+            $valid = filter_var($ips[0], FILTER_VALIDATE_IP);
+            if ($valid) {
+                $this->ip = $valid;
+            }
         }
 
         $this->userAgent = $this->server['HTTP_USER_AGENT'] ?? null;

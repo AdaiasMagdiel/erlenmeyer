@@ -2,8 +2,6 @@
 
 namespace AdaiasMagdiel\Erlenmeyer\Exception;
 
-use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use Closure;
 use InvalidArgumentException;
 use Throwable;
@@ -11,12 +9,6 @@ use Throwable;
 class Handler
 {
     private array $handlers = [];
-    private LoggerInterface $logger;
-
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
 
     public function register(string $throwableClass, callable $handler): void
     {
@@ -24,7 +16,6 @@ class Handler
             throw new InvalidArgumentException("Invalid throwable class: $throwableClass");
         }
         $this->handlers[$throwableClass] = Closure::fromCallable($handler);
-        $this->logger->log(LogLevel::INFO, "Exception handler registered for class: $throwableClass");
     }
 
     public function getHandler(Throwable $e): ?Closure

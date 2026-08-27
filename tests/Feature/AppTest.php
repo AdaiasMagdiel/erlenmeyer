@@ -3,13 +3,7 @@
 use AdaiasMagdiel\Erlenmeyer\App;
 use AdaiasMagdiel\Erlenmeyer\Request;
 use AdaiasMagdiel\Erlenmeyer\Response;
-use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 use AdaiasMagdiel\Erlenmeyer\Testing\ErlenClient;
-
-beforeEach(function () {
-    $this->logger = new ConsoleLogger([LogLevel::INFO]);
-});
 
 test('app can be instantiated without logger', function () {
     $app = new App(null);
@@ -17,7 +11,7 @@ test('app can be instantiated without logger', function () {
 });
 
 test('app registers GET route via proxy', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->get('/test', function (Request $req, Response $res) {
         $res->withText('GET route works');
     });
@@ -29,7 +23,7 @@ test('app registers GET route via proxy', function () {
 });
 
 test('app registers POST route via proxy', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->post('/test', function (Request $req, Response $res) {
         $res->withText('POST route works');
     });
@@ -41,7 +35,7 @@ test('app registers POST route via proxy', function () {
 });
 
 test('app handles route parameters correctly', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->get('/users/[id]', function (Request $req, Response $res, $params) {
         $res->withJson(['user_id' => $params->id]);
     });
@@ -54,7 +48,7 @@ test('app handles route parameters correctly', function () {
 });
 
 test('app returns 404 for non-existent routes', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $client = new ErlenClient($app);
 
     $response = $client->get('/non-existent-route');
@@ -62,7 +56,7 @@ test('app returns 404 for non-existent routes', function () {
 });
 
 test('app handles custom 404 handler', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->set404Handler(function (Request $req, Response $res) {
         $res->setStatusCode(404)->withJson(['error' => 'Custom 404']);
     });
@@ -76,7 +70,7 @@ test('app handles custom 404 handler', function () {
 });
 
 test('app applies global middlewares', function () {
-    $app = new App($this->logger);
+    $app = new App();
 
     $app->addMiddleware(function (Request $req, Response $res, $next) {
         $res->setHeader('X-Middleware', 'applied');
@@ -94,7 +88,7 @@ test('app applies global middlewares', function () {
 });
 
 test('app handles redirects', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->redirect('/old1', '/new1', true);
     $app->redirect('/old2', '/new2', false);
 
@@ -110,7 +104,7 @@ test('app handles redirects', function () {
 });
 
 test('app handles exceptions with custom handler', function () {
-    $app = new App($this->logger);
+    $app = new App();
 
     $app->setExceptionHandler(RuntimeException::class, function (Request $req, Response $res, Throwable $e) {
         $res->setStatusCode(500)->withJson(['error' => 'Custom handler: ' . $e->getMessage()]);
@@ -129,7 +123,7 @@ test('app handles exceptions with custom handler', function () {
 });
 
 test('app handles multiple HTTP methods with any', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->any('/any-route', function (Request $req, Response $res) {
         $res->withText('Any method works: ' . $req->getMethod());
     });
@@ -144,7 +138,7 @@ test('app handles multiple HTTP methods with any', function () {
 });
 
 test('app handles route with and without trailing slash consistently', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->get('/test', function (Request $req, Response $res) {
         $res->withText('Route matched');
     });
@@ -159,7 +153,7 @@ test('app handles route with and without trailing slash consistently', function 
 });
 
 test('app sanitizes default error output', function () {
-    $app = new App($this->logger);
+    $app = new App();
     $app->get('/unsafe', function () {
         throw new Exception('<script>alert("XSS")</script>');
     });
@@ -170,4 +164,183 @@ test('app sanitizes default error output', function () {
     expect($response->getStatusCode())->toBe(500)
         ->and($response->getBody())->toContain('&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;')
         ->and($response->getBody())->not->toContain('<script>alert("XSS")</script>');
+});
+
+// -------------------------------------------------------------------------
+// HTTP method proxies
+// -------------------------------------------------------------------------
+
+test('app registers PUT route via proxy', function () {
+    $app = new App();
+    $app->put('/resource', function (Request $req, Response $res) {
+        $res->withText('PUT works');
+    });
+    $response = (new ErlenClient($app))->put('/resource');
+    expect($response->getBody())->toBe('PUT works');
+});
+
+test('app registers DELETE route via proxy', function () {
+    $app = new App();
+    $app->delete('/resource', function (Request $req, Response $res) {
+        $res->withText('DELETE works');
+    });
+    $response = (new ErlenClient($app))->delete('/resource');
+    expect($response->getBody())->toBe('DELETE works');
+});
+
+test('app registers PATCH route via proxy', function () {
+    $app = new App();
+    $app->patch('/resource', function (Request $req, Response $res) {
+        $res->withText('PATCH works');
+    });
+    $response = (new ErlenClient($app))->patch('/resource');
+    expect($response->getBody())->toBe('PATCH works');
+});
+
+test('app registers OPTIONS route via proxy', function () {
+    $app = new App();
+    $app->options('/resource', function (Request $req, Response $res) {
+        $res->withText('OPTIONS works');
+    });
+    $response = (new ErlenClient($app))->options('/resource');
+    expect($response->getBody())->toBe('OPTIONS works');
+});
+
+test('app registers HEAD route via proxy', function () {
+    $app = new App();
+    $app->head('/resource', function (Request $req, Response $res) {
+        $res->withText('HEAD works');
+    });
+    $response = (new ErlenClient($app))->head('/resource');
+    expect($response->getStatusCode())->toBe(200);
+});
+
+test('app registers route via generic route() method', function () {
+    $app = new App();
+    $app->route('GET', '/generic', function (Request $req, Response $res) {
+        $res->withText('route() works');
+    });
+    $response = (new ErlenClient($app))->get('/generic');
+    expect($response->getBody())->toBe('route() works');
+});
+
+test('app match() registers route for specific methods only', function () {
+    $app = new App();
+    $app->match(['GET', 'POST'], '/multi', function (Request $req, Response $res) {
+        $res->withText('match: ' . $req->getMethod());
+    });
+    $client = new ErlenClient($app);
+    expect($client->get('/multi')->getBody())->toBe('match: GET');
+    expect($client->post('/multi')->getBody())->toBe('match: POST');
+    expect($client->put('/multi')->getStatusCode())->toBe(404);
+});
+
+// -------------------------------------------------------------------------
+// Fallback handler
+// -------------------------------------------------------------------------
+
+test('app uses fallback handler instead of 404 when set', function () {
+    $app = new App();
+    $app->setFallbackHandler(function (Request $req, Response $res) {
+        $res->setStatusCode(200)->withText('fallback: ' . $req->getUri());
+    });
+    $response = (new ErlenClient($app))->get('/anything');
+    expect($response->getStatusCode())->toBe(200)
+        ->and($response->getBody())->toContain('fallback: /anything');
+});
+
+// -------------------------------------------------------------------------
+// Route groups
+// -------------------------------------------------------------------------
+
+test('app group prefixes routes correctly', function () {
+    $app = new App();
+    $app->group('/api', function () use ($app) {
+        $app->get('/', function (Request $req, Response $res) {
+            $res->withText('api root');
+        });
+        $app->get('/users', function (Request $req, Response $res) {
+            $res->withText('api users');
+        });
+        $app->get('/users/[id]', function (Request $req, Response $res, $params) {
+            $res->withText('user ' . $params->id);
+        });
+    });
+    $client = new ErlenClient($app);
+    expect($client->get('/api')->getBody())->toBe('api root');
+    expect($client->get('/api/users')->getBody())->toBe('api users');
+    expect($client->get('/api/users/42')->getBody())->toBe('user 42');
+    expect($client->get('/users')->getStatusCode())->toBe(404);
+});
+
+test('app group applies middlewares to all routes in group', function () {
+    $app = new App();
+    $app->group('/protected', function () use ($app) {
+        $app->get('/data', function (Request $req, Response $res) {
+            $res->withText('secret');
+        });
+    }, [
+        function (Request $req, Response $res, $next) {
+            $res->setHeader('X-Auth', 'checked');
+            $next($req, $res, new stdClass());
+        },
+    ]);
+    $response = (new ErlenClient($app))->get('/protected/data');
+    expect($response->getBody())->toBe('secret')
+        ->and($response->getHeaders())->toHaveKey('X-Auth', 'checked');
+});
+
+test('app nested groups compose prefixes correctly', function () {
+    $app = new App();
+    $app->group('/api', function () use ($app) {
+        $app->group('/v2', function () use ($app) {
+            $app->get('/posts', function (Request $req, Response $res) {
+                $res->withText('v2 posts');
+            });
+        });
+    });
+    $client = new ErlenClient($app);
+    expect($client->get('/api/v2/posts')->getBody())->toBe('v2 posts');
+    expect($client->get('/api/posts')->getStatusCode())->toBe(404);
+    expect($client->get('/v2/posts')->getStatusCode())->toBe(404);
+});
+
+test('app group nested middlewares run outer before inner', function () {
+    $app = new App();
+    $order = [];
+    $app->group('/a', function () use ($app, &$order) {
+        $app->group('/b', function () use ($app, &$order) {
+            $app->get('/c', function (Request $req, Response $res) use (&$order) {
+                $order[] = 'handler';
+                $res->withText('ok');
+            }, [function ($req, $res, $next) use (&$order) {
+                $order[] = 'route-mw';
+                $next($req, $res, new stdClass());
+            }]);
+        }, [function ($req, $res, $next) use (&$order) {
+            $order[] = 'inner-mw';
+            $next($req, $res, new stdClass());
+        }]);
+    }, [function ($req, $res, $next) use (&$order) {
+        $order[] = 'outer-mw';
+        $next($req, $res, new stdClass());
+    }]);
+    (new ErlenClient($app))->get('/a/b/c');
+    expect($order)->toBe(['outer-mw', 'inner-mw', 'route-mw', 'handler']);
+});
+
+test('app group restores prefix after exception in callback', function () {
+    $app = new App();
+    try {
+        $app->group('/broken', function () {
+            throw new RuntimeException('setup error');
+        });
+    } catch (RuntimeException) {}
+
+    $app->get('/clean', function (Request $req, Response $res) {
+        $res->withText('clean');
+    });
+    $client = new ErlenClient($app);
+    expect($client->get('/clean')->getBody())->toBe('clean');
+    expect($client->get('/broken/clean')->getStatusCode())->toBe(404);
 });

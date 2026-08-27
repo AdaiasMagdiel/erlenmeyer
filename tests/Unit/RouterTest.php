@@ -1,10 +1,9 @@
 <?php
 
 use AdaiasMagdiel\Erlenmeyer\Router;
-use AdaiasMagdiel\Erlenmeyer\Logging\NullLogger;
 
 beforeEach(function () {
-    $this->router = new Router(new NullLogger());
+    $this->router = new Router();
 });
 test('router throws exception for invalid HTTP method', function () {
     expect(fn() => $this->router->add('INVALID_METHOD', '/test', fn() => null))
@@ -53,4 +52,51 @@ test('router redirect normalizes trailing slashes on source uri', function () {
     expect($match)->not->toBeNull()
         ->and($match['type'])->toBe('redirect')
         ->and($match['to'])->toBe('/target');
+});
+
+// -------------------------------------------------------------------------
+// Static route optimisation
+// -------------------------------------------------------------------------
+
+test('router matches static route without regex', function () {
+    $this->router->add('GET', '/about', fn() => null);
+    $match = $this->router->match('GET', '/about');
+    expect($match)->not->toBeNull()
+        ->and($match['type'])->toBe('route')
+        ->and($match['params'])->toBeObject();
+});
+
+test('router static route returns empty params object', function () {
+    $this->router->add('GET', '/contact', fn() => null);
+    $match = $this->router->match('GET', '/contact');
+    expect((array) $match['params'])->toBe([]);
+});
+
+test('router does not match static route for different method', function () {
+    $this->router->add('GET', '/page', fn() => null);
+    expect($this->router->match('POST', '/page'))->toBeNull();
+});
+
+// -------------------------------------------------------------------------
+// Dynamic route prefix index
+// -------------------------------------------------------------------------
+
+test('router matches dynamic route from correct prefix group', function () {
+    $this->router->add('GET', '/users/[id]', fn() => null);
+    $this->router->add('GET', '/posts/[slug]', fn() => null);
+    $match = $this->router->match('GET', '/posts/hello-world');
+    expect($match)->not->toBeNull()
+        ->and($match['params']->slug)->toBe('hello-world');
+});
+
+test('router does not match dynamic route from wrong prefix group', function () {
+    $this->router->add('GET', '/users/[id]', fn() => null);
+    expect($this->router->match('GET', '/posts/123'))->toBeNull();
+});
+
+test('router matches dynamic route with dynamic first segment', function () {
+    $this->router->add('GET', '/[type]/info', fn() => null);
+    $match = $this->router->match('GET', '/products/info');
+    expect($match)->not->toBeNull()
+        ->and($match['params']->type)->toBe('products');
 });

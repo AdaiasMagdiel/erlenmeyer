@@ -1,90 +1,13 @@
 # Advanced: Custom Handlers
 
-Erlenmeyer allows you to fully customize **logging** and **exception handling** behavior.  
-This includes:
+Erlenmeyer allows you to fully customize **exception handling** behavior via
+`App::setExceptionHandler()`.
 
-- Creating **custom loggers** by implementing `LoggerInterface`;
-- Registering **custom exception handlers** using `App::setExceptionHandler()`.
-
-These features are useful when integrating Erlenmeyer with external systems (such as Sentry, Logstash, or Graylog), or when defining precise responses for specific error types.
+This is useful when integrating Erlenmeyer with external systems (such as Sentry, Logstash, or Graylog), or when defining precise responses for specific error types.
 
 ---
 
-## 1. Creating a Custom Logger
-
-All loggers in Erlenmeyer implement the [`LoggerInterface`](../reference/Logging/LoggerInterface.md):
-
-```php
-interface LoggerInterface
-{
-    public function log(LogLevel $level, string $message): void;
-    public function logException(Throwable $e, ?Request $request = null): void;
-}
-```
-
-To create your own logger, simply implement this interface.
-
-### Example: JSON-based Logger
-
-```php
-use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
-use AdaiasMagdiel\Erlenmeyer\Request;
-use Throwable;
-
-class JsonLogger implements LoggerInterface
-{
-    private string $file;
-
-    public function __construct(string $file = __DIR__ . '/app.log')
-    {
-        $this->file = $file;
-    }
-
-    public function log(LogLevel $level, string $message): void
-    {
-        $entry = [
-            'timestamp' => date('c'),
-            'level' => $level->value,
-            'message' => $message
-        ];
-
-        file_put_contents($this->file, json_encode($entry) . PHP_EOL, FILE_APPEND);
-    }
-
-    public function logException(Throwable $e, ?Request $request = null): void
-    {
-        $entry = [
-            'timestamp' => date('c'),
-            'level' => LogLevel::ERROR->value,
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => explode("\n", $e->getTraceAsString()),
-            'request' => $request ? [
-                'method' => $request->getMethod(),
-                'uri' => $request->getUri(),
-            ] : null,
-        ];
-
-        file_put_contents($this->file, json_encode($entry) . PHP_EOL, FILE_APPEND);
-    }
-}
-```
-
-Then inject it into your app:
-
-```php
-use AdaiasMagdiel\Erlenmeyer\App;
-
-$app = new App(new JsonLogger(__DIR__ . '/logs/app.jsonl'));
-```
-
-Each log entry is stored as a separate JSON line — ideal for structured logging and observability tools.
-
----
-
-## 2. Registering Custom Exception Handlers
+## 1. Registering Custom Exception Handlers
 
 The method `setExceptionHandler()` lets you define specific behaviors for particular exception types.
 
@@ -115,7 +38,7 @@ When an exception is thrown, Erlenmeyer traverses the exception’s class hierar
 
 ---
 
-## 3. Global (Fallback) Exception Handler
+## 2. Global (Fallback) Exception Handler
 
 By default, Erlenmeyer defines a generic 500 handler:
 
@@ -142,19 +65,32 @@ $app->setExceptionHandler(Throwable::class, function ($req, $res, $e) {
 
 ---
 
-## 4. Combining Loggers and Handlers
+## 3. Recording Errors Externally
 
-It’s common to use a logger inside a custom exception handler for better traceability:
+Erlenmeyer has no built-in logging system — it stays out of the way so you can wire up
+whatever observability tool you already use (Monolog, Sentry, a plain file, etc.) directly
+inside your handlers.
 
 ```php
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
+function recordError(Throwable $e, $req): void
+{
+    $entry = [
+        'timestamp' => date('c'),
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'request' => [
+            'method' => $req->getMethod(),
+            'uri' => $req->getUri(),
+        ],
+    ];
 
-$app->setExceptionHandler(RuntimeException::class, function ($req, $res, $e) use ($app) {
-    // Log details
-    $logger = new JsonLogger(__DIR__ . '/logs/errors.jsonl');
-    $logger->logException($e, $req);
+    file_put_contents(__DIR__ . '/logs/errors.jsonl', json_encode($entry) . PHP_EOL, FILE_APPEND);
+}
 
-    // Send friendly response
+$app->setExceptionHandler(RuntimeException::class, function ($req, $res, $e) {
+    recordError($e, $req);
+
     $res->setStatusCode(500)
         ->withJson(['error' => 'Unexpected server error'])
         ->send();
@@ -163,26 +99,24 @@ $app->setExceptionHandler(RuntimeException::class, function ($req, $res, $e) use
 
 ---
 
-## 5. Full Example
+## 4. Full Example
 
 ```php
 use AdaiasMagdiel\Erlenmeyer\App;
-use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
 
 require 'vendor/autoload.php';
 
-$logger = new FileLogger(__DIR__ . '/logs');
-$app = new App($logger);
+$app = new App();
 
 // Handler for validation exceptions
-$app->setExceptionHandler(ValidationException::class, function ($req, $res, $e) use ($logger) {
-    $logger->logException($e, $req);
+$app->setExceptionHandler(ValidationException::class, function ($req, $res, $e) {
+    recordError($e, $req);
     $res->setStatusCode(422)->withJson(['error' => $e->getMessage()])->send();
 });
 
 // Global fallback handler
-$app->setExceptionHandler(Throwable::class, function ($req, $res, $e) use ($logger) {
-    $logger->logException($e, $req);
+$app->setExceptionHandler(Throwable::class, function ($req, $res, $e) {
+    recordError($e, $req);
     $res->setStatusCode(500)->withText('Internal Server Error')->send();
 });
 
@@ -195,10 +129,10 @@ $app->run();
 
 ---
 
-## 6. Best Practices
+## 5. Best Practices
 
 ✅ **Catch specific exception types first** (e.g. `ValidationException`, `TypeError`).
-✅ **Use loggers for technical detail**, and handlers for user-facing messages.
+✅ **Record technical detail externally**, and keep handlers focused on user-facing messages.
 ✅ **Avoid exposing sensitive data** in production error responses.
 ✅ **Combine with global middlewares** to normalize errors consistently.
 
@@ -206,12 +140,10 @@ $app->run();
 
 ## Summary
 
-| Feature                        | Purpose                                                |
-| ------------------------------ | ------------------------------------------------------ |
-| **LoggerInterface**            | Defines the common logging contract                    |
-| **FileLogger / ConsoleLogger** | Default logger implementations                         |
-| **setExceptionHandler()**      | Associates exception types with custom responses       |
-| **Custom Logger**              | Integrate with external tools (Sentry, Logstash, etc.) |
+| Feature                    | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| **setExceptionHandler()**   | Associates exception types with custom responses       |
+| **External recording**      | Integrate with external tools (Sentry, Logstash, etc.) |
 
 With these tools, you can build professional-grade error handling and observability pipelines inside Erlenmeyer.
 

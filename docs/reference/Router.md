@@ -24,19 +24,14 @@ Route definitions registered via `$app->get()`, `$app->post()`, etc. are delegat
 | `$redirects`     | private    | `array`           | Registered redirect rules.                       |
 | `$routePattern`  | private    | `string`          | Regex to detect dynamic parameters in routes.    |
 | `$paramPattern`  | private    | `string`          | Replacement pattern for parameter capture groups.|
-| `$logger`        | private    | `LoggerInterface` | Logger instance.                                 |
 
 ---
 
 ## Constructor
 
-### `__construct(LoggerInterface $logger)`
+### `__construct()`
 
-Creates a new `Router` instance. Called internally by `App`.
-
-| Parameter | Type              | Description                       |
-| --------- | ----------------- | --------------------------------- |
-| `$logger` | `LoggerInterface` | Logger injected from the `App`.   |
+Creates a new `Router` instance. Called internally by `App`. Takes no parameters.
 
 ---
 

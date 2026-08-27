@@ -2,12 +2,9 @@
 
 use AdaiasMagdiel\Erlenmeyer\App;
 use AdaiasMagdiel\Erlenmeyer\Testing\ErlenClient;
-use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
 
 test('full application flow with routing and middleware', function () {
-    $logger = new ConsoleLogger([LogLevel::INFO]);
-    $app = new App($logger);
+    $app = new App();
 
     // Add global middleware
     $app->addMiddleware(function ($req, $res, $next) {
@@ -46,8 +43,7 @@ test('full application flow with routing and middleware', function () {
 });
 
 test('application handles errors and exceptions gracefully', function () {
-    $logger = new ConsoleLogger([LogLevel::INFO]);
-    $app = new App($logger);
+    $app = new App();
 
     $app->get('/error', function () {
         throw new RuntimeException('Something went wrong');

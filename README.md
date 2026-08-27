@@ -2,6 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)  
 [![Composer](https://img.shields.io/badge/Composer-adaiasmagdiel/erlenmeyer-blue)](https://packagist.org/packages/adaiasmagdiel/erlenmeyer)  
+[![Packagist Downloads](https://img.shields.io/packagist/dt/adaiasmagdiel/erlenmeyer.svg)](https://packagist.org/packages/adaiasmagdiel/erlenmeyer)  
 [![GitHub Repository](https://img.shields.io/badge/GitHub-AdaiasMagdiel/Erlenmeyer-blue)](https://github.com/AdaiasMagdiel/Erlenmeyer)
 
 **Erlenmeyer** is a lightweight PHP framework designed for simplicity and efficiency in building web applications. Inspired by the minimalism of Python's Flask, Erlenmeyer is not a direct clone but a unique solution tailored for PHP developers. It is currently in its early stages, making it perfect for small projects, APIs, or microservices where a lean setup is preferred. I created Erlenmeyer to streamline my own projects, but it's open for anyone seeking a straightforward, no-frills framework.
@@ -18,7 +19,6 @@
 - [Error Handling](#error-handling)
 - [Session Management](#session-management)
 - [Request and Response Objects](#request-and-response-objects)
-- [Logging](#logging)
 - [Tests](#tests)
 - [Use Cases](#use-cases)
 - [License](#license)
@@ -42,7 +42,8 @@ Erlenmeyer is a lightweight PHP framework designed for simplicity and efficiency
 - Custom error handling for 404 errors and exceptions.
 - Integrated session management with flash messages.
 - Comprehensive `Request` and `Response` objects for handling HTTP requests and responses.
-- Logging with file rotation for application event monitoring.
+- Trusted proxy support for safely resolving the client IP behind a reverse proxy.
+- Route groups for nesting routes under a shared prefix and middleware set.
 
 ## Requirements
 
@@ -212,105 +213,6 @@ $res->setCORS(['origin' => '*', 'methods' => 'GET,POST']);
 $res->send();
 ```
 
-## Logging
-
-Erlenmeyer provides a flexible and extensible logging system to help you monitor and debug your application. Logging is essential for tracking events, identifying issues, and understanding application behavior. The logging system is based on the `LoggerInterface`, which defines the contract for logging messages and exceptions.
-
-### Using Loggers
-
-Erlenmeyer provides two built-in loggers: `FileLogger` for file-based logging with rotation, and `ConsoleLogger` for logging to the command line using `error_log`. You can choose either by passing an instance to the `App` constructor.
-
-**Example with FileLogger:**
-
-```php
-use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
-use AdaiasMagdiel\Erlenmeyer\App;
-
-$logger = new FileLogger('/path/to/logs');
-$app = new App(logger: $logger);
-```
-
-- Logs are written to `/path/to/logs/info.log`.
-- The `FileLogger` automatically rotates the log file when it exceeds 3MB, keeping up to 5 rotated files (e.g., `info.log.1`, `info.log.2`, etc.).
-- If no log directory is provided, `FileLogger` will not log anything.
-
-**Example with ConsoleLogger:**
-
-```php
-use AdaiasMagdiel\Erlenmeyer\Logging\ConsoleLogger;
-use AdaiasMagdiel\Erlenmeyer\App;
-
-$logger = new ConsoleLogger();
-$app = new App(logger: $logger);
-```
-
-- Logs are output to the command line using `error_log`, appearing in the terminal or server error log.
-- No configuration is required for `ConsoleLogger`, making it ideal for debugging or CLI environments.
-
-### Log Levels
-
-The logging system supports the following levels, defined in the `LogLevel` enum:
-
-| Level      | Description                                                        |
-| ---------- | ------------------------------------------------------------------ |
-| `INFO`     | General operational information                                    |
-| `DEBUG`    | Detailed debug information                                         |
-| `WARNING`  | Indicates something unexpected but recoverable                     |
-| `ERROR`    | Indicates a serious error affecting functionality                  |
-| `CRITICAL` | Indicates a critical error that may cause the application to crash |
-
-These levels can be used when logging messages to categorize their severity.
-
-### Creating a Custom Logger
-
-If you need advanced logging features, such as logging to a database, sending logs to an external service, or using a custom format, you can create a custom logger by implementing the `LoggerInterface`.
-
-**Example of a Custom Logger:**
-
-```php
-use AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface;
-use AdaiasMagdiel\Erlenmeyer\Logging\LogLevel;
-use Throwable;
-use AdaiasMagdiel\Erlenmeyer\Request;
-
-class CustomLogger implements LoggerInterface
-{
-    private $logFile;
-
-    public function __construct(string $logFile)
-    {
-        $this->logFile = $logFile;
-    }
-
-    public function log(LogLevel $level, string $message): void
-    {
-        $timestamp = date('Y-m-d H:i:s');
-        $logEntry = "[$timestamp] [$level->value] $message\n";
-        file_put_contents($this->logFile, $logEntry, FILE_APPEND);
-    }
-
-    public function logException(Throwable $e, ?Request $request = null): void
-    {
-        $timestamp = date('Y-m-d H:i:s');
-        $message = "[$timestamp] [ERROR] Exception: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "\n";
-        if ($request) {
-            $message .= "Request: " . $request->getMethod() . " " . $request->getUri() . "\n";
-        }
-        $message .= $e->getTraceAsString() . "\n";
-        file_put_contents($this->logFile, $message, FILE_APPEND);
-    }
-}
-```
-
-To use the custom logger, pass an instance to the `App` constructor:
-
-```php
-$customLogger = new CustomLogger('/path/to/custom.log');
-$app = new App(logger: $customLogger);
-```
-
-**Important Note:** If no logger is explicitly provided, the `App` uses a `NullLogger` — a no-op implementation that silently discards all log messages. To enable logging, pass a `FileLogger` or `ConsoleLogger` explicitly.
-
 ## Tests
 
 Erlenmeyer uses PestPHP for testing. Run tests with:
@@ -369,7 +271,9 @@ Erlenmeyer is licensed under the GPLv3. See the [LICENSE](LICENSE) and the [COPY
 
 | Method                                                                            | Description                              |
 | --------------------------------------------------------------------------------- | ---------------------------------------- |
-| `__construct(?LoggerInterface $logger = null)`                                    | Initializes the application.             |
+| `__construct()`                                                                    | Initializes the application.             |
+| `setTrustedProxies(array $ips)`                                                    | Sets the list of trusted proxy IPs used to resolve `X-Forwarded-For`. |
+| `group(string $prefix, callable $callback, array $middlewares = [])`              | Groups routes under a shared prefix and middlewares. |
 | `route(string $method, string $route, callable $action, array $middlewares = [])` | Registers a route for an HTTP method.    |
 | `get(string $route, callable $action, array $middlewares = [])`                   | Registers a GET route.                   |
 | `post(string $route, callable $action, array $middlewares = [])`                  | Registers a POST route.                  |

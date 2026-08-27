@@ -32,6 +32,11 @@ class Response
     private bool $isSent = false;
 
     /**
+     * @var string[] Accumulated Set-Cookie header values.
+     */
+    private array $cookies = [];
+
+    /**
      * @var string The default content type for the response.
      */
     private string $contentType = 'text/html';
@@ -306,6 +311,10 @@ class Response
         bool $secure = false,
         bool $httpOnly = true
     ): self {
+        if ($this->isSent) {
+            throw new RuntimeException("Cannot set cookies after the response has been sent.");
+        }
+
         $cookie = urlencode($name) . '=' . urlencode($value);
         if ($expire) {
             $cookie .= '; Expires=' . gmdate('D, d M Y H:i:s T', $expire);
@@ -323,7 +332,18 @@ class Response
             $cookie .= '; HttpOnly';
         }
 
-        return $this->setHeader('Set-Cookie', $cookie);
+        $this->cookies[] = $cookie;
+        return $this;
+    }
+
+    /**
+     * Returns all accumulated Set-Cookie values.
+     *
+     * @return string[]
+     */
+    public function getCookies(): array
+    {
+        return $this->cookies;
     }
 
     /**
@@ -345,6 +365,10 @@ class Response
 
         foreach ($this->headers as $name => $value) {
             self::$functions['header']("$name: $value", true);
+        }
+
+        foreach ($this->cookies as $cookie) {
+            self::$functions['header']("Set-Cookie: $cookie", false);
         }
 
         if ($this->body !== null) {
@@ -377,6 +401,7 @@ class Response
         }
 
         $this->headers = [];
+        $this->cookies = [];
         $this->body = null;
         $this->contentType = 'text/html';
         return $this;

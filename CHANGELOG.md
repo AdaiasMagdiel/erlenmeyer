@@ -2,6 +2,39 @@
 
 A record of all notable changes to **Erlenmeyer**.
 
+## [6.0.0] – 2026-08-27
+
+### ⚠️ **BREAKING CHANGES**
+
+- **Logging module removed**
+  - `AdaiasMagdiel\Erlenmeyer\Logging\LoggerInterface`, `NullLogger`, `FileLogger` and `ConsoleLogger` have been deleted.
+  - `App` no longer accepts a logger in its constructor and no longer logs internally.
+  - _Action Required:_ Remove any `LoggerInterface` implementations passed to `App` and handle logging via your own middleware or exception handlers if needed.
+
+### 🚀 **New Features**
+
+- **Trusted proxy support**
+  - Added `App::setTrustedProxies(array $ips)` / `Request::setTrustedProxies(array $ips)`.
+  - `Request::getIp()` now only honors `X-Forwarded-For` when the immediate peer (`REMOTE_ADDR`) is in the trusted proxy list, preventing IP spoofing via that header by default.
+
+- **Route groups**
+  - Added `App::group(string $prefix, callable $callback, array $middlewares = [])` to nest routes under a shared prefix and middleware set.
+
+### 🛡️ **Security Improvements**
+
+- **Multiple `Set-Cookie` headers**
+  - `Response::withCookie()` now accumulates cookies instead of overwriting the previous `Set-Cookie` value, so multiple cookies (session + preferences, token rotation, logout clearing several cookies) are sent correctly.
+  - Calling `withCookie()` after the response has been sent now throws a `RuntimeException`.
+
+### 🐛 **Fixes**
+
+- Corrected `Request::getIp()` to resolve the originating client IP from the leftmost entry of `X-Forwarded-For` instead of the rightmost, matching the standard proxy chain convention.
+
+### 🧹 **Housekeeping**
+
+- `Router` now indexes static routes and groups dynamic routes by URI prefix for faster lookups instead of a linear scan.
+- `index.php` example now runs through the real `App::run()` flow instead of `Testing\ErlenClient`.
+
 ## [5.0.0] – 2026-01-20
 
 ### ⚠️ **BREAKING CHANGES**

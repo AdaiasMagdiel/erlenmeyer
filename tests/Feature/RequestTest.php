@@ -65,14 +65,33 @@ test('request captures client IP', function () {
     expect($request->getIp())->toBe('192.168.1.1');
 });
 
-test('request handles forwarded IP correctly', function () {
-    // Note: Based on the provided code, X-Forwarded-For IS trusted currently.
-    $server = [
+test('request handles forwarded IP when proxy is trusted', function () {
+    Request::setTrustedProxies(['127.0.0.1']);
+    $request = new Request([
         'REMOTE_ADDR' => '127.0.0.1',
-        'HTTP_X_FORWARDED_FOR' => '10.0.0.5, 192.168.1.1'
-    ];
-    $request = new Request($server);
+        'HTTP_X_FORWARDED_FOR' => '10.0.0.5, 192.168.1.1',
+    ]);
+    Request::setTrustedProxies([]);
     expect($request->getIp())->toBe('10.0.0.5');
+});
+
+test('request ignores X-Forwarded-For when proxy is not trusted', function () {
+    Request::setTrustedProxies([]);
+    $request = new Request([
+        'REMOTE_ADDR' => '1.2.3.4',
+        'HTTP_X_FORWARDED_FOR' => '10.0.0.5',
+    ]);
+    expect($request->getIp())->toBe('1.2.3.4');
+});
+
+test('request ignores X-Forwarded-For even from known IP when not in trusted list', function () {
+    Request::setTrustedProxies(['192.168.1.1']);
+    $request = new Request([
+        'REMOTE_ADDR' => '1.2.3.4',
+        'HTTP_X_FORWARDED_FOR' => '10.0.0.5',
+    ]);
+    Request::setTrustedProxies([]);
+    expect($request->getIp())->toBe('1.2.3.4');
 });
 
 test('request returns null for JSON with ignoreContentType and invalid JSON', function () {
@@ -135,4 +154,143 @@ test('request getJson handles lazy initialization caching', function () {
 
     expect($first)->toBe($second)
         ->and($first)->toBe(['a' => 1]);
+});
+
+// -------------------------------------------------------------------------
+// Headers
+// -------------------------------------------------------------------------
+
+test('request getHeader returns value case-insensitively', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'HTTP_X_CUSTOM' => 'test-value']);
+    expect($req->getHeader('x-custom'))->toBe('test-value')
+        ->and($req->getHeader('X-Custom'))->toBe('test-value');
+});
+
+test('request getHeader returns null for missing header', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/']);
+    expect($req->getHeader('x-missing'))->toBeNull();
+});
+
+test('request getHeaders returns all parsed headers', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'HTTP_ACCEPT' => 'application/json']);
+    expect($req->getHeaders())->toHaveKey('accept', 'application/json');
+});
+
+test('request hasHeader returns true for existing header', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'HTTP_ACCEPT' => 'text/html']);
+    expect($req->hasHeader('accept'))->toBeTrue()
+        ->and($req->hasHeader('Accept'))->toBeTrue();
+});
+
+test('request hasHeader returns false for missing header', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/']);
+    expect($req->hasHeader('x-missing'))->toBeFalse();
+});
+
+test('request parses CONTENT_TYPE server var as header', function () {
+    $req = new Request(['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/', 'CONTENT_TYPE' => 'application/json']);
+    expect($req->getHeader('content-type'))->toBe('application/json');
+});
+
+// -------------------------------------------------------------------------
+// Method override
+// -------------------------------------------------------------------------
+
+test('request overrides method via _method POST field', function () {
+    $req = new Request(
+        ['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/resource'],
+        [],
+        ['_method' => 'PUT']
+    );
+    expect($req->getMethod())->toBe('PUT');
+});
+
+test('request overrides method via X-HTTP-Method-Override header', function () {
+    $req = new Request(
+        ['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/resource', 'HTTP_X_HTTP_METHOD_OVERRIDE' => 'DELETE'],
+        [],
+        []
+    );
+    expect($req->getMethod())->toBe('DELETE');
+});
+
+// -------------------------------------------------------------------------
+// Body & files
+// -------------------------------------------------------------------------
+
+test('request getRawBody returns the raw body string', function () {
+    $req = new Request(['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/'], [], [], [], 'php://memory', 'raw content');
+    expect($req->getRawBody())->toBe('raw content');
+});
+
+test('request getFile returns file by numeric index for multi-upload', function () {
+    $files = [
+        'docs' => [
+            'name'     => ['a.txt', 'b.txt'],
+            'type'     => ['text/plain', 'text/plain'],
+            'tmp_name' => ['/tmp/x', '/tmp/y'],
+            'error'    => [0, 0],
+            'size'     => [10, 20],
+        ],
+    ];
+    $req = new Request(['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/'], [], [], $files);
+    $file = $req->getFile('docs', 1);
+    expect($file['name'])->toBe('b.txt')
+        ->and($file['size'])->toBe(20);
+});
+
+test('request getJsonError returns null when JSON is valid', function () {
+    $req = new Request(
+        ['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/', 'CONTENT_TYPE' => 'application/json'],
+        [], [], [], 'php://memory',
+        '{"ok": true}'
+    );
+    expect($req->getJsonError())->toBeNull();
+});
+
+// -------------------------------------------------------------------------
+// isAjax / isSecure
+// -------------------------------------------------------------------------
+
+test('request isAjax returns true for XMLHttpRequest header', function () {
+    $req = new Request([
+        'REQUEST_METHOD' => 'GET',
+        'REQUEST_URI' => '/',
+        'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
+    ]);
+    expect($req->isAjax())->toBeTrue();
+});
+
+test('request isAjax returns false for regular requests', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/']);
+    expect($req->isAjax())->toBeFalse();
+});
+
+test('request isSecure returns true when HTTPS is on', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'HTTPS' => 'on']);
+    expect($req->isSecure())->toBeTrue();
+});
+
+test('request isSecure returns true on port 443', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'SERVER_PORT' => '443']);
+    expect($req->isSecure())->toBeTrue();
+});
+
+test('request isSecure returns false for plain HTTP', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'HTTPS' => 'off', 'SERVER_PORT' => '80']);
+    expect($req->isSecure())->toBeFalse();
+});
+
+// -------------------------------------------------------------------------
+// getUserAgent
+// -------------------------------------------------------------------------
+
+test('request getUserAgent returns user agent string', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/', 'HTTP_USER_AGENT' => 'TestAgent/1.0']);
+    expect($req->getUserAgent())->toBe('TestAgent/1.0');
+});
+
+test('request getUserAgent returns null when not set', function () {
+    $req = new Request(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/']);
+    expect($req->getUserAgent())->toBeNull();
 });

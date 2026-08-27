@@ -1,10 +1,9 @@
 <?php
 
 use AdaiasMagdiel\Erlenmeyer\Exception\Handler;
-use AdaiasMagdiel\Erlenmeyer\Logging\NullLogger;
 
 beforeEach(function () {
-    $this->handler = new Handler(new NullLogger());
+    $this->handler = new Handler();
 });
 
 test('handler registers and retrieves exact match', function () {

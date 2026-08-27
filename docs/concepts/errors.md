@@ -17,8 +17,6 @@ By default, Erlenmeyer catches all uncaught exceptions and displays a simple HTM
 <p>Error: [message]</p>
 ```
 
-It also logs every exception to the configured logger.
-
 If no route matches the request, the framework automatically runs the **404 handler** —
 which is also customizable.
 
@@ -80,36 +78,6 @@ $app->setExceptionHandler(TypeError::class, function ($req, $res, $e) {
 
 If an exception doesn’t match any registered class,
 Erlenmeyer falls back to the **generic `Throwable` handler** (the default 500 page).
-
----
-
-## 🪤 Built-in Logging
-
-Every caught exception is automatically logged through the configured logger.
-
-By default:
-
-- Errors go to `logs/info.log` via `FileLogger`.
-- Each log includes the timestamp, exception type, message, file, and line number.
-- Request context (method + URI) is included when available.
-
-Example log entry:
-
-```
-[2025-10-15 12:34:56] [ERROR] Undefined variable in /app/Controllers/Home.php:42
-Request: GET /home
-Stack trace:
-  #0 /public/index.php(10): HomeController->index()
-  ...
-```
-
-You can plug in your own logger (e.g., Monolog or a custom PSR-3 implementation)
-by passing it to the `App` constructor:
-
-```php
-$logger = new MyCustomLogger();
-$app = new App($logger);
-```
 
 ---
 
@@ -185,7 +153,6 @@ You’ll get:
 | --------------------- | ------------------------------------------- |
 | **404 Handler**       | Custom response when no route matches       |
 | **Exception Handler** | Maps exception classes to custom handlers   |
-| **Logging**           | All exceptions are logged automatically     |
 | **Error Conversion**  | PHP warnings and notices become exceptions  |
 | **Fallback**          | Default 500 handler for uncaught exceptions |
 

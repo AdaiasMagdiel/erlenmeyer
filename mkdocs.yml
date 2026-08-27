@@ -58,16 +58,9 @@ nav:
           - Request: reference/Request.md
           - Response: reference/Response.md
           - Session: reference/Session.md
-      - Logging:
-          - NullLogger: reference/Logging/NullLogger.md
-          - ConsoleLogger: reference/Logging/ConsoleLogger.md
-          - FileLogger: reference/Logging/FileLogger.md
-          - LoggerInterface: reference/Logging/LoggerInterface.md
-          - LogLevel: reference/Logging/LogLevel.md
       - Testing:
           - ErlenClient: reference/Testing/ErlenClient.md
   - Advanced:
-      - Logging: advanced/logging.md
       - Custom Handlers: advanced/custom-handlers.md
 
 markdown_extensions:

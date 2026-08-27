@@ -21,19 +21,14 @@ Handlers registered via `$app->setExceptionHandler()` are delegated to this clas
 | Name       | Visibility | Type              | Description                                        |
 | ---------- | ---------- | ----------------- | -------------------------------------------------- |
 | `$handlers` | private   | `array`           | Map of exception class names to handler closures.  |
-| `$logger`  | private    | `LoggerInterface` | Logger instance.                                   |
 
 ---
 
 ## Constructor
 
-### `__construct(LoggerInterface $logger)`
+### `__construct()`
 
-Creates a new `Handler` instance. Called internally by `App`.
-
-| Parameter | Type              | Description                       |
-| --------- | ----------------- | --------------------------------- |
-| `$logger` | `LoggerInterface` | Logger injected from the `App`.   |
+Creates a new `Handler` instance. Called internally by `App`. Takes no parameters.
 
 ---
 
@@ -115,11 +110,9 @@ If `RuntimeException::class` were a parent of the thrown exception, it would mat
 | **Resolution**       | Traverses class hierarchy to find the most specific match.           |
 | **Validation**       | Rejects classes that don't implement `Throwable`.                    |
 | **Fallback**         | Returns `null` when no handler is found (App handles the fallback).  |
-| **Logging**          | Logs handler registrations at `INFO` level.                          |
 
 ---
 
 ## See Also
 
 - [`App`](./App.md)
-- [`Logging\LoggerInterface`](./Logging/LoggerInterface.md)

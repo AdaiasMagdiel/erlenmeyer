@@ -48,3 +48,49 @@ test('session regenerate works', function () {
     // but we can ensure the method exists and runs.
     expect(fn() => Session::regenerate())->not->toThrow(Exception::class);
 });
+
+test('session close writes and releases session lock', function () {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    Session::close();
+    expect(session_status())->not->toBe(PHP_SESSION_ACTIVE);
+});
+
+test('session close does nothing when session not active', function () {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+    expect(fn() => Session::close())->not->toThrow(Exception::class);
+});
+
+test('session has returns true for existing key', function () {
+    Session::set('has_test_key', 'yes');
+    expect(Session::has('has_test_key'))->toBeTrue();
+    Session::remove('has_test_key');
+});
+
+test('session has returns false for missing key', function () {
+    Session::remove('missing_has_key');
+    expect(Session::has('missing_has_key'))->toBeFalse();
+});
+
+test('session flash throws for empty key', function () {
+    expect(fn() => Session::flash('', 'value'))
+        ->toThrow(InvalidArgumentException::class);
+});
+
+test('session getFlash returns default for missing key', function () {
+    $value = Session::getFlash('nonexistent_flash_xyz', 'default_val');
+    expect($value)->toBe('default_val');
+});
+
+test('session hasFlash returns false for non-set flash', function () {
+    expect(Session::hasFlash('nonexistent_flash_abc'))->toBeFalse();
+});
+
+test('session hasFlash returns true for set flash', function () {
+    Session::flash('hf_key', 'msg');
+    expect(Session::hasFlash('hf_key'))->toBeTrue();
+    Session::getFlash('hf_key');
+});

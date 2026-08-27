@@ -8,7 +8,7 @@
 ## Overview
 
 The `App` class is the core of the Erlenmeyer framework.  
-It provides routing, middleware, error management, and logging.
+It provides routing, middleware, and error management.
 
 ---
 
@@ -16,7 +16,6 @@ It provides routing, middleware, error management, and logging.
 
 | Name                 | Visibility | Type               | Description                                              |
 | -------------------- | ---------- | ------------------ | -------------------------------------------------------- |
-| `$logger`            | private    | `LoggerInterface`  | Logger instance for application events and errors.       |
 | `$router`            | private    | `Router`           | Handles route registration and matching.                 |
 | `$exceptionHandler`  | private    | `ExceptionHandler` | Manages exception handler registration and dispatch.     |
 | `$globalMiddlewares` | private    | `array`            | Global middlewares executed on every request.            |
@@ -27,32 +26,50 @@ It provides routing, middleware, error management, and logging.
 
 ## Constructor
 
-### `__construct(?LoggerInterface $logger = null)`
+### `__construct()`
 
 Initializes the application, starts the session, sets up the router, exception handler,
-and registers default 404 and 500 handlers.
-
-#### Parameters
-
-| Name      | Type               | Description                                                                  |
-| --------- | ------------------ | ---------------------------------------------------------------------------- |
-| `$logger` | `?LoggerInterface` | Optional logger. Defaults to `NullLogger` (all log calls are discarded).     |
-
-#### Default Behavior
-
-When no logger is provided, a `NullLogger` is used — a no-op implementation that discards
-all log messages silently. To enable logging, pass a `FileLogger` or `ConsoleLogger`:
-
-```php
-use AdaiasMagdiel\Erlenmeyer\App;
-use AdaiasMagdiel\Erlenmeyer\Logging\FileLogger;
-
-$app = new App(new FileLogger(__DIR__ . '/logs'));
-```
+and registers default 404 and 500 handlers. Takes no parameters.
 
 ---
 
 ## Public Methods
+
+### `setTrustedProxies(array $ips): void`
+
+Sets the list of proxy IPs trusted to set `X-Forwarded-For`. When the immediate connecting
+peer (`REMOTE_ADDR`) is in this list, `Request::getIp()` resolves the client IP from that
+header instead of `REMOTE_ADDR`. Leave empty (the default) to always use `REMOTE_ADDR`.
+
+#### Parameters
+
+| Name   | Type    | Description                        |
+| ------ | ------- | ----------------------------------- |
+| `$ips` | `array` | List of trusted proxy IP addresses. |
+
+---
+
+### `group(string $prefix, callable $callback, array $middlewares = []): void`
+
+Nests route registrations under a shared path prefix and middleware set. Groups can be nested.
+
+#### Parameters
+
+| Name           | Type       | Description                                                        |
+| -------------- | ---------- | ------------------------------------------------------------------- |
+| `$prefix`      | `string`   | Path prefix prepended to every route registered inside the group.   |
+| `$callback`    | `callable` | Closure that registers routes (e.g. `$app->get(...)`) for the group.|
+| `$middlewares` | `array`    | Middlewares applied to every route registered inside the group.     |
+
+```php
+$app->group('/admin', function () use ($app) {
+    $app->get('/users', function ($req, $res) {
+        $res->withJson(['users' => []])->send();
+    });
+}, [$authMiddleware]);
+```
+
+---
 
 ### `setExceptionHandler(string $throwableClass, callable $handler): void`
 
@@ -295,7 +312,6 @@ Wraps a handler with a stack of middleware closures using reverse iteration.
 | Middlewares        | Global and route-specific, with `$next` chaining.                      |
 | Exception Handling | Per-class exception mapping with class hierarchy traversal.            |
 | Fallback Handler   | Optional catch-all called before 404, bypasses global middlewares.     |
-| Logging            | Delegated to `LoggerInterface`. Defaults to `NullLogger` (no output).  |
 
 ---
 
@@ -306,4 +322,3 @@ Wraps a handler with a stack of middleware closures using reverse iteration.
 - [`Request`](./Request.md)
 - [`Response`](./Response.md)
 - [`Session`](./Session.md)
-- [`Logging\LoggerInterface`](./Logging/LoggerInterface.md)
