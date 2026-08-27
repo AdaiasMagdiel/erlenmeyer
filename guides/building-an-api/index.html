@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -1000,6 +1000,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1098,7 +1144,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1108,149 +1154,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1344,29 +1247,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1444,7 +1324,7 @@
 <h2 id="basic-application">⚙️ Basic Application<a class="headerlink" href="#basic-application" title="Permanent link">&para;</a></h2>
 <p>Start by creating a minimal API that returns a JSON response.</p>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
-<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/../vendor/autoload.php&#39;</span><span class="p">;</span>
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/../vendor/autoload.php'</span><span class="p">;</span>
 
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\App</span><span class="p">;</span>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Request</span><span class="p">;</span>
@@ -1452,8 +1332,8 @@
 
 <span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">App</span><span class="p">();</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/hello&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span><span class="s1">&#39;message&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Hello, API!&#39;</span><span class="p">]);</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/hello'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span><span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'Hello, API!'</span><span class="p">]);</span>
 <span class="p">});</span>
 
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
@@ -1464,38 +1344,38 @@
 <p>Visit:
 👉 <a href="http://localhost:8000/hello">http://localhost:8000/hello</a></p>
 <p>You should see:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello, API!&quot;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello, API!"</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <hr />
 <h2 id="defining-routes">🧱 Defining Routes<a class="headerlink" href="#defining-routes" title="Permanent link">&para;</a></h2>
 <p>Erlenmeyer supports all common HTTP verbs:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/users&#39;, $handler);</span>
-<span class="x">$app-&gt;post(&#39;/users&#39;, $handler);</span>
-<span class="x">$app-&gt;put(&#39;/users/[id]&#39;, $handler);</span>
-<span class="x">$app-&gt;delete(&#39;/users/[id]&#39;, $handler);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/users', $handler);</span>
+<span class="x">$app-&gt;post('/users', $handler);</span>
+<span class="x">$app-&gt;put('/users/[id]', $handler);</span>
+<span class="x">$app-&gt;delete('/users/[id]', $handler);</span>
 </code></pre></div>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Request;</span>
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Response;</span>
 
 <span class="x">$users = [</span>
-<span class="x">    [&#39;id&#39; =&gt; 1, &#39;name&#39; =&gt; &#39;Alice&#39;],</span>
-<span class="x">    [&#39;id&#39; =&gt; 2, &#39;name&#39; =&gt; &#39;Bob&#39;],</span>
+<span class="x">    ['id' =&gt; 1, 'name' =&gt; 'Alice'],</span>
+<span class="x">    ['id' =&gt; 2, 'name' =&gt; 'Bob'],</span>
 <span class="x">];</span>
 
-<span class="x">$app-&gt;get(&#39;/users&#39;, function (Request $req, Response $res, stdClass $params): Response {</span>
+<span class="x">$app-&gt;get('/users', function (Request $req, Response $res, stdClass $params): Response {</span>
 <span class="x">    global $users;</span>
 <span class="x">    return $res-&gt;withJson($users);</span>
 <span class="x">});</span>
 
-<span class="x">$app-&gt;get(&#39;/users/[id]&#39;, function (Request $req, Response $res, stdClass $params): Response {</span>
+<span class="x">$app-&gt;get('/users/[id]', function (Request $req, Response $res, stdClass $params): Response {</span>
 <span class="x">    global $users;</span>
 
 <span class="x">    $id = (int) $params-&gt;id;</span>
-<span class="x">    $user = array_values(array_filter($users, fn($u) =&gt; $u[&#39;id&#39;] === $id))[0] ?? null;</span>
+<span class="x">    $user = array_values(array_filter($users, fn($u) =&gt; $u['id'] === $id))[0] ?? null;</span>
 
 <span class="x">    if (!$user) {</span>
-<span class="x">        return $res-&gt;withJson([&#39;error&#39; =&gt; &#39;User not found&#39;])</span>
+<span class="x">        return $res-&gt;withJson(['error' =&gt; 'User not found'])</span>
 <span class="x">                   -&gt;setStatusCode(404);</span>
 <span class="x">    }</span>
 
@@ -1508,17 +1388,17 @@
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Request;</span>
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Response;</span>
 
-<span class="x">$app-&gt;post(&#39;/users&#39;, function (Request $req, Response $res, stdClass $params): Response {</span>
+<span class="x">$app-&gt;post('/users', function (Request $req, Response $res, stdClass $params): Response {</span>
 <span class="x">    $data = $req-&gt;getJson(true);</span>
 
-<span class="x">    if (!$data || empty($data[&#39;name&#39;])) {</span>
-<span class="x">        return $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Invalid input&#39;])</span>
+<span class="x">    if (!$data || empty($data['name'])) {</span>
+<span class="x">        return $res-&gt;withJson(['error' =&gt; 'Invalid input'])</span>
 <span class="x">                   -&gt;setStatusCode(400);</span>
 <span class="x">    }</span>
 
 <span class="x">    return $res-&gt;withJson([</span>
-<span class="x">        &#39;message&#39; =&gt; &#39;User created successfully&#39;,</span>
-<span class="x">        &#39;user&#39; =&gt; $data,</span>
+<span class="x">        'message' =&gt; 'User created successfully',</span>
+<span class="x">        'user' =&gt; $data,</span>
 <span class="x">    ])-&gt;setStatusCode(201);</span>
 <span class="x">});</span>
 </code></pre></div>
@@ -1529,10 +1409,10 @@
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Response;</span>
 
 <span class="x">$app-&gt;addMiddleware(function (Request $req, Response $res, callable $next, stdClass $params): void {</span>
-<span class="x">    $token = $req-&gt;getHeader(&#39;Authorization&#39;);</span>
+<span class="x">    $token = $req-&gt;getHeader('Authorization');</span>
 
-<span class="x">    if ($token !== &#39;Bearer secret123&#39;) {</span>
-<span class="x">        $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Unauthorized&#39;])</span>
+<span class="x">    if ($token !== 'Bearer secret123') {</span>
+<span class="x">        $res-&gt;withJson(['error' =&gt; 'Unauthorized'])</span>
 <span class="x">            -&gt;setStatusCode(401)</span>
 <span class="x">            -&gt;send();</span>
 <span class="x">        return;</span>
@@ -1548,26 +1428,26 @@
 <div class="highlight"><pre><span></span><code><span class="x">use Throwable;</span>
 
 <span class="x">$app-&gt;set404Handler(function (Request $req, Response $res) {</span>
-<span class="x">    $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Endpoint not found&#39;])</span>
+<span class="x">    $res-&gt;withJson(['error' =&gt; 'Endpoint not found'])</span>
 <span class="x">        -&gt;setStatusCode(404)</span>
 <span class="x">        -&gt;send();</span>
 <span class="x">});</span>
 
 <span class="x">$app-&gt;setExceptionHandler(Throwable::class, function (Request $req, Response $res, Throwable $e) {</span>
 <span class="x">    $res-&gt;withJson([</span>
-<span class="x">        &#39;error&#39; =&gt; &#39;Server error&#39;,</span>
-<span class="x">        &#39;message&#39; =&gt; $e-&gt;getMessage(),</span>
+<span class="x">        'error' =&gt; 'Server error',</span>
+<span class="x">        'message' =&gt; $e-&gt;getMessage(),</span>
 <span class="x">    ])-&gt;setStatusCode(500)-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <hr />
 <h2 id="testing-the-api">🧪 Testing the API<a class="headerlink" href="#testing-the-api" title="Permanent link">&para;</a></h2>
 <p>You can use <strong>ErlenClient</strong> to test your API routes programmatically.</p>
-<div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\ErlenClient;</span>
+<div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Testing\ErlenClient;</span>
 
 <span class="x">$client = new ErlenClient($app);</span>
 
-<span class="x">$response = $client-&gt;get(&#39;/users&#39;);</span>
+<span class="x">$response = $client-&gt;get('/users');</span>
 <span class="x">echo $response-&gt;getBody();</span>
 </code></pre></div>
 <p>This simulates HTTP requests without running a web server — perfect for automated testing.</p>
@@ -1575,7 +1455,7 @@
 <h2 id="full-example">🧩 Full Example<a class="headerlink" href="#full-example" title="Permanent link">&para;</a></h2>
 <p>Here’s a small but complete API that supports listing, adding, and fetching users:</p>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
-<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/../vendor/autoload.php&#39;</span><span class="p">;</span>
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/../vendor/autoload.php'</span><span class="p">;</span>
 
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\App</span><span class="p">;</span>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Request</span><span class="p">;</span>
@@ -1584,40 +1464,40 @@
 <span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">App</span><span class="p">();</span>
 
 <span class="nv">$users</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="s1">&#39;id&#39;</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Alice&#39;</span><span class="p">],</span>
-    <span class="p">[</span><span class="s1">&#39;id&#39;</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Bob&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">'id'</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'Alice'</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">'id'</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'Bob'</span><span class="p">],</span>
 <span class="p">];</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/users&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/users'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
     <span class="k">global</span> <span class="nv">$users</span><span class="p">;</span>
     <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">(</span><span class="nv">$users</span><span class="p">);</span>
 <span class="p">});</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/users/[id]&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/users/[id]'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
     <span class="k">global</span> <span class="nv">$users</span><span class="p">;</span>
     <span class="nv">$id</span> <span class="o">=</span> <span class="p">(</span><span class="nx">int</span><span class="p">)</span> <span class="nv">$params</span><span class="o">-&gt;</span><span class="na">id</span><span class="p">;</span>
-    <span class="nv">$user</span> <span class="o">=</span> <span class="nb">array_values</span><span class="p">(</span><span class="nb">array_filter</span><span class="p">(</span><span class="nv">$users</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nv">$u</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nv">$u</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">===</span> <span class="nv">$id</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">??</span> <span class="k">null</span><span class="p">;</span>
+    <span class="nv">$user</span> <span class="o">=</span> <span class="nb">array_values</span><span class="p">(</span><span class="nb">array_filter</span><span class="p">(</span><span class="nv">$users</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nv">$u</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nv">$u</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span> <span class="o">===</span> <span class="nv">$id</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">??</span> <span class="k">null</span><span class="p">;</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$user</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span><span class="s1">&#39;error&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;User not found&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span><span class="s1">'error'</span> <span class="o">=&gt;</span> <span class="s1">'User not found'</span><span class="p">])</span>
                    <span class="o">-&gt;</span><span class="na">setStatusCode</span><span class="p">(</span><span class="mi">404</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">(</span><span class="nv">$user</span><span class="p">);</span>
 <span class="p">});</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">post</span><span class="p">(</span><span class="s1">&#39;/users&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">post</span><span class="p">(</span><span class="s1">'/users'</span><span class="p">,</span> <span class="k">function</span> <span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span><span class="o">:</span> <span class="nx">Response</span> <span class="p">{</span>
     <span class="k">global</span> <span class="nv">$users</span><span class="p">;</span>
 
     <span class="nv">$data</span> <span class="o">=</span> <span class="nv">$req</span><span class="o">-&gt;</span><span class="na">getJson</span><span class="p">();</span>
     <span class="nv">$id</span> <span class="o">=</span> <span class="nb">count</span><span class="p">(</span><span class="nv">$users</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
 
-    <span class="nv">$user</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span> <span class="o">=&gt;</span> <span class="nv">$id</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]];</span>
+    <span class="nv">$user</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'id'</span> <span class="o">=&gt;</span> <span class="nv">$id</span><span class="p">,</span> <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="nv">$data</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]];</span>
     <span class="nv">$users</span><span class="p">[]</span> <span class="o">=</span> <span class="nv">$user</span><span class="p">;</span>
 
     <span class="k">return</span> <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span>
-        <span class="s1">&#39;message&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;User added&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;user&#39;</span> <span class="o">=&gt;</span> <span class="nv">$user</span><span class="p">,</span>
+        <span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'User added'</span><span class="p">,</span>
+        <span class="s1">'user'</span> <span class="o">=&gt;</span> <span class="nv">$user</span><span class="p">,</span>
     <span class="p">])</span><span class="o">-&gt;</span><span class="na">setStatusCode</span><span class="p">(</span><span class="mi">201</span><span class="p">);</span>
 <span class="p">});</span>
 
@@ -1626,8 +1506,8 @@
 <p>Run it, then test with:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://localhost:8000/users
 curl<span class="w"> </span>http://localhost:8000/users/1
-curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: &quot;Charlie&quot;}&#39;</span><span class="w"> </span>http://localhost:8000/users
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-d<span class="w"> </span><span class="s1">'{"name": "Charlie"}'</span><span class="w"> </span>http://localhost:8000/users
 </code></pre></div>
 <hr />
 <h2 id="summary">🚀 Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>

@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -658,15 +658,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      🪤 Built-in Logging
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#handling-php-errors" class="md-nav__link">
     <span class="md-ellipsis">
       🧰 Handling PHP Errors
@@ -976,6 +967,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1074,7 +1111,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1084,149 +1121,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1320,29 +1214,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1409,7 +1280,6 @@ all while keeping things clear and explicit.</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>500 Internal Server Error<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Error: [message]<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
 </code></pre></div>
-<p>It also logs every exception to the configured logger.</p>
 <p>If no route matches the request, the framework automatically runs the <strong>404 handler</strong> —
 which is also customizable.</p>
 <hr />
@@ -1417,7 +1287,7 @@ which is also customizable.</p>
 <p>You can override the default 404 handler using <code>set404Handler()</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;set404Handler(function (Request $req, Response $res) {</span>
 <span class="x">    $res-&gt;setStatusCode(404)</span>
-<span class="x">        -&gt;withHtml(&#39;&lt;h1&gt;Oops! Page not found 😕&lt;/h1&gt;&#39;)</span>
+<span class="x">        -&gt;withHtml('&lt;h1&gt;Oops! Page not found 😕&lt;/h1&gt;')</span>
 <span class="x">        -&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
@@ -1425,8 +1295,8 @@ which is also customizable.</p>
 <p>You can include route info, headers, or even return JSON for API responses.</p>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;set404Handler(fn($req, $res) =&gt;</span>
 <span class="x">    $res-&gt;withJson([</span>
-<span class="x">        &#39;error&#39; =&gt; &#39;Resource not found&#39;,</span>
-<span class="x">        &#39;path&#39; =&gt; $req-&gt;getUri()</span>
+<span class="x">        'error' =&gt; 'Resource not found',</span>
+<span class="x">        'path' =&gt; $req-&gt;getUri()</span>
 <span class="x">    ])-&gt;setStatusCode(404)-&gt;send()</span>
 <span class="x">);</span>
 </code></pre></div>
@@ -1441,40 +1311,19 @@ which is also customizable.</p>
 
 <span class="x">$app-&gt;setExceptionHandler(RuntimeException::class, function ($req, $res, $e) {</span>
 <span class="x">    $res-&gt;withJson([</span>
-<span class="x">        &#39;error&#39; =&gt; &#39;Runtime error&#39;,</span>
-<span class="x">        &#39;message&#39; =&gt; $e-&gt;getMessage(),</span>
+<span class="x">        'error' =&gt; 'Runtime error',</span>
+<span class="x">        'message' =&gt; $e-&gt;getMessage(),</span>
 <span class="x">    ])-&gt;setStatusCode(500)-&gt;send();</span>
 <span class="x">});</span>
 
 <span class="x">$app-&gt;setExceptionHandler(TypeError::class, function ($req, $res, $e) {</span>
-<span class="x">    $res-&gt;withText(&quot;Invalid type: {$e-&gt;getMessage()}&quot;)</span>
+<span class="x">    $res-&gt;withText("Invalid type: {$e-&gt;getMessage()}")</span>
 <span class="x">        -&gt;setStatusCode(400)</span>
 <span class="x">        -&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>If an exception doesn’t match any registered class,
 Erlenmeyer falls back to the <strong>generic <code>Throwable</code> handler</strong> (the default 500 page).</p>
-<hr />
-<h2 id="built-in-logging">🪤 Built-in Logging<a class="headerlink" href="#built-in-logging" title="Permanent link">&para;</a></h2>
-<p>Every caught exception is automatically logged through the configured logger.</p>
-<p>By default:</p>
-<ul>
-<li>Errors go to <code>logs/info.log</code> via <code>FileLogger</code>.</li>
-<li>Each log includes the timestamp, exception type, message, file, and line number.</li>
-<li>Request context (method + URI) is included when available.</li>
-</ul>
-<p>Example log entry:</p>
-<div class="highlight"><pre><span></span><code>[2025-10-15 12:34:56] [ERROR] Undefined variable in /app/Controllers/Home.php:42
-Request: GET /home
-Stack trace:
-  #0 /public/index.php(10): HomeController-&gt;index()
-  ...
-</code></pre></div>
-<p>You can plug in your own logger (e.g., Monolog or a custom PSR-3 implementation)
-by passing it to the <code>App</code> constructor:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$logger = new MyCustomLogger();</span>
-<span class="x">$app = new App($logger);</span>
-</code></pre></div>
 <hr />
 <h2 id="handling-php-errors">🧰 Handling PHP Errors<a class="headerlink" href="#handling-php-errors" title="Permanent link">&para;</a></h2>
 <p>Erlenmeyer automatically converts PHP errors (like notices or warnings)
@@ -1499,25 +1348,25 @@ and let more general ones handle everything else.</p>
 <h2 id="example-full-error-stack">🚀 Example: Full Error Stack<a class="headerlink" href="#example-full-error-stack" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;setExceptionHandler(DomainException::class, fn($req, $res, $e) =&gt;</span>
 <span class="x">    $res-&gt;withJson([</span>
-<span class="x">        &#39;error&#39; =&gt; &#39;Domain violation&#39;,</span>
-<span class="x">        &#39;message&#39; =&gt; $e-&gt;getMessage()</span>
+<span class="x">        'error' =&gt; 'Domain violation',</span>
+<span class="x">        'message' =&gt; $e-&gt;getMessage()</span>
 <span class="x">    ])-&gt;setStatusCode(422)-&gt;send()</span>
 <span class="x">);</span>
 
 <span class="x">$app-&gt;setExceptionHandler(Throwable::class, fn($req, $res, $e) =&gt;</span>
 <span class="x">    $res-&gt;withJson([</span>
-<span class="x">        &#39;error&#39; =&gt; &#39;Unexpected server error&#39;,</span>
-<span class="x">        &#39;message&#39; =&gt; $e-&gt;getMessage()</span>
+<span class="x">        'error' =&gt; 'Unexpected server error',</span>
+<span class="x">        'message' =&gt; $e-&gt;getMessage()</span>
 <span class="x">    ])-&gt;setStatusCode(500)-&gt;send()</span>
 <span class="x">);</span>
 </code></pre></div>
 <p>Then, if your route throws:</p>
-<div class="highlight"><pre><span></span><code><span class="x">throw new DomainException(&quot;Invalid email format&quot;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">throw new DomainException("Invalid email format");</span>
 </code></pre></div>
 <p>You’ll get:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Domain violation&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid email format&quot;</span>
+<span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Domain violation"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Invalid email format"</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />
@@ -1537,10 +1386,6 @@ and let more general ones handle everything else.</p>
 <tr>
 <td><strong>Exception Handler</strong></td>
 <td>Maps exception classes to custom handlers</td>
-</tr>
-<tr>
-<td><strong>Logging</strong></td>
-<td>All exceptions are logged automatically</td>
 </tr>
 <tr>
 <td><strong>Error Conversion</strong></td>

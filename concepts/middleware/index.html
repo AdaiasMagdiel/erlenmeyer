@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -1018,6 +1018,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1116,7 +1162,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1126,149 +1172,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1362,29 +1265,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1456,9 +1336,9 @@
 </ul>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$auth = function ($req, $res, $next, $params) {</span>
-<span class="x">    $token = $req-&gt;getQueryParam(&#39;token&#39;);</span>
-<span class="x">    if ($token !== &#39;secret&#39;) {</span>
-<span class="x">        $res-&gt;withText(&#39;Unauthorized&#39;)-&gt;setStatusCode(401)-&gt;send();</span>
+<span class="x">    $token = $req-&gt;getQueryParam('token');</span>
+<span class="x">    if ($token !== 'secret') {</span>
+<span class="x">        $res-&gt;withText('Unauthorized')-&gt;setStatusCode(401)-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
 
@@ -1468,8 +1348,8 @@
 <hr />
 <h2 id="applying-middleware-to-a-single-route">Applying middleware to a single route<a class="headerlink" href="#applying-middleware-to-a-single-route" title="Permanent link">&para;</a></h2>
 <p>You can attach one or more middlewares directly to a route:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/dashboard&#39;, function ($req, $res) {</span>
-<span class="x">    $res-&gt;withText(&#39;Welcome to your dashboard&#39;)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/dashboard', function ($req, $res) {</span>
+<span class="x">    $res-&gt;withText('Welcome to your dashboard')-&gt;send();</span>
 <span class="x">}, [$auth]);</span>
 </code></pre></div>
 <p>Middlewares are executed <strong>in the order they’re defined</strong>.</p>
@@ -1485,8 +1365,8 @@ You can combine global and route-specific middlewares freely.</p>
 <p>A middleware can terminate the request early simply by <strong>not calling <code>$next()</code></strong>.
 This is useful for authentication, validation, or rate-limiting:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$rateLimit = function ($req, $res, $next, $params) {</span>
-<span class="x">    if (Session::get(&#39;requests&#39;) &gt; 100) {</span>
-<span class="x">        $res-&gt;setStatusCode(429)-&gt;withText(&#39;Too many requests&#39;)-&gt;send();</span>
+<span class="x">    if (Session::get('requests') &gt; 100) {</span>
+<span class="x">        $res-&gt;setStatusCode(429)-&gt;withText('Too many requests')-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
 <span class="x">    $next($req, $res, $params);</span>
@@ -1511,7 +1391,7 @@ If a middleware doesn’t call <code>$next()</code>, the chain stops there.</p>
 <hr />
 <h3 id="route-specific-middlewares">Route-specific middlewares<a class="headerlink" href="#route-specific-middlewares" title="Permanent link">&para;</a></h3>
 <p>When you attach middlewares to a specific route:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/admin&#39;, $handler, [$auth, $log]);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/admin', $handler, [$auth, $log]);</span>
 </code></pre></div>
 <p>The order will be:</p>
 <div class="highlight"><pre><span></span><code>auth → log → Route Handler
@@ -1520,7 +1400,7 @@ If a middleware doesn’t call <code>$next()</code>, the chain stops there.</p>
 <h3 id="global-route-middlewares-together">Global + route middlewares together<a class="headerlink" href="#global-route-middlewares-together" title="Permanent link">&para;</a></h3>
 <p>Global middlewares run before route-specific ones:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;addMiddleware($log);</span>
-<span class="x">$app-&gt;get(&#39;/secure&#39;, $handler, [$auth]);</span>
+<span class="x">$app-&gt;get('/secure', $handler, [$auth]);</span>
 </code></pre></div>
 <p>Execution order:</p>
 <div class="highlight"><pre><span></span><code>Global log → Route auth → Route Handler
@@ -1541,18 +1421,18 @@ If a middleware doesn’t call <code>$next()</code>, the chain stops there.</p>
 <hr />
 <h2 id="example-chaining-multiple-middlewares">Example: chaining multiple middlewares<a class="headerlink" href="#example-chaining-multiple-middlewares" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="x">$log = fn($req, $res, $next) =&gt; (</span>
-<span class="x">    error_log(&quot;[LOG] {$req-&gt;getMethod()} {$req-&gt;getUri()}&quot;),</span>
+<span class="x">    error_log("[LOG] {$req-&gt;getMethod()} {$req-&gt;getUri()}"),</span>
 <span class="x">    $next($req, $res, new stdClass())</span>
 <span class="x">);</span>
 
 <span class="x">$auth = fn($req, $res, $next) =&gt; (</span>
-<span class="x">    $req-&gt;getQueryParam(&#39;token&#39;) === &#39;secret&#39;</span>
+<span class="x">    $req-&gt;getQueryParam('token') === 'secret'</span>
 <span class="x">        ? $next($req, $res, new stdClass())</span>
-<span class="x">        : $res-&gt;withText(&#39;Unauthorized&#39;)-&gt;setStatusCode(401)-&gt;send()</span>
+<span class="x">        : $res-&gt;withText('Unauthorized')-&gt;setStatusCode(401)-&gt;send()</span>
 <span class="x">);</span>
 
 <span class="x">$app-&gt;addMiddleware($log);</span>
-<span class="x">$app-&gt;get(&#39;/admin&#39;, fn($req, $res) =&gt; $res-&gt;withText(&#39;Admin OK&#39;)-&gt;send(), [$auth]);</span>
+<span class="x">$app-&gt;get('/admin', fn($req, $res) =&gt; $res-&gt;withText('Admin OK')-&gt;send(), [$auth]);</span>
 </code></pre></div>
 <p><strong>Execution flow:</strong></p>
 <ol>

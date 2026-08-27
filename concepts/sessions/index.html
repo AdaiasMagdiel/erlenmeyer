@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -1042,6 +1042,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1140,7 +1186,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1150,149 +1196,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1386,29 +1289,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1478,14 +1358,14 @@ always started automatically when needed.</p>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Session;</span>
 
 <span class="x">// Store user data</span>
-<span class="x">Session::set(&#39;user_id&#39;, 42);</span>
+<span class="x">Session::set('user_id', 42);</span>
 
 <span class="x">// Retrieve it later</span>
-<span class="x">$userId = Session::get(&#39;user_id&#39;);</span>
+<span class="x">$userId = Session::get('user_id');</span>
 
 <span class="x">// Check existence</span>
-<span class="x">if (Session::has(&#39;user_id&#39;)) {</span>
-<span class="x">    echo &quot;User logged in&quot;;</span>
+<span class="x">if (Session::has('user_id')) {</span>
+<span class="x">    echo "User logged in";</span>
 <span class="x">}</span>
 </code></pre></div>
 <hr />
@@ -1496,14 +1376,14 @@ Erlenmeyer does this automatically whenever you interact with <code>Session</cod
 <hr />
 <h2 id="basic-api">🧱 Basic API<a class="headerlink" href="#basic-api" title="Permanent link">&para;</a></h2>
 <h3 id="storing-and-retrieving-values">Storing and Retrieving Values<a class="headerlink" href="#storing-and-retrieving-values" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">Session::set(&#39;theme&#39;, &#39;dark&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">Session::set('theme', 'dark');</span>
 
-<span class="x">echo Session::get(&#39;theme&#39;);        // &quot;dark&quot;</span>
-<span class="x">echo Session::get(&#39;language&#39;, &#39;en&#39;); // default fallback: &quot;en&quot;</span>
+<span class="x">echo Session::get('theme');        // "dark"</span>
+<span class="x">echo Session::get('language', 'en'); // default fallback: "en"</span>
 </code></pre></div>
 <h3 id="checking-and-removing">Checking and Removing<a class="headerlink" href="#checking-and-removing" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">if (Session::has(&#39;theme&#39;)) {</span>
-<span class="x">    Session::remove(&#39;theme&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">if (Session::has('theme')) {</span>
+<span class="x">    Session::remove('theme');</span>
 <span class="x">}</span>
 </code></pre></div>
 <hr />
@@ -1511,14 +1391,14 @@ Erlenmeyer does this automatically whenever you interact with <code>Session</cod
 <p>Flash messages are temporary session values that last <strong>for one request only</strong>.</p>
 <p>They’re perfect for redirect-based workflows — for example, after a form submission.</p>
 <div class="highlight"><pre><span></span><code><span class="x">// On form submission</span>
-<span class="x">Session::flash(&#39;success&#39;, &#39;User created successfully!&#39;);</span>
-<span class="x">return $res-&gt;redirect(&quot;/login&quot;);</span>
+<span class="x">Session::flash('success', 'User created successfully!');</span>
+<span class="x">return $res-&gt;redirect("/login");</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="x">// On the redirected page</span>
-<span class="x">$message = Session::getFlash(&#39;success&#39;);</span>
+<span class="x">$message = Session::getFlash('success');</span>
 
 <span class="x">if ($message) {</span>
-<span class="x">    echo &quot;&lt;p class=&#39;alert alert-success&#39;&gt;{$message}&lt;/p&gt;&quot;;</span>
+<span class="x">    echo "&lt;p class='alert alert-success'&gt;{$message}&lt;/p&gt;";</span>
 <span class="x">}</span>
 </code></pre></div>
 <p>The message is automatically removed after being retrieved.</p>
@@ -1530,9 +1410,9 @@ Erlenmeyer does this automatically whenever you interact with <code>Session</cod
 <li>If the flash container becomes empty, it’s cleared completely.</li>
 </ul>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="x">Session::flash(&#39;notice&#39;, &#39;Settings saved!&#39;);</span>
-<span class="x">echo Session::getFlash(&#39;notice&#39;); // Displays and removes the message</span>
-<span class="x">echo Session::getFlash(&#39;notice&#39;); // null</span>
+<div class="highlight"><pre><span></span><code><span class="x">Session::flash('notice', 'Settings saved!');</span>
+<span class="x">echo Session::getFlash('notice'); // Displays and removes the message</span>
+<span class="x">echo Session::getFlash('notice'); // null</span>
 </code></pre></div>
 <hr />
 <h2 id="complete-api-reference">🧩 Complete API Reference<a class="headerlink" href="#complete-api-reference" title="Permanent link">&para;</a></h2>
@@ -1584,24 +1464,24 @@ Erlenmeyer does this automatically whenever you interact with <code>Session</cod
 </table>
 <hr />
 <h2 id="example-login-system">🧩 Example: Login System<a class="headerlink" href="#example-login-system" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post(&#39;/login&#39;, function ($req, $res) {</span>
-<span class="x">    $user = authenticate($req-&gt;getFormDataParam(&#39;email&#39;), $req-&gt;getFormDataParam(&#39;password&#39;));</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post('/login', function ($req, $res) {</span>
+<span class="x">    $user = authenticate($req-&gt;getFormDataParam('email'), $req-&gt;getFormDataParam('password'));</span>
 
 <span class="x">    if (!$user) {</span>
-<span class="x">        Session::flash(&#39;error&#39;, &#39;Invalid credentials&#39;);</span>
-<span class="x">        return $res-&gt;redirect(&#39;/login&#39;);</span>
+<span class="x">        Session::flash('error', 'Invalid credentials');</span>
+<span class="x">        return $res-&gt;redirect('/login');</span>
 <span class="x">    }</span>
 
-<span class="x">    Session::set(&#39;user&#39;, $user[&#39;id&#39;]);</span>
-<span class="x">    return $res-&gt;redirect(&#39;/dashboard&#39;);</span>
+<span class="x">    Session::set('user', $user['id']);</span>
+<span class="x">    return $res-&gt;redirect('/dashboard');</span>
 <span class="x">});</span>
 
-<span class="x">$app-&gt;get(&#39;/dashboard&#39;, function ($req, $res) {</span>
-<span class="x">    if (!Session::has(&#39;user&#39;)) {</span>
-<span class="x">        return $res-&gt;redirect(&#39;/login&#39;);</span>
+<span class="x">$app-&gt;get('/dashboard', function ($req, $res) {</span>
+<span class="x">    if (!Session::has('user')) {</span>
+<span class="x">        return $res-&gt;redirect('/login');</span>
 <span class="x">    }</span>
 
-<span class="x">    $res-&gt;withHtml(&#39;&lt;h1&gt;Welcome to your dashboard&lt;/h1&gt;&#39;)-&gt;send();</span>
+<span class="x">    $res-&gt;withHtml('&lt;h1&gt;Welcome to your dashboard&lt;/h1&gt;')-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>This demonstrates how you can combine sessions and flash messages

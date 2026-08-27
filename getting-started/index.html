@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../advanced/logging/" class="md-tabs__link">
+        <a href="../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -998,6 +998,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/Request/" class="md-nav__link">
         
   
@@ -1096,7 +1142,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1106,149 +1152,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1334,29 +1237,6 @@
             Advanced
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1473,12 +1353,12 @@ and initializes anything your app needs.</p>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
 <span class="c1">// bootstrap.php</span>
 
-<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/vendor/autoload.php&#39;</span><span class="p">;</span>
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/vendor/autoload.php'</span><span class="p">;</span>
 
 <span class="k">use</span> <span class="nx">Dotenv\Dotenv</span><span class="p">;</span>
 
 <span class="c1">// Load environment variables (optional)</span>
-<span class="k">if</span> <span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/.env&#39;</span><span class="p">))</span> <span class="p">{</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">file_exists</span><span class="p">(</span><span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/.env'</span><span class="p">))</span> <span class="p">{</span>
     <span class="nx">Dotenv</span><span class="o">::</span><span class="na">createImmutable</span><span class="p">(</span><span class="no">__DIR__</span><span class="p">)</span><span class="o">-&gt;</span><span class="na">load</span><span class="p">();</span>
 <span class="p">}</span>
 
@@ -1492,18 +1372,18 @@ and initializes anything your app needs.</p>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Request</span><span class="p">;</span>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Response</span><span class="p">;</span>
 
-<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/../bootstrap.php&#39;</span><span class="p">;</span>
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/../bootstrap.php'</span><span class="p">;</span>
 
 <span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">App</span><span class="p">();</span>
 
 <span class="c1">// Root route</span>
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">)</span> <span class="o">=&gt;</span>
-    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withHtml</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;Hello from Erlenmeyer ⚗️&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withHtml</span><span class="p">(</span><span class="s1">'&lt;h1&gt;Hello from Erlenmeyer ⚗️&lt;/h1&gt;'</span><span class="p">)</span>
 <span class="p">);</span>
 
 <span class="c1">// Dynamic route with parameter</span>
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/hello/[name]&#39;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=&gt;</span>
-    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withText</span><span class="p">(</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="nv">$params</span><span class="o">-&gt;</span><span class="na">name</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/hello/[name]'</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withText</span><span class="p">(</span><span class="s2">"Hello, </span><span class="si">{</span><span class="nv">$params</span><span class="o">-&gt;</span><span class="na">name</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
 <span class="p">);</span>
 
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
@@ -1517,10 +1397,10 @@ for authentication, logging, headers, or anything else.</p>
 Here’s a simple example:</p>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
 <span class="nv">$auth</span> <span class="o">=</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$req</span><span class="p">,</span> <span class="nv">$res</span><span class="p">,</span> <span class="nv">$next</span><span class="p">,</span> <span class="nv">$params</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nv">$token</span> <span class="o">=</span> <span class="nv">$req</span><span class="o">-&gt;</span><span class="na">getQueryParam</span><span class="p">(</span><span class="s1">&#39;token&#39;</span><span class="p">);</span>
+    <span class="nv">$token</span> <span class="o">=</span> <span class="nv">$req</span><span class="o">-&gt;</span><span class="na">getQueryParam</span><span class="p">(</span><span class="s1">'token'</span><span class="p">);</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nv">$token</span> <span class="o">!==</span> <span class="s1">&#39;secret&#39;</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withText</span><span class="p">(</span><span class="s1">&#39;Unauthorized&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$token</span> <span class="o">!==</span> <span class="s1">'secret'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withText</span><span class="p">(</span><span class="s1">'Unauthorized'</span><span class="p">)</span>
             <span class="o">-&gt;</span><span class="na">setStatusCode</span><span class="p">(</span><span class="mi">401</span><span class="p">)</span>
             <span class="o">-&gt;</span><span class="na">send</span><span class="p">();</span>
         <span class="k">return</span><span class="p">;</span>
@@ -1534,8 +1414,8 @@ Here’s a simple example:</p>
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="na">addMiddleware</span><span class="p">(</span><span class="nv">$auth</span><span class="p">);</span>
 
 <span class="c1">// Or per route</span>
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/private&#39;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nv">$req</span><span class="p">,</span> <span class="nv">$res</span><span class="p">)</span> <span class="o">=&gt;</span>
-    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withHtml</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;Welcome to the secret area 🧪&lt;/h1&gt;&#39;</span><span class="p">),</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/private'</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nv">$req</span><span class="p">,</span> <span class="nv">$res</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withHtml</span><span class="p">(</span><span class="s1">'&lt;h1&gt;Welcome to the secret area 🧪&lt;/h1&gt;'</span><span class="p">),</span>
     <span class="p">[</span><span class="nv">$auth</span><span class="p">]</span>
 <span class="p">);</span>
 </code></pre></div>

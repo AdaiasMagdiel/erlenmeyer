@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -1012,6 +1012,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1110,7 +1156,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1120,149 +1166,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1356,29 +1259,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1442,16 +1322,16 @@ allowing for fluent chaining and predictable output.</p>
 <hr />
 <h2 id="sending-basic-responses">Sending Basic Responses<a class="headerlink" href="#sending-basic-responses" title="Permanent link">&para;</a></h2>
 <p>The simplest way to send a response:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/hello&#39;, function ($req, $res) {</span>
-<span class="x">    $res-&gt;withText(&#39;Hello, world!&#39;)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/hello', function ($req, $res) {</span>
+<span class="x">    $res-&gt;withText('Hello, world!')-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>This sets a <code>Content-Type: text/plain; charset=UTF-8</code> header
 and flushes the text directly to the client.</p>
 <hr />
 <h2 id="sending-html">Sending HTML<a class="headerlink" href="#sending-html" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/&#39;, function ($req, $res) {</span>
-<span class="x">    $html = &quot;&lt;h1&gt;Welcome to Erlenmeyer ⚗️&lt;/h1&gt;&quot;;</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/', function ($req, $res) {</span>
+<span class="x">    $html = "&lt;h1&gt;Welcome to Erlenmeyer ⚗️&lt;/h1&gt;";</span>
 <span class="x">    $res-&gt;withHtml($html)-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
@@ -1460,8 +1340,8 @@ and flushes the text directly to the client.</p>
 </code></pre></div>
 <hr />
 <h2 id="sending-json">Sending JSON<a class="headerlink" href="#sending-json" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/api/info&#39;, function ($req, $res) {</span>
-<span class="x">    $data = [&#39;status&#39; =&gt; &#39;ok&#39;, &#39;framework&#39; =&gt; &#39;Erlenmeyer&#39;];</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/api/info', function ($req, $res) {</span>
+<span class="x">    $data = ['status' =&gt; 'ok', 'framework' =&gt; 'Erlenmeyer'];</span>
 <span class="x">    $res-&gt;withJson($data)-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
@@ -1474,69 +1354,69 @@ and flushes the text directly to the client.</p>
 <hr />
 <h2 id="setting-status-codes">Setting Status Codes<a class="headerlink" href="#setting-status-codes" title="Permanent link">&para;</a></h2>
 <p>You can easily set status codes before sending:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;withText(&#39;Unauthorized&#39;)-&gt;setStatusCode(401)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;withText('Unauthorized')-&gt;setStatusCode(401)-&gt;send();</span>
 </code></pre></div>
 <p>or chain fluently:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setStatusCode(201)-&gt;withJson([&#39;created&#39; =&gt; true])-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setStatusCode(201)-&gt;withJson(['created' =&gt; true])-&gt;send();</span>
 </code></pre></div>
 <hr />
 <h2 id="redirects">Redirects<a class="headerlink" href="#redirects" title="Permanent link">&para;</a></h2>
 <p>Redirects are just another response type:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;redirect(&#39;/new-location&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;redirect('/new-location');</span>
 </code></pre></div>
 <p>You can specify whether it’s permanent:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;redirect(&#39;/new-home&#39;, 301);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;redirect('/new-home', 301);</span>
 </code></pre></div>
 <hr />
 <h2 id="custom-headers">Custom Headers<a class="headerlink" href="#custom-headers" title="Permanent link">&para;</a></h2>
 <p>Add or replace headers using <code>setHeader()</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setHeader(&#39;X-Powered-By&#39;, &#39;Erlenmeyer&#39;)</span>
-<span class="x">    -&gt;withText(&#39;OK&#39;)</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setHeader('X-Powered-By', 'Erlenmeyer')</span>
+<span class="x">    -&gt;withText('OK')</span>
 <span class="x">    -&gt;send();</span>
 </code></pre></div>
 <p>Or multiple at once:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setHeaders([</span>
-<span class="x">    &#39;Cache-Control&#39; =&gt; &#39;no-store&#39;,</span>
-<span class="x">    &#39;X-Frame-Options&#39; =&gt; &#39;DENY&#39;,</span>
-<span class="x">])-&gt;withText(&#39;Secure&#39;)-&gt;send();</span>
+<span class="x">    'Cache-Control' =&gt; 'no-store',</span>
+<span class="x">    'X-Frame-Options' =&gt; 'DENY',</span>
+<span class="x">])-&gt;withText('Secure')-&gt;send();</span>
 </code></pre></div>
 <hr />
 <h2 id="sending-files">Sending Files<a class="headerlink" href="#sending-files" title="Permanent link">&para;</a></h2>
 <p>For binary or downloadable responses:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/download&#39;, function ($req, $res) {</span>
-<span class="x">    $res-&gt;withFile(&#39;assets/banner.jpg&#39;)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/download', function ($req, $res) {</span>
+<span class="x">    $res-&gt;withFile('assets/banner.jpg')-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>This automatically sets the correct MIME type and streams the file content.</p>
 <hr />
 <h2 id="json-error-helpers">JSON Error Helpers<a class="headerlink" href="#json-error-helpers" title="Permanent link">&para;</a></h2>
 <p>For quick API responses:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;withError(404, &#39;Not found&#39;)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;withError(404, 'Not found')-&gt;send();</span>
 </code></pre></div>
 <p>This produces a JSON body like:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Not found&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">404</span>
+<span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Not found"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="mi">404</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>and sets both <code>Content-Type: application/json</code> and HTTP 404.</p>
 <hr />
 <h2 id="working-with-cookies">Working with Cookies<a class="headerlink" href="#working-with-cookies" title="Permanent link">&para;</a></h2>
 <p>You can add cookies easily:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setCookie(&#39;session&#39;, &#39;abc123&#39;, [</span>
-<span class="x">    &#39;path&#39; =&gt; &#39;/&#39;,</span>
-<span class="x">    &#39;httponly&#39; =&gt; true,</span>
-<span class="x">    &#39;secure&#39; =&gt; true,</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;setCookie('session', 'abc123', [</span>
+<span class="x">    'path' =&gt; '/',</span>
+<span class="x">    'httponly' =&gt; true,</span>
+<span class="x">    'secure' =&gt; true,</span>
 <span class="x">]);</span>
 </code></pre></div>
 <p>And clear them:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;clearCookie(&#39;session&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$res-&gt;clearCookie('session');</span>
 </code></pre></div>
 <hr />
 <h2 id="combining-responses-and-middleware">Combining Responses and Middleware<a class="headerlink" href="#combining-responses-and-middleware" title="Permanent link">&para;</a></h2>
 <p>Because the response is mutable, it can be safely modified in middlewares:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$headers = function ($req, $res, $next, $params) {</span>
-<span class="x">    $res-&gt;setHeader(&#39;X-Request-ID&#39;, uniqid());</span>
+<span class="x">    $res-&gt;setHeader('X-Request-ID', uniqid());</span>
 <span class="x">    $next($req, $res, $params);</span>
 <span class="x">};</span>
 </code></pre></div>
@@ -1547,10 +1427,10 @@ so all mutations (headers, status codes, cookies) persist across the chain.</p>
 </div>
 <hr />
 <h2 id="full-example">Full Example<a class="headerlink" href="#full-example" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/profile&#39;, function ($req, $res) {</span>
-<span class="x">    $user = [&#39;id&#39; =&gt; 1, &#39;name&#39; =&gt; &#39;Ada Lovelace&#39;];</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/profile', function ($req, $res) {</span>
+<span class="x">    $user = ['id' =&gt; 1, 'name' =&gt; 'Ada Lovelace'];</span>
 
-<span class="x">    $res-&gt;setHeader(&#39;X-Powered-By&#39;, &#39;Erlenmeyer&#39;)</span>
+<span class="x">    $res-&gt;setHeader('X-Powered-By', 'Erlenmeyer')</span>
 <span class="x">        -&gt;setStatusCode(200)</span>
 <span class="x">        -&gt;withJson($user)</span>
 <span class="x">        -&gt;send();</span>
@@ -1562,7 +1442,7 @@ Content-Type: application/json; charset=UTF-8
 X-Powered-By: Erlenmeyer
 </code></pre></div>
 <p>Body:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ada Lovelace&quot;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ada Lovelace"</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <hr />
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>

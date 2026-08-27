@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -1147,6 +1147,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1245,7 +1291,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1255,149 +1301,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1491,29 +1394,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1597,14 +1477,14 @@ as your app. This means:</p>
 </code></pre></div>
 <h3 id="example-testsbootstrapphp">Example: <code>tests/bootstrap.php</code><a class="headerlink" href="#example-testsbootstrapphp" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
-<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/../vendor/autoload.php&#39;</span><span class="p">;</span>
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/../vendor/autoload.php'</span><span class="p">;</span>
 
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\App</span><span class="p">;</span>
 
 <span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">App</span><span class="p">();</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/hello&#39;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nv">$req</span><span class="p">,</span> <span class="nv">$res</span><span class="p">,</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=&gt;</span>
-    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span><span class="s1">&#39;message&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Hello, Tests!&#39;</span><span class="p">])</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/hello'</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nv">$req</span><span class="p">,</span> <span class="nv">$res</span><span class="p">,</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withJson</span><span class="p">([</span><span class="s1">'message'</span> <span class="o">=&gt;</span> <span class="s1">'Hello, Tests!'</span><span class="p">])</span>
 <span class="p">);</span>
 
 <span class="k">return</span> <span class="nv">$app</span><span class="p">;</span>
@@ -1614,38 +1494,38 @@ as your app. This means:</p>
 <div class="highlight"><pre><span></span><code><span class="cp">&lt;?php</span>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Testing\ErlenClient</span><span class="p">;</span>
 
-<span class="nv">$app</span> <span class="o">=</span> <span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/bootstrap.php&#39;</span><span class="p">;</span>
+<span class="nv">$app</span> <span class="o">=</span> <span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/bootstrap.php'</span><span class="p">;</span>
 <span class="nv">$client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ErlenClient</span><span class="p">(</span><span class="nv">$app</span><span class="p">);</span>
 
-<span class="nv">$response</span> <span class="o">=</span> <span class="nv">$client</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/hello&#39;</span><span class="p">);</span>
+<span class="nv">$response</span> <span class="o">=</span> <span class="nv">$client</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/hello'</span><span class="p">);</span>
 
 <span class="k">echo</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getStatusCode</span><span class="p">();</span> <span class="c1">// 200</span>
-<span class="k">echo</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getBody</span><span class="p">();</span>       <span class="c1">// {&quot;message&quot;:&quot;Hello, Tests!&quot;}</span>
+<span class="k">echo</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getBody</span><span class="p">();</span>       <span class="c1">// {"message":"Hello, Tests!"}</span>
 </code></pre></div>
 <p>✅ This test runs entirely in memory — no HTTP calls, no external dependencies.</p>
 <hr />
 <h2 id="testing-json-endpoints">🧱 Testing JSON Endpoints<a class="headerlink" href="#testing-json-endpoints" title="Permanent link">&para;</a></h2>
 <p>To simulate a <code>POST</code> request with a JSON body:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post(&#39;/users&#39;, [</span>
-<span class="x">    &#39;json&#39; =&gt; [&#39;name&#39; =&gt; &#39;Alice&#39;]</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post('/users', [</span>
+<span class="x">    'json' =&gt; ['name' =&gt; 'Alice']</span>
 <span class="x">]);</span>
 
 <span class="x">echo $response-&gt;getStatusCode(); // 201</span>
-<span class="x">echo $response-&gt;getBody();       // {&quot;message&quot;:&quot;User created&quot;,&quot;user&quot;:{&quot;name&quot;:&quot;Alice&quot;}}</span>
+<span class="x">echo $response-&gt;getBody();       // {"message":"User created","user":{"name":"Alice"}}</span>
 </code></pre></div>
 <h3 id="assertions-for-phpunit-or-pest">Assertions (for PHPUnit or Pest)<a class="headerlink" href="#assertions-for-phpunit-or-pest" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="x">$this-&gt;assertEquals(201, $response-&gt;getStatusCode());</span>
-<span class="x">$this-&gt;assertStringContainsString(&#39;Alice&#39;, $response-&gt;getBody());</span>
+<span class="x">$this-&gt;assertStringContainsString('Alice', $response-&gt;getBody());</span>
 </code></pre></div>
 <hr />
 <h2 id="sending-headers-and-tokens">🧩 Sending Headers and Tokens<a class="headerlink" href="#sending-headers-and-tokens" title="Permanent link">&para;</a></h2>
 <p>You can add headers globally or per request.</p>
 <h3 id="global-headers">Global Headers<a class="headerlink" href="#global-headers" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">$client-&gt;withHeaders([&#39;Authorization&#39; =&gt; &#39;Bearer test123&#39;]);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$client-&gt;withHeaders(['Authorization' =&gt; 'Bearer test123']);</span>
 </code></pre></div>
 <h3 id="per-request">Per Request<a class="headerlink" href="#per-request" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get(&#39;/profile&#39;, [</span>
-<span class="x">    &#39;headers&#39; =&gt; [&#39;Authorization&#39; =&gt; &#39;Bearer test123&#39;]</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get('/profile', [</span>
+<span class="x">    'headers' =&gt; ['Authorization' =&gt; 'Bearer test123']</span>
 <span class="x">]);</span>
 </code></pre></div>
 <p>All headers are automatically transformed into the proper PHP <code>$_SERVER</code> keys
@@ -1655,48 +1535,48 @@ as your app. This means:</p>
 <p>Global and route-specific middleware logic is fully executed in tests.</p>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;addMiddleware(function ($req, $res, $next, $params) {</span>
-<span class="x">    $token = $req-&gt;getHeader(&#39;Authorization&#39;);</span>
-<span class="x">    if ($token !== &#39;Bearer valid123&#39;) {</span>
-<span class="x">        $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Unauthorized&#39;])-&gt;setStatusCode(401)-&gt;send();</span>
+<span class="x">    $token = $req-&gt;getHeader('Authorization');</span>
+<span class="x">    if ($token !== 'Bearer valid123') {</span>
+<span class="x">        $res-&gt;withJson(['error' =&gt; 'Unauthorized'])-&gt;setStatusCode(401)-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
-<span class="x">    $params-&gt;user = [&#39;id&#39; =&gt; 1, &#39;name&#39; =&gt; &#39;Alice&#39;];</span>
+<span class="x">    $params-&gt;user = ['id' =&gt; 1, 'name' =&gt; 'Alice'];</span>
 <span class="x">    $next($req, $res, $params);</span>
 <span class="x">});</span>
 
-<span class="x">$app-&gt;get(&#39;/me&#39;, fn($req, $res, $params) =&gt;</span>
+<span class="x">$app-&gt;get('/me', fn($req, $res, $params) =&gt;</span>
 <span class="x">    $res-&gt;withJson($params-&gt;user)</span>
 <span class="x">);</span>
 </code></pre></div>
 <p>Test:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get(&#39;/me&#39;, [</span>
-<span class="x">    &#39;headers&#39; =&gt; [&#39;Authorization&#39; =&gt; &#39;Bearer valid123&#39;]</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get('/me', [</span>
+<span class="x">    'headers' =&gt; ['Authorization' =&gt; 'Bearer valid123']</span>
 <span class="x">]);</span>
 
 <span class="x">$this-&gt;assertEquals(200, $response-&gt;getStatusCode());</span>
-<span class="x">$this-&gt;assertStringContainsString(&#39;Alice&#39;, $response-&gt;getBody());</span>
+<span class="x">$this-&gt;assertStringContainsString('Alice', $response-&gt;getBody());</span>
 </code></pre></div>
 <hr />
 <h2 id="testing-cors-and-preflight-requests">🧩 Testing CORS and Preflight Requests<a class="headerlink" href="#testing-cors-and-preflight-requests" title="Permanent link">&para;</a></h2>
 <p>CORS is easy to test — just send an <code>OPTIONS</code> request.</p>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;options(&#39;/users&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;options('/users');</span>
 
 <span class="x">$this-&gt;assertEquals(204, $response-&gt;getStatusCode());</span>
-<span class="x">$this-&gt;assertEquals(&#39;*&#39;, $response-&gt;getHeaders()[&#39;Access-Control-Allow-Origin&#39;]);</span>
+<span class="x">$this-&gt;assertEquals('*', $response-&gt;getHeaders()['Access-Control-Allow-Origin']);</span>
 </code></pre></div>
 <p>If your global middleware sets CORS headers, they will appear in the response automatically.</p>
 <hr />
 <h2 id="testing-query-strings-and-form-data">⚙️ Testing Query Strings and Form Data<a class="headerlink" href="#testing-query-strings-and-form-data" title="Permanent link">&para;</a></h2>
 <h3 id="query-strings">Query Strings<a class="headerlink" href="#query-strings" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get(&#39;/search&#39;, [</span>
-<span class="x">    &#39;query&#39; =&gt; [&#39;q&#39; =&gt; &#39;test&#39;]</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get('/search', [</span>
+<span class="x">    'query' =&gt; ['q' =&gt; 'test']</span>
 <span class="x">]);</span>
 
-<span class="x">$this-&gt;assertStringContainsString(&#39;test&#39;, $response-&gt;getBody());</span>
+<span class="x">$this-&gt;assertStringContainsString('test', $response-&gt;getBody());</span>
 </code></pre></div>
 <h3 id="form-data">Form Data<a class="headerlink" href="#form-data" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post(&#39;/submit&#39;, [</span>
-<span class="x">    &#39;form_params&#39; =&gt; [&#39;email&#39; =&gt; &#39;user@example.com&#39;]</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post('/submit', [</span>
+<span class="x">    'form_params' =&gt; ['email' =&gt; 'user@example.com']</span>
 <span class="x">]);</span>
 
 <span class="x">$this-&gt;assertEquals(200, $response-&gt;getStatusCode());</span>
@@ -1704,14 +1584,14 @@ as your app. This means:</p>
 <hr />
 <h2 id="testing-file-uploads">🧱 Testing File Uploads<a class="headerlink" href="#testing-file-uploads" title="Permanent link">&para;</a></h2>
 <p>ErlenClient supports simulated file uploads as well:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post(&#39;/upload&#39;, [</span>
-<span class="x">    &#39;files&#39; =&gt; [</span>
-<span class="x">        &#39;avatar&#39; =&gt; [</span>
-<span class="x">            &#39;name&#39; =&gt; &#39;photo.jpg&#39;,</span>
-<span class="x">            &#39;type&#39; =&gt; &#39;image/jpeg&#39;,</span>
-<span class="x">            &#39;tmp_name&#39; =&gt; __DIR__ . &#39;/fixtures/photo.jpg&#39;,</span>
-<span class="x">            &#39;error&#39; =&gt; 0,</span>
-<span class="x">            &#39;size&#39; =&gt; 2048</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post('/upload', [</span>
+<span class="x">    'files' =&gt; [</span>
+<span class="x">        'avatar' =&gt; [</span>
+<span class="x">            'name' =&gt; 'photo.jpg',</span>
+<span class="x">            'type' =&gt; 'image/jpeg',</span>
+<span class="x">            'tmp_name' =&gt; __DIR__ . '/fixtures/photo.jpg',</span>
+<span class="x">            'error' =&gt; 0,</span>
+<span class="x">            'size' =&gt; 2048</span>
 <span class="x">        ]</span>
 <span class="x">    ]</span>
 <span class="x">]);</span>
@@ -1720,17 +1600,17 @@ as your app. This means:</p>
 <h2 id="testing-error-handling">🧩 Testing Error Handling<a class="headerlink" href="#testing-error-handling" title="Permanent link">&para;</a></h2>
 <p>You can verify custom exception and 404 handlers easily.</p>
 <h3 id="404-example">404 Example<a class="headerlink" href="#404-example" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get(&#39;/does-not-exist&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get('/does-not-exist');</span>
 <span class="x">$this-&gt;assertEquals(404, $response-&gt;getStatusCode());</span>
 </code></pre></div>
 <h3 id="exception-example">Exception Example<a class="headerlink" href="#exception-example" title="Permanent link">&para;</a></h3>
 <p>If a route throws an error:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/boom&#39;, fn() =&gt; throw new Exception(&#39;Boom!&#39;));</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/boom', fn() =&gt; throw new Exception('Boom!'));</span>
 </code></pre></div>
 <p>Test:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get(&#39;/boom&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;get('/boom');</span>
 <span class="x">$this-&gt;assertEquals(500, $response-&gt;getStatusCode());</span>
-<span class="x">$this-&gt;assertStringContainsString(&#39;Boom&#39;, $response-&gt;getBody());</span>
+<span class="x">$this-&gt;assertStringContainsString('Boom', $response-&gt;getBody());</span>
 </code></pre></div>
 <hr />
 <h2 id="session-testing">🧩 Session Testing<a class="headerlink" href="#session-testing" title="Permanent link">&para;</a></h2>
@@ -1739,11 +1619,11 @@ it works normally during tests.</p>
 <p>You can check flash messages and user data easily.</p>
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Session;</span>
 
-<span class="x">Session::set(&#39;user_id&#39;, 1);</span>
-<span class="x">$this-&gt;assertEquals(1, Session::get(&#39;user_id&#39;));</span>
+<span class="x">Session::set('user_id', 1);</span>
+<span class="x">$this-&gt;assertEquals(1, Session::get('user_id'));</span>
 
-<span class="x">Session::flash(&#39;notice&#39;, &#39;Profile updated!&#39;);</span>
-<span class="x">$this-&gt;assertEquals(&#39;Profile updated!&#39;, Session::getFlash(&#39;notice&#39;));</span>
+<span class="x">Session::flash('notice', 'Profile updated!');</span>
+<span class="x">$this-&gt;assertEquals('Profile updated!', Session::getFlash('notice'));</span>
 </code></pre></div>
 <hr />
 <h2 id="using-phpunit-or-pest">🧰 Using PHPUnit or Pest<a class="headerlink" href="#using-phpunit-or-pest" title="Permanent link">&para;</a></h2>
@@ -1759,15 +1639,15 @@ it works normally during tests.</p>
 
     <span class="k">protected</span> <span class="k">function</span> <span class="nf">setUp</span><span class="p">()</span><span class="o">:</span> <span class="nx">void</span>
     <span class="p">{</span>
-        <span class="nv">$app</span> <span class="o">=</span> <span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/bootstrap.php&#39;</span><span class="p">;</span>
+        <span class="nv">$app</span> <span class="o">=</span> <span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/bootstrap.php'</span><span class="p">;</span>
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ErlenClient</span><span class="p">(</span><span class="nv">$app</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="k">public</span> <span class="k">function</span> <span class="nf">testHelloRoute</span><span class="p">()</span><span class="o">:</span> <span class="nx">void</span>
     <span class="p">{</span>
-        <span class="nv">$response</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/hello&#39;</span><span class="p">);</span>
+        <span class="nv">$response</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">client</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/hello'</span><span class="p">);</span>
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertEquals</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getStatusCode</span><span class="p">());</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertStringContainsString</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getBody</span><span class="p">());</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">assertStringContainsString</span><span class="p">(</span><span class="s1">'Hello'</span><span class="p">,</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getBody</span><span class="p">());</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1776,16 +1656,16 @@ it works normally during tests.</p>
 </code></pre></div>
 <hr />
 <h2 id="example-full-api-test-suite">🧩 Example: Full API Test Suite<a class="headerlink" href="#example-full-api-test-suite" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post(&#39;/login&#39;, [</span>
-<span class="x">    &#39;json&#39; =&gt; [&#39;email&#39; =&gt; &#39;user@example.com&#39;, &#39;password&#39; =&gt; &#39;secret&#39;]</span>
+<div class="highlight"><pre><span></span><code><span class="x">$response = $client-&gt;post('/login', [</span>
+<span class="x">    'json' =&gt; ['email' =&gt; 'user@example.com', 'password' =&gt; 'secret']</span>
 <span class="x">]);</span>
 <span class="x">$this-&gt;assertEquals(200, $response-&gt;getStatusCode());</span>
 
-<span class="x">$response = $client-&gt;get(&#39;/profile&#39;, [</span>
-<span class="x">    &#39;headers&#39; =&gt; [&#39;Authorization&#39; =&gt; &#39;Bearer token123&#39;]</span>
+<span class="x">$response = $client-&gt;get('/profile', [</span>
+<span class="x">    'headers' =&gt; ['Authorization' =&gt; 'Bearer token123']</span>
 <span class="x">]);</span>
 <span class="x">$this-&gt;assertEquals(200, $response-&gt;getStatusCode());</span>
-<span class="x">$this-&gt;assertStringContainsString(&#39;user@example.com&#39;, $response-&gt;getBody());</span>
+<span class="x">$this-&gt;assertStringContainsString('user@example.com', $response-&gt;getBody());</span>
 </code></pre></div>
 <hr />
 <h2 id="summary">🚀 Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>

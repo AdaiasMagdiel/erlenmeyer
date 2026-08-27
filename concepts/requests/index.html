@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -985,6 +985,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1083,7 +1129,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1093,149 +1139,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1329,29 +1232,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1414,9 +1294,9 @@ to JSON payloads, uploaded files, and headers.</p>
 <hr />
 <h2 id="accessing-the-request">Accessing the Request<a class="headerlink" href="#accessing-the-request" title="Permanent link">&para;</a></h2>
 <p>Every route in Erlenmeyer receives the request object as the first argument:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/hello&#39;, function (Request $req, Response $res) {</span>
-<span class="x">    $name = $req-&gt;getQueryParam(&#39;name&#39;, &#39;world&#39;);</span>
-<span class="x">    $res-&gt;withText(&quot;Hello, {$name}!&quot;)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/hello', function (Request $req, Response $res) {</span>
+<span class="x">    $name = $req-&gt;getQueryParam('name', 'world');</span>
+<span class="x">    $res-&gt;withText("Hello, {$name}!")-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>Here, <code>/hello?name=Adaias</code> responds with:</p>
@@ -1427,8 +1307,8 @@ to JSON payloads, uploaded files, and headers.</p>
 </code></pre></div>
 <hr />
 <h2 id="reading-query-and-form-data">Reading Query and Form Data<a class="headerlink" href="#reading-query-and-form-data" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$name = $req-&gt;getQueryParam(&#39;name&#39;);   // ?name=John</span>
-<span class="x">$email = $req-&gt;getFormDataParam(&#39;email&#39;); // POST form input</span>
+<div class="highlight"><pre><span></span><code><span class="x">$name = $req-&gt;getQueryParam('name');   // ?name=John</span>
+<span class="x">$email = $req-&gt;getFormDataParam('email'); // POST form input</span>
 </code></pre></div>
 <p>You can also get all parameters at once:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$req-&gt;getQueryParams(); // returns array</span>
@@ -1438,20 +1318,20 @@ to JSON payloads, uploaded files, and headers.</p>
 <h2 id="working-with-json">Working with JSON<a class="headerlink" href="#working-with-json" title="Permanent link">&para;</a></h2>
 <p>Erlenmeyer automatically decodes JSON payloads when the <code>Content-Type</code>
 header is <code>application/json</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post(&#39;/api/data&#39;, function (Request $req, Response $res) {</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;post('/api/data', function (Request $req, Response $res) {</span>
 <span class="x">    $data = $req-&gt;getJson();</span>
-<span class="x">    $res-&gt;withJson([&#39;received&#39; =&gt; $data])-&gt;send();</span>
+<span class="x">    $res-&gt;withJson(['received' =&gt; $data])-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>If the request body isn’t valid JSON, you can safely handle it:</p>
 <div class="highlight"><pre><span></span><code><span class="x">if ($req-&gt;getJsonError()) {</span>
-<span class="x">    $res-&gt;withError(400, &quot;Invalid JSON: &quot; . $req-&gt;getJsonError())-&gt;send();</span>
+<span class="x">    $res-&gt;withError(400, "Invalid JSON: " . $req-&gt;getJsonError())-&gt;send();</span>
 <span class="x">    return;</span>
 <span class="x">}</span>
 </code></pre></div>
 <hr />
 <h2 id="headers-and-metadata">Headers and Metadata<a class="headerlink" href="#headers-and-metadata" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="x">$agent = $req-&gt;getHeader(&#39;User-Agent&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$agent = $req-&gt;getHeader('User-Agent');</span>
 <span class="x">$all   = $req-&gt;getHeaders();</span>
 
 <span class="x">if ($req-&gt;isSecure()) {</span>
@@ -1465,15 +1345,15 @@ header is <code>application/json</code>.</p>
 <hr />
 <h2 id="accessing-files">Accessing Files<a class="headerlink" href="#accessing-files" title="Permanent link">&para;</a></h2>
 <p>Uploaded files are available through <code>getFile()</code> or <code>getFiles()</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$file = $req-&gt;getFile(&#39;avatar&#39;);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$file = $req-&gt;getFile('avatar');</span>
 
-<span class="x">if ($file &amp;&amp; $file[&#39;error&#39;] === UPLOAD_ERR_OK) {</span>
-<span class="x">    move_uploaded_file($file[&#39;tmp_name&#39;], &#39;uploads/&#39; . $file[&#39;name&#39;]);</span>
+<span class="x">if ($file &amp;&amp; $file['error'] === UPLOAD_ERR_OK) {</span>
+<span class="x">    move_uploaded_file($file['tmp_name'], 'uploads/' . $file['name']);</span>
 <span class="x">}</span>
 </code></pre></div>
 <p>For multiple uploads under the same key:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$file1 = $req-&gt;getFile(&#39;images&#39;, 0);</span>
-<span class="x">$file2 = $req-&gt;getFile(&#39;images&#39;, 1);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$file1 = $req-&gt;getFile('images', 0);</span>
+<span class="x">$file2 = $req-&gt;getFile('images', 1);</span>
 </code></pre></div>
 <hr />
 <h2 id="getting-client-info">Getting Client Info<a class="headerlink" href="#getting-client-info" title="Permanent link">&para;</a></h2>
@@ -1486,8 +1366,8 @@ but always falls back to <code>REMOTE_ADDR</code>.</p>
 <h2 id="handling-tokens-or-auth-checks">Handling Tokens or Auth Checks<a class="headerlink" href="#handling-tokens-or-auth-checks" title="Permanent link">&para;</a></h2>
 <p>Because the <code>Request</code> gives you direct access to headers and params,
 you can implement lightweight auth guards easily:</p>
-<div class="highlight"><pre><span></span><code><span class="x">if ($req-&gt;getQueryParam(&#39;token&#39;) !== &#39;secret&#39;) {</span>
-<span class="x">    $res-&gt;withText(&#39;Unauthorized&#39;)-&gt;setStatusCode(401)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">if ($req-&gt;getQueryParam('token') !== 'secret') {</span>
+<span class="x">    $res-&gt;withText('Unauthorized')-&gt;setStatusCode(401)-&gt;send();</span>
 <span class="x">    return;</span>
 <span class="x">}</span>
 </code></pre></div>

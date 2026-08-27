@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -1021,6 +1021,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1119,7 +1165,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1129,149 +1175,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1365,29 +1268,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1471,15 +1351,15 @@ and handle CORS headers without registering separate routes.</p>
 <span class="x">$app-&gt;addMiddleware(function (Request $req, Response $res, callable $next, stdClass $params): void {</span>
 <span class="x">    // Apply CORS headers to every request</span>
 <span class="x">    $res-&gt;setCORS([</span>
-<span class="x">        &#39;origin&#39; =&gt; &#39;*&#39;,</span>
-<span class="x">        &#39;methods&#39; =&gt; [&#39;GET&#39;, &#39;POST&#39;, &#39;PUT&#39;, &#39;DELETE&#39;, &#39;OPTIONS&#39;],</span>
-<span class="x">        &#39;headers&#39; =&gt; [&#39;Content-Type&#39;, &#39;Authorization&#39;],</span>
-<span class="x">        &#39;credentials&#39; =&gt; false,</span>
-<span class="x">        &#39;max_age&#39; =&gt; 86400, // cache preflight response for 1 day</span>
+<span class="x">        'origin' =&gt; '*',</span>
+<span class="x">        'methods' =&gt; ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],</span>
+<span class="x">        'headers' =&gt; ['Content-Type', 'Authorization'],</span>
+<span class="x">        'credentials' =&gt; false,</span>
+<span class="x">        'max_age' =&gt; 86400, // cache preflight response for 1 day</span>
 <span class="x">    ]);</span>
 
 <span class="x">    // Handle preflight requests automatically</span>
-<span class="x">    if ($req-&gt;getMethod() === &#39;OPTIONS&#39;) {</span>
+<span class="x">    if ($req-&gt;getMethod() === 'OPTIONS') {</span>
 <span class="x">        $res-&gt;setStatusCode(204)-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
@@ -1505,10 +1385,10 @@ to check for a token, validate it, and inject a user object into <code>$params</
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Response;</span>
 
 <span class="x">$app-&gt;addMiddleware(function (Request $req, Response $res, callable $next, stdClass $params): void {</span>
-<span class="x">    $authHeader = $req-&gt;getHeader(&#39;Authorization&#39;);</span>
+<span class="x">    $authHeader = $req-&gt;getHeader('Authorization');</span>
 
-<span class="x">    if (!$authHeader || !str_starts_with($authHeader, &#39;Bearer &#39;)) {</span>
-<span class="x">        $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Missing or invalid Authorization header&#39;])</span>
+<span class="x">    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {</span>
+<span class="x">        $res-&gt;withJson(['error' =&gt; 'Missing or invalid Authorization header'])</span>
 <span class="x">            -&gt;setStatusCode(401)</span>
 <span class="x">            -&gt;send();</span>
 <span class="x">        return;</span>
@@ -1518,13 +1398,13 @@ to check for a token, validate it, and inject a user object into <code>$params</
 
 <span class="x">    // Simulate token validation (replace with your logic)</span>
 <span class="x">    $user = match ($token) {</span>
-<span class="x">        &#39;secret123&#39; =&gt; (object) [&#39;id&#39; =&gt; 1, &#39;name&#39; =&gt; &#39;Alice&#39;],</span>
-<span class="x">        &#39;admin456&#39;  =&gt; (object) [&#39;id&#39; =&gt; 2, &#39;name&#39; =&gt; &#39;Bob&#39;, &#39;role&#39; =&gt; &#39;admin&#39;],</span>
+<span class="x">        'secret123' =&gt; (object) ['id' =&gt; 1, 'name' =&gt; 'Alice'],</span>
+<span class="x">        'admin456'  =&gt; (object) ['id' =&gt; 2, 'name' =&gt; 'Bob', 'role' =&gt; 'admin'],</span>
 <span class="x">        default     =&gt; null,</span>
 <span class="x">    };</span>
 
 <span class="x">    if (!$user) {</span>
-<span class="x">        $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Unauthorized&#39;])</span>
+<span class="x">        $res-&gt;withJson(['error' =&gt; 'Unauthorized'])</span>
 <span class="x">            -&gt;setStatusCode(401)</span>
 <span class="x">            -&gt;send();</span>
 <span class="x">        return;</span>
@@ -1543,14 +1423,14 @@ to check for a token, validate it, and inject a user object into <code>$params</
 <div class="highlight"><pre><span></span><code><span class="x">use AdaiasMagdiel\Erlenmeyer\Request;</span>
 <span class="x">use AdaiasMagdiel\Erlenmeyer\Response;</span>
 
-<span class="x">$app-&gt;get(&#39;/profile&#39;, function (Request $req, Response $res, stdClass $params): Response {</span>
+<span class="x">$app-&gt;get('/profile', function (Request $req, Response $res, stdClass $params): Response {</span>
 <span class="x">    if (empty($params-&gt;user)) {</span>
-<span class="x">        return $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Not authenticated&#39;])-&gt;setStatusCode(401);</span>
+<span class="x">        return $res-&gt;withJson(['error' =&gt; 'Not authenticated'])-&gt;setStatusCode(401);</span>
 <span class="x">    }</span>
 
 <span class="x">    return $res-&gt;withJson([</span>
-<span class="x">        &#39;id&#39; =&gt; $params-&gt;user-&gt;id,</span>
-<span class="x">        &#39;name&#39; =&gt; $params-&gt;user-&gt;name,</span>
+<span class="x">        'id' =&gt; $params-&gt;user-&gt;id,</span>
+<span class="x">        'name' =&gt; $params-&gt;user-&gt;name,</span>
 <span class="x">    ]);</span>
 <span class="x">});</span>
 </code></pre></div>
@@ -1567,12 +1447,12 @@ injected by your authentication middleware.</p>
 <div class="highlight"><pre><span></span><code><span class="x">// 1️⃣ CORS middleware</span>
 <span class="x">$app-&gt;addMiddleware(function (Request $req, Response $res, callable $next, stdClass $params): void {</span>
 <span class="x">    $res-&gt;setCORS([</span>
-<span class="x">        &#39;origin&#39; =&gt; &#39;*&#39;,</span>
-<span class="x">        &#39;methods&#39; =&gt; [&#39;GET&#39;, &#39;POST&#39;, &#39;PUT&#39;, &#39;DELETE&#39;, &#39;OPTIONS&#39;],</span>
-<span class="x">        &#39;headers&#39; =&gt; [&#39;Content-Type&#39;, &#39;Authorization&#39;],</span>
+<span class="x">        'origin' =&gt; '*',</span>
+<span class="x">        'methods' =&gt; ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],</span>
+<span class="x">        'headers' =&gt; ['Content-Type', 'Authorization'],</span>
 <span class="x">    ]);</span>
 
-<span class="x">    if ($req-&gt;getMethod() === &#39;OPTIONS&#39;) {</span>
+<span class="x">    if ($req-&gt;getMethod() === 'OPTIONS') {</span>
 <span class="x">        $res-&gt;setStatusCode(204)-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
@@ -1582,14 +1462,14 @@ injected by your authentication middleware.</p>
 
 <span class="x">// 2️⃣ Auth middleware</span>
 <span class="x">$app-&gt;addMiddleware(function (Request $req, Response $res, callable $next, stdClass $params): void {</span>
-<span class="x">    $authHeader = $req-&gt;getHeader(&#39;Authorization&#39;);</span>
+<span class="x">    $authHeader = $req-&gt;getHeader('Authorization');</span>
 
 <span class="x">    if (!$authHeader) {</span>
-<span class="x">        $res-&gt;withJson([&#39;error&#39; =&gt; &#39;Unauthorized&#39;])-&gt;setStatusCode(401)-&gt;send();</span>
+<span class="x">        $res-&gt;withJson(['error' =&gt; 'Unauthorized'])-&gt;setStatusCode(401)-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
 
-<span class="x">    $params-&gt;user = (object) [&#39;id&#39; =&gt; 1, &#39;name&#39; =&gt; &#39;ExampleUser&#39;]; // Example</span>
+<span class="x">    $params-&gt;user = (object) ['id' =&gt; 1, 'name' =&gt; 'ExampleUser']; // Example</span>
 <span class="x">    $next($req, $res, $params);</span>
 <span class="x">});</span>
 </code></pre></div>
@@ -1603,19 +1483,19 @@ and that authenticated routes can safely access <code>$params-&gt;user</code>.</
 <span class="x">$client = new ErlenClient($app);</span>
 
 <span class="x">// Test CORS preflight</span>
-<span class="x">$response = $client-&gt;options(&#39;/profile&#39;);</span>
+<span class="x">$response = $client-&gt;options('/profile');</span>
 <span class="x">echo $response-&gt;getStatusCode(); // 204</span>
 
 <span class="x">// Test authenticated GET</span>
-<span class="x">$response = $client-&gt;get(&#39;/profile&#39;, [</span>
-<span class="x">    &#39;headers&#39; =&gt; [&#39;Authorization&#39; =&gt; &#39;Bearer secret123&#39;]</span>
+<span class="x">$response = $client-&gt;get('/profile', [</span>
+<span class="x">    'headers' =&gt; ['Authorization' =&gt; 'Bearer secret123']</span>
 <span class="x">]);</span>
 <span class="x">echo $response-&gt;getBody();</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alice&quot;</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alice"</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />

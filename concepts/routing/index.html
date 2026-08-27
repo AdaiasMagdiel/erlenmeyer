@@ -329,7 +329,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../advanced/logging/" class="md-tabs__link">
+        <a href="../../advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -967,6 +967,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/Request/" class="md-nav__link">
         
   
@@ -1065,7 +1111,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1075,149 +1121,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1311,29 +1214,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../advanced/custom-handlers/" class="md-nav__link">
         
   
@@ -1396,20 +1276,20 @@ You declare routes directly on the <code>App</code> instance — no separate rou
 <h2 id="how-routing-works">How routing works<a class="headerlink" href="#how-routing-works" title="Permanent link">&para;</a></h2>
 <p>At its core, routing is managed by the <a href="../../reference/App/"><code>App</code></a> class.<br />
 Each route maps an HTTP method and a URI pattern to a callable handler:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/hello&#39;, function (Request $req, Response $res) {</span>
-<span class="x">    $res-&gt;withText(&#39;Hello world!&#39;)-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/hello', function (Request $req, Response $res) {</span>
+<span class="x">    $res-&gt;withText('Hello world!')-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>Under the hood, routes are stored internally as regular expressions, allowing Erlenmeyer to support dynamic parameters and even fallback routes.</p>
 <hr />
 <h2 id="dynamic-parameters">Dynamic parameters<a class="headerlink" href="#dynamic-parameters" title="Permanent link">&para;</a></h2>
 <p>Parameters are enclosed in square brackets <code>[]</code>, and are automatically converted into named regex groups:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/users/[id]&#39;, function ($req, $res, $params) {</span>
-<span class="x">    $res-&gt;withJson([&#39;id&#39; =&gt; $params-&gt;id])-&gt;send();</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/users/[id]', function ($req, $res, $params) {</span>
+<span class="x">    $res-&gt;withJson(['id' =&gt; $params-&gt;id])-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <p>You can use as many parameters as you need, and Erlenmeyer will map them into a <code>$params</code> object:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/posts/[year]/[slug]&#39;, fn($req, $res, $p)</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/posts/[year]/[slug]', fn($req, $res, $p)</span>
 <span class="x">    =&gt; $res-&gt;withJson($p)-&gt;send());</span>
 </code></pre></div>
 <p>Internally, <code>/users/[id]</code> becomes:</p>
@@ -1418,21 +1298,21 @@ Each route maps an HTTP method and a URI pattern to a callable handler:</p>
 <hr />
 <h2 id="route-methods">Route methods<a class="headerlink" href="#route-methods" title="Permanent link">&para;</a></h2>
 <p>You can register routes for any HTTP verb, or for multiple ones at once:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get(&#39;/users&#39;, ...);</span>
-<span class="x">$app-&gt;post(&#39;/users&#39;, ...);</span>
-<span class="x">$app-&gt;put(&#39;/users/[id]&#39;, ...);</span>
-<span class="x">$app-&gt;delete(&#39;/users/[id]&#39;, ...);</span>
-<span class="x">$app-&gt;patch(&#39;/users/[id]&#39;, ...);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;get('/users', ...);</span>
+<span class="x">$app-&gt;post('/users', ...);</span>
+<span class="x">$app-&gt;put('/users/[id]', ...);</span>
+<span class="x">$app-&gt;delete('/users/[id]', ...);</span>
+<span class="x">$app-&gt;patch('/users/[id]', ...);</span>
 </code></pre></div>
 <p>Or combine several in one call:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;match([&#39;GET&#39;, &#39;POST&#39;], &#39;/contact&#39;, ...);</span>
-<span class="x">$app-&gt;any(&#39;/ping&#39;, ...); // handles all methods</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;match(['GET', 'POST'], '/contact', ...);</span>
+<span class="x">$app-&gt;any('/ping', ...); // handles all methods</span>
 </code></pre></div>
 <hr />
 <h2 id="redirects">Redirects<a class="headerlink" href="#redirects" title="Permanent link">&para;</a></h2>
 <p>Simple route redirection is built in:</p>
-<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;redirect(&#39;/old-home&#39;, &#39;/new-home&#39;);</span>
-<span class="x">$app-&gt;redirect(&#39;/legacy&#39;, &#39;/&#39;, permanent: true);</span>
+<div class="highlight"><pre><span></span><code><span class="x">$app-&gt;redirect('/old-home', '/new-home');</span>
+<span class="x">$app-&gt;redirect('/legacy', '/', permanent: true);</span>
 </code></pre></div>
 <p>The second parameter defines the destination, and the optional <code>permanent</code> flag triggers a 301 redirect instead of 302.</p>
 <hr />
@@ -1444,7 +1324,7 @@ Each route maps an HTTP method and a URI pattern to a callable handler:</p>
 </ol>
 <p>You can customize the 404 handler at any time:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;set404Handler(function ($req, $res) {</span>
-<span class="x">    $res-&gt;setStatusCode(404)-&gt;withHtml(&#39;&lt;h1&gt;Not found&lt;/h1&gt;&#39;)-&gt;send();</span>
+<span class="x">    $res-&gt;setStatusCode(404)-&gt;withHtml('&lt;h1&gt;Not found&lt;/h1&gt;')-&gt;send();</span>
 <span class="x">});</span>
 </code></pre></div>
 <hr />
@@ -1452,14 +1332,14 @@ Each route maps an HTTP method and a URI pattern to a callable handler:</p>
 <p>Each route can have its own middleware chain.
 A middleware receives a <code>$next()</code> callback to continue the execution flow:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$auth = function ($req, $res, $next, $params) {</span>
-<span class="x">    if ($req-&gt;getQueryParam(&#39;token&#39;) !== &#39;secret&#39;) {</span>
-<span class="x">        $res-&gt;withText(&#39;Unauthorized&#39;)-&gt;setStatusCode(401)-&gt;send();</span>
+<span class="x">    if ($req-&gt;getQueryParam('token') !== 'secret') {</span>
+<span class="x">        $res-&gt;withText('Unauthorized')-&gt;setStatusCode(401)-&gt;send();</span>
 <span class="x">        return;</span>
 <span class="x">    }</span>
 <span class="x">    $next($req, $res, new stdClass());</span>
 <span class="x">};</span>
 
-<span class="x">$app-&gt;get(&#39;/secure&#39;, fn($req, $res) =&gt; $res-&gt;withText(&#39;Welcome!&#39;)-&gt;send(), [$auth]);</span>
+<span class="x">$app-&gt;get('/secure', fn($req, $res) =&gt; $res-&gt;withText('Welcome!')-&gt;send(), [$auth]);</span>
 </code></pre></div>
 <p>You can also register <strong>global middlewares</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="x">$app-&gt;addMiddleware($auth);</span>

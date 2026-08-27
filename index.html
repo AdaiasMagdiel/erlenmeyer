@@ -327,7 +327,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="advanced/logging/" class="md-tabs__link">
+        <a href="advanced/custom-handlers/" class="md-tabs__link">
           
   
   
@@ -969,6 +969,52 @@
   
   
     <li class="md-nav__item">
+      <a href="reference/Router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Router
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/ExceptionHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ExceptionHandler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="reference/Request/" class="md-nav__link">
         
   
@@ -1067,7 +1113,7 @@
   
   
   <span class="md-ellipsis">
-    Logging
+    Testing
     
   </span>
   
@@ -1077,149 +1123,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            Logging
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/Logging/ConsoleLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    ConsoleLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/Logging/FileLogger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    FileLogger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/Logging/LoggerInterface/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LoggerInterface
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/Logging/LogLevel/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    LogLevel
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Testing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Testing
           </label>
@@ -1305,29 +1208,6 @@
             Advanced
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="advanced/logging/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Logging
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1431,10 +1311,6 @@ Prefer everything in a single <code>index.php</code> file? That works too.</p>
 <td>Typed API with helpers for HTML, JSON, text, and files</td>
 </tr>
 <tr>
-<td><strong>Logging</strong></td>
-<td>Console or rotating file-based logs with structured levels</td>
-</tr>
-<tr>
 <td><strong>Error Handling</strong></td>
 <td>Custom exception mapping and fallback handlers</td>
 </tr>
@@ -1455,16 +1331,16 @@ Prefer everything in a single <code>index.php</code> file? That works too.</p>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Request</span><span class="p">;</span>
 <span class="k">use</span> <span class="nx">AdaiasMagdiel\Erlenmeyer\Response</span><span class="p">;</span>
 
-<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">&#39;/bootstrap.php&#39;</span><span class="p">;</span>
+<span class="k">require</span> <span class="no">__DIR__</span> <span class="o">.</span> <span class="s1">'/bootstrap.php'</span><span class="p">;</span>
 
 <span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">App</span><span class="p">();</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">)</span> <span class="o">=&gt;</span>
-    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withHtml</span><span class="p">(</span><span class="s1">&#39;&lt;h1&gt;Hello from Erlenmeyer ⚗️&lt;/h1&gt;&#39;</span><span class="p">)</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withHtml</span><span class="p">(</span><span class="s1">'&lt;h1&gt;Hello from Erlenmeyer ⚗️&lt;/h1&gt;'</span><span class="p">)</span>
 <span class="p">);</span>
 
-<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/hello/[name]&#39;</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=&gt;</span>
-    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withText</span><span class="p">(</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="nv">$params</span><span class="o">-&gt;</span><span class="na">name</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+<span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'/hello/[name]'</span><span class="p">,</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$req</span><span class="p">,</span> <span class="nx">Response</span> <span class="nv">$res</span><span class="p">,</span> <span class="k">stdClass</span> <span class="nv">$params</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">$res</span><span class="o">-&gt;</span><span class="na">withText</span><span class="p">(</span><span class="s2">"Hello, </span><span class="si">{</span><span class="nv">$params</span><span class="o">-&gt;</span><span class="na">name</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
 <span class="p">);</span>
 
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
