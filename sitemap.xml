@@ -1,3 +1,283 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>None./</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="None"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/"/>
+    </url>
+    <url>
+        <loc>Nonegetting-started/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonegetting-started/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/getting-started/"/>
+    </url>
+    <url>
+        <loc>Noneadvanced/custom-handlers/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneadvanced/custom-handlers/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/advanced/custom-handlers/"/>
+    </url>
+    <url>
+        <loc>Noneconcepts/errors/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/errors/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/errors/"/>
+    </url>
+    <url>
+        <loc>Noneconcepts/middleware/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/middleware/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/middleware/"/>
+    </url>
+    <url>
+        <loc>Noneconcepts/requests/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/requests/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/requests/"/>
+    </url>
+    <url>
+        <loc>Noneconcepts/responses/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/responses/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/responses/"/>
+    </url>
+    <url>
+        <loc>Noneconcepts/routing/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/routing/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/routing/"/>
+    </url>
+    <url>
+        <loc>Noneconcepts/sessions/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/sessions/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/sessions/"/>
+    </url>
+    <url>
+        <loc>Noneguides/building-an-api/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/building-an-api/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/building-an-api/"/>
+    </url>
+    <url>
+        <loc>Noneguides/deployment/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/deployment/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/deployment/"/>
+    </url>
+    <url>
+        <loc>Noneguides/handling-cors-and-auth/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/handling-cors-and-auth/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/handling-cors-and-auth/"/>
+    </url>
+    <url>
+        <loc>Noneguides/testing/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/testing/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/testing/"/>
+    </url>
+    <url>
+        <loc>Nonereference/App/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/App/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/App/"/>
+    </url>
+    <url>
+        <loc>Nonereference/ExceptionHandler/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/ExceptionHandler/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/ExceptionHandler/"/>
+    </url>
+    <url>
+        <loc>Nonereference/Request/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Request/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Request/"/>
+    </url>
+    <url>
+        <loc>Nonereference/Response/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Response/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Response/"/>
+    </url>
+    <url>
+        <loc>Nonereference/Router/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Router/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Router/"/>
+    </url>
+    <url>
+        <loc>Nonereference/Session/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Session/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Session/"/>
+    </url>
+    <url>
+        <loc>Nonereference/Testing/ErlenClient/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Testing/ErlenClient/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Testing/ErlenClient/"/>
+    </url>
+    <url>
+        <loc>Nonept/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="None"/>
+    </url>
+    <url>
+        <loc>Nonept/getting-started/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonegetting-started/"/>
+    </url>
+    <url>
+        <loc>Nonept/advanced/custom-handlers/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/advanced/custom-handlers/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneadvanced/custom-handlers/"/>
+    </url>
+    <url>
+        <loc>Nonept/concepts/errors/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/errors/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/errors/"/>
+    </url>
+    <url>
+        <loc>Nonept/concepts/middleware/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/middleware/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/middleware/"/>
+    </url>
+    <url>
+        <loc>Nonept/concepts/requests/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/requests/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/requests/"/>
+    </url>
+    <url>
+        <loc>Nonept/concepts/responses/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/responses/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/responses/"/>
+    </url>
+    <url>
+        <loc>Nonept/concepts/routing/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/routing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/routing/"/>
+    </url>
+    <url>
+        <loc>Nonept/concepts/sessions/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/concepts/sessions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneconcepts/sessions/"/>
+    </url>
+    <url>
+        <loc>Nonept/guides/building-an-api/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/building-an-api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/building-an-api/"/>
+    </url>
+    <url>
+        <loc>Nonept/guides/deployment/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/deployment/"/>
+    </url>
+    <url>
+        <loc>Nonept/guides/handling-cors-and-auth/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/handling-cors-and-auth/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/handling-cors-and-auth/"/>
+    </url>
+    <url>
+        <loc>Nonept/guides/testing/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/guides/testing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Noneguides/testing/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/App/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/App/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/App/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/ExceptionHandler/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/ExceptionHandler/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/ExceptionHandler/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/Request/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Request/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Request/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/Response/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Response/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Response/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/Router/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Router/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Router/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/Session/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Session/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Session/"/>
+    </url>
+    <url>
+        <loc>Nonept/reference/Testing/ErlenClient/</loc>
+        <lastmod>2026-08-27</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="Nonept/reference/Testing/ErlenClient/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="Nonereference/Testing/ErlenClient/"/>
+    </url>
 </urlset>
