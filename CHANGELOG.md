@@ -2,6 +2,18 @@
 
 A record of all notable changes to **Erlenmeyer**.
 
+## [6.0.1] – 2026-08-27
+
+### ⚠️ **BREAKING CHANGES**
+
+- **Minimum PHP version raised to 8.2**
+  - `composer.json` now requires `php: ^8.2` (was `^8.1`).
+  - _Reason:_ `composer.lock` already resolved dev dependencies (`pestphp/pest` → `phpunit` 11.5) that require PHP ≥8.2, so the test suite could never actually run on 8.1. The declared requirement now matches what's installable.
+
+### 🛡️ **Security Improvements**
+
+- Updated `phpunit/phpunit` (and related dev dependencies) to patch [CVE-2026-24765](https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p) (unsafe deserialization in PHPT code coverage handling). Dev-only dependency; does not affect production installs.
+
 ## [6.0.0] – 2026-08-27
 
 ### ⚠️ **BREAKING CHANGES**
